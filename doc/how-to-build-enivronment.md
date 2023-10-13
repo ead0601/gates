@@ -62,9 +62,11 @@ PER-PROJECT:
     cd /build/repo/gates/{desired-project}/Xilinx
 
     **All project related enviroment settings added to this file**
+    
     source /build/repo/gates/{desired-project}/sourceme-project.env 
 
     **Start ISE**
+    
     cd xilinx
     
     ise &
