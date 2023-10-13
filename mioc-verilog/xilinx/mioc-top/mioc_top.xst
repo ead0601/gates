@@ -1,0 +1,29 @@
+set -tmpdir "xst/projnav.tmp"
+set -xsthdpdir "xst"
+run
+-ifn mioc_top.prj
+-ifmt mixed
+-ofn mioc_top
+-ofmt NGC
+-p xc9500xl
+-top mioc_top
+-opt_mode Speed
+-opt_level 1
+-uc "/build/repo/mioc-verilog/xilinx/mioc-top/constraints/mioc_top_syn.xcf"
+-iuc NO
+-keep_hierarchy Yes
+-netlist_hierarchy As_Optimized
+-rtlview Yes
+-hierarchy_separator /
+-bus_delimiter <>
+-case Maintain
+-verilog2001 YES
+-fsm_extract NO
+-mux_extract No
+-resource_sharing NO
+-iobuf YES
+-pld_mp NO
+-pld_xp NO
+-pld_ce NO
+-wysiwyg NO
+-equivalent_register_removal NO
