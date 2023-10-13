@@ -32,6 +32,10 @@ When prompted selected the install Xilinx ISE path into:
 
 **/build/tools/Xilinx**
 
+When prompted for Edition List select:
+
+**ISE Design Suite Systems Edition**
+
 4)  **Create a Xilinx account and download a free license:**
 
     [**https://www.xilinx.com/support/licensing\_solution\_center.html**](https://www.xilinx.com/support/licensing_solution_center.html)
