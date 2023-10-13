@@ -54,13 +54,21 @@ When prompted selected the install Xilinx ISE path into:
     launched. At this point select the file of the keyfile you received
     from step 4:
 
+-------------------------------------------------------------------------
+PER-PROJECT:
+
 7)  **Starting ISE:**
 
     cd /build/repo/gates/{desired-project}/Xilinx
 
-    source /build/tools/Xilinx/14.7/ISE\_DS/settings64.sh (if you have
-    not done it already)
+    # All project related enviroment settings added to this file
+    #
+    source /build/repo/gates/{desired-project}/sourceme-project.env 
 
+    # Start ISE
+    #
+    cd xilinx
+    
     ise &
 
     Open project {desire-project}-top.xise
