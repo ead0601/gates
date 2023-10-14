@@ -59,6 +59,12 @@ When prompted for Edition List select:
     from step 4:
 
 -------------------------------------------------------------------------
+**Good Video for License Setup**
+
+https://www.youtube.com/watch?v=yzEIQLQZYpk&t=2s
+
+-------------------------------------------------------------------------
+
 PER-PROJECT:
 
 7)  **Starting ISE:**
