@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- IMPORTANT: This is an internal file that has been generated
+     by the Xilinx ISE software.  Any direct editing or
+     changes made to this file may result in unpredictable
+     behavior or data corruption.  It is strongly advised that
+     users do not edit the contents of this file. -->
+<messages>
+<msg type="warning" file="HDLCompiler" num="693" delta="unknown" >"/build/repo/gates/uart-test/uart_top/uart_tx.v" Line 23: Parameter declaration becomes local in <arg fmt="%s" index="1">uart_tx</arg> with formal parameter declaration list
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="693" delta="unknown" >"/build/repo/gates/uart-test/uart_top/uart_tx.v" Line 24: Parameter declaration becomes local in <arg fmt="%s" index="1">uart_tx</arg> with formal parameter declaration list
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="693" delta="unknown" >"/build/repo/gates/uart-test/uart_top/uart_tx.v" Line 25: Parameter declaration becomes local in <arg fmt="%s" index="1">uart_tx</arg> with formal parameter declaration list
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="693" delta="unknown" >"/build/repo/gates/uart-test/uart_top/uart_tx.v" Line 26: Parameter declaration becomes local in <arg fmt="%s" index="1">uart_tx</arg> with formal parameter declaration list
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="693" delta="unknown" >"/build/repo/gates/uart-test/uart_top/uart_tx.v" Line 27: Parameter declaration becomes local in <arg fmt="%s" index="1">uart_tx</arg> with formal parameter declaration list
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="693" delta="unknown" >"/build/repo/gates/uart-test/uart_top/uart_rx.v" Line 21: Parameter declaration becomes local in <arg fmt="%s" index="1">uart_rx</arg> with formal parameter declaration list
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="693" delta="unknown" >"/build/repo/gates/uart-test/uart_top/uart_rx.v" Line 22: Parameter declaration becomes local in <arg fmt="%s" index="1">uart_rx</arg> with formal parameter declaration list
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="693" delta="unknown" >"/build/repo/gates/uart-test/uart_top/uart_rx.v" Line 23: Parameter declaration becomes local in <arg fmt="%s" index="1">uart_rx</arg> with formal parameter declaration list
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="693" delta="unknown" >"/build/repo/gates/uart-test/uart_top/uart_rx.v" Line 24: Parameter declaration becomes local in <arg fmt="%s" index="1">uart_rx</arg> with formal parameter declaration list
+</msg>
+
+<msg type="warning" file="HDLCompiler" num="693" delta="unknown" >"/build/repo/gates/uart-test/uart_top/uart_rx.v" Line 25: Parameter declaration becomes local in <arg fmt="%s" index="1">uart_rx</arg> with formal parameter declaration list
+</msg>
+
+</messages>
+

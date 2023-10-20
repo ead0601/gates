@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="/build/repo/gates/sdio-reader/xilinx/uart-top/uart_tb_isim_beh.wdb" id="1" type="auto">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="uart_tb" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <WVObjectSize size="12" />
+   <wvobject fp_name="/uart_tb/w_Tx_Done" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">w_Tx_Done</obj_property>
+      <obj_property name="ObjectShortName">w_Tx_Done</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uart_tb/w_Rx_Byte" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">w_Rx_Byte[7:0]</obj_property>
+      <obj_property name="ObjectShortName">w_Rx_Byte[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uart_tb/r_Clock" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">r_Clock</obj_property>
+      <obj_property name="ObjectShortName">r_Clock</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uart_tb/r_Tx_DV" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">r_Tx_DV</obj_property>
+      <obj_property name="ObjectShortName">r_Tx_DV</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uart_tb/r_Tx_Byte" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_Tx_Byte[7:0]</obj_property>
+      <obj_property name="ObjectShortName">r_Tx_Byte[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uart_tb/r_Rx_Serial" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">r_Rx_Serial</obj_property>
+      <obj_property name="ObjectShortName">r_Rx_Serial</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uart_tb/c_CLOCK_PERIOD_NS" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">c_CLOCK_PERIOD_NS[31:0]</obj_property>
+      <obj_property name="ObjectShortName">c_CLOCK_PERIOD_NS[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uart_tb/c_CLKS_PER_BIT" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">c_CLKS_PER_BIT[31:0]</obj_property>
+      <obj_property name="ObjectShortName">c_CLKS_PER_BIT[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uart_tb/c_BIT_PERIOD" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">c_BIT_PERIOD[31:0]</obj_property>
+      <obj_property name="ObjectShortName">c_BIT_PERIOD[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uart_tb/UART_TOP_INST/UART_TX_INST/i_Tx_DV" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">i_Tx_DV</obj_property>
+      <obj_property name="ObjectShortName">i_Tx_DV</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uart_tb/UART_TOP_INST/UART_TX_INST/r_SM_Main" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_SM_Main[2:0]</obj_property>
+      <obj_property name="ObjectShortName">r_SM_Main[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uart_tb/UART_TOP_INST/UART_TX_INST/r_Clock_Count" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_Clock_Count[7:0]</obj_property>
+      <obj_property name="ObjectShortName">r_Clock_Count[7:0]</obj_property>
+   </wvobject>
+</wave_config>

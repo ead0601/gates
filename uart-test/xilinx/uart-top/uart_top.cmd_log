@@ -1,0 +1,7 @@
+xst -intstyle ise -ifn "/build/repo/gates/sdio-reader/xilinx/uart-top/uart_top.xst" -ofn "/build/repo/gates/sdio-reader/xilinx/uart-top/uart_top.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc6slx16-ftg256-3 uart_top.ngc uart_top.ngd  
+map -intstyle ise -p xc6slx16-ftg256-3 -w -logic_opt off -ol high -t 1 -xt 0 -register_duplication off -r 4 -global_opt off -mt off -ir off -pr off -lc off -power off -o uart_top_map.ncd uart_top.ngd uart_top.pcf 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -uc uart_top.ucf -p xc6slx16-ftg256-3 uart_top.ngc uart_top.ngd  
+map -intstyle ise -p xc6slx16-ftg256-3 -w -logic_opt off -ol high -t 1 -xt 0 -register_duplication off -r 4 -global_opt off -mt off -ir off -pr off -lc off -power off -o uart_top_map.ncd uart_top.ngd uart_top.pcf 
+xst -intstyle ise -ifn "/build/repo/gates/sdio-reader/xilinx/uart-top/uart_top.xst" -ofn "/build/repo/gates/sdio-reader/xilinx/uart-top/uart_top.syr" 
+netgen -intstyle ise -insert_glbl true -w -dir netgen/synthesis -ofmt verilog -sim uart_top.ngc uart_top_synthesis.v 

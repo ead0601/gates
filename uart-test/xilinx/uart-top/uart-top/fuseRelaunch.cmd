@@ -1,0 +1,1 @@
+-intstyle "ise" -incremental -lib "unisims_ver" -lib "unimacro_ver" -lib "xilinxcorelib_ver" -lib "secureip" -o "/build/repo/gates/uart-test/xilinx/uart-top/uart-top/uart_tb_isim_beh.exe" -prj "/build/repo/gates/uart-test/xilinx/uart-top/uart-top/uart_tb_beh.prj" "work.uart_tb" "work.glbl" 

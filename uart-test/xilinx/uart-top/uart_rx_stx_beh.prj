@@ -1,0 +1,2 @@
+verilog isim_temp "../../uart_top/uart_rx.v"
+verilog isim_temp "/build/tools/Xilinx/14.7/ISE_DS/ISE//verilog/src/glbl.v"
