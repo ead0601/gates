@@ -15,19 +15,19 @@ UART-TEST
 
 2) **ISE starts**
 
-a) Make sure simulation radio button is selected
-b) Click on uart_tb under hierarchy.
-c) Expand iSim Simulator in pane below
-d) Double click on "Simulate Behavioral Model"
+a) Make sure simulation radio button is selected<br>
+b) Click on uart_tb under hierarchy.<br>
+c) Expand iSim Simulator in pane below<br>
+d) Double click on "Simulate Behavioral Model"<br>
 
 3) **iSim will start**
 
-e) Click on ISIM> and enter:
+e) Click on ISIM> and enter:<br>
 
 > run 200us
 >
 
-f) Click on waveform and hit F6
+f) Click on waveform and hit F6<br>
 
 <br>
 <ul>
