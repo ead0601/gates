@@ -2,7 +2,6 @@
 
 UART-TEST
 
-<br>
 1) **To run simulation:**
 
 > cd /build/repo/gates/
