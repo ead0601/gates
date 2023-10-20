@@ -62,8 +62,8 @@ When prompted for Edition List select:
 
 5)  **Source env scripts:**
 
-    source /build/tools/Xilinx/14.7/ISE\_DS/settings64.sh (bash)
-
+> source /build/tools/Xilinx/14.7/ISE\_DS/settings64.sh (bash)
+>
 > ise & (to execute ISE)
 
 6)  **Setup license:**
@@ -79,7 +79,7 @@ https://www.youtube.com/watch?v=yzEIQLQZYpk&t=2s
 
 -------------------------------------------------------------------------
 
-PER-PROJECT:
+<b> PER-PROJECT: </b>
 
 7)  **Starting ISE:**
 
@@ -87,7 +87,7 @@ PER-PROJECT:
 
     **All project related enviroment settings added to this file**
 >    
->    source /build/repo/gates/{desired-project}/sourceme-project.env 
+>    source /build/repo/gates/ise-project-sourceme-project.env 
 
     **Start ISE**
 >    
