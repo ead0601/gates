@@ -100,6 +100,12 @@ https://www.youtube.com/watch?v=yzEIQLQZYpk&t=2s
 
 8) TO BURN:
 
+   **XC3SPROG**
+   <https://xc3sprog.sourceforge.net/>
+   <br>
+   Using the Xilinx iMPACT tool on Debian is a near impossibility. So we burn with the xc3sprog. <b>xc3sprog</b> is a suite of utilities for programming Xilinx FPGAs, CPLDs, and EEPROMs with the Xilinx Parallel Cable and other JTAG adapters under Linux. That was specifically created because of the difficulty of using the Windows to Linux ported version of iMPACT.
+
+
 >  sudo apt -y install xc3sprog
 
    Go to directory of .bit file  (in a window where you did not source ISE env)
