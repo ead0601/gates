@@ -2,11 +2,6 @@
 UART-TEST
 
 <br>
-<ul>
-<li><b>Simulation is currently working.</b></li>
-<li><b>Implementation is next step.</b></li>
-</ul>
-<br>
 **To run simulation:**
 <br>
 > cd /build/repo/gates/
@@ -26,6 +21,13 @@ UART-TEST
 5) Click on ISIM> and enter:
 > run 200us
 6) Click on waveform and hit F6
+
+<br>
+<ul>
+<li><b>Simulation is currently working.</b></li>
+<li><b>Implementation is next step.</b></li>
+</ul>
+<br>
 
 
 
