@@ -1,26 +1,29 @@
-# gates
+**README.md**
+
 UART-TEST
 
 <br>
-**To run simulation:**
-<br>
+1) **To run simulation:**
+
 > cd /build/repo/gates/
 > source ise-project-sourceme.env
 > cd uart-test/xilinx
 > ise ./uart-top/uart-top.xise &
-<br>
-**ISE starts**
-<br>
-1) Make sure simulation radio button is selected
-2) Click on uart_tb under hierarchy.
-3) Expand iSim Simulator in pane below
-4) Double click on "Simulate Behavioral Model"
-<br>
-**iSim will start**
-<br>
-5) Click on ISIM> and enter:
+
+2) **ISE starts**
+
+a) Make sure simulation radio button is selected
+b) Click on uart_tb under hierarchy.
+c) Expand iSim Simulator in pane below
+d) Double click on "Simulate Behavioral Model"
+
+3) **iSim will start**
+
+e) Click on ISIM> and enter:
+
 > run 200us
-6) Click on waveform and hit F6
+
+f) Click on waveform and hit F6
 
 <br>
 <ul>
