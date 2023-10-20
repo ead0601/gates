@@ -6,7 +6,7 @@ piswords: Xilinx spartan6 XC6SLX16 development Core Board Xilinx spartan 6 FPGA 
 
 <http://piswords.com/xc6slx16.html>
 
-Prefered JTAG programmer:  <b MODEL DLC10 >
+Prefered JTAG programmer:  <b> MODEL DLC10 </b>
 
 Waveshare XILINX JTAG Download Debugger Compatible XILINX Platform Cable USB FPGA CPLD in-Circuit Debugger Programmer
 
