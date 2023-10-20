@@ -1,0 +1,8 @@
+INTSTYLE=impact
+INFILE=/build/repo/gates/led-blink/xilinx/led-blink/impact.xsl
+OUTFILE=/build/repo/gates/led-blink/xilinx/led-blink/impact.xsl
+FAMILY=Single
+PART=Single
+WORKINGDIR=/build/repo/gates/led-blink/xilinx/led-blink
+LICENSE=iMPACT
+USER_INFO=iMPACT

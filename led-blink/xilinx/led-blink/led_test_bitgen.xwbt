@@ -1,0 +1,8 @@
+INTSTYLE=ise
+INFILE=/build/repo/gates/led-blink/xilinx/led-blink/led_test.ncd
+OUTFILE=/build/repo/gates/led-blink/xilinx/led-blink/led_test.bit
+FAMILY=Spartan6
+PART=xc6slx16-3ftg256
+WORKINGDIR=/build/repo/gates/led-blink/xilinx/led-blink
+LICENSE=WebPack
+USER_INFO=212536042_0_0_773
