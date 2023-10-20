@@ -5,9 +5,13 @@ UART-TEST
 1) **To run simulation:**
 
 > cd /build/repo/gates/
+>
 > source ise-project-sourceme.env
+>
 > cd uart-test/xilinx
+>
 > ise ./uart-top/uart-top.xise &
+>
 
 2) **ISE starts**
 
@@ -21,6 +25,7 @@ d) Double click on "Simulate Behavioral Model"
 e) Click on ISIM> and enter:
 
 > run 200us
+>
 
 f) Click on waveform and hit F6
 
