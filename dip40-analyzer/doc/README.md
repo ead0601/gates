@@ -40,7 +40,7 @@ C05  : ENABLEDEV : DEVICEID[0]<br>
 C06  : SETSECT	 : SET SECTOR NUMBER<br>
 C03  : SETTRIG	 : SET TRIG PIN<br>
 C04  : STOPACQ	 : STOP ACQ<br>
-C01  : STARTACQ	 : START ACQ<br>
+C01  : STARTACQ	 : START ACQ (wait for trigger)<br>
 C00  : RESERVED<br>
 (followed by)<br>
 T00  : TRIG PIN ( 8bits) : (0-40) pins<br>
