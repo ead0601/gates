@@ -1,17 +1,16 @@
 # RAW DATA FORMAT<br>
-
 We will break a 40 pin header into 2 sets of 20pin sections, where each 20 pin section will be stored in a 32 bit container.
 
 **[32 BIT CONTAINER]**<br>
 D31  T9             (100Mhz timer)  INTERNAL TIMER COUNT<br>
-D30  T8              .<br>
-D29  T7              .<br>
-D28  T6              .<br>
-D27  T5              .<br>
-D26  T4              .<br>
-D25  T3              .<br>
-D24  T2              .<br>
-D23  T1              .<br>
+D30  T8              <br>
+D29  T7              <br>
+D28  T6              <br>
+D27  T5              <br>
+D26  T4              <br>
+D25  T3              <br>
+D24  T2              <br>
+D23  T1              <br>
 D22  T0             (100Mhz timer)  INTERNAL TIMER COUNT<br>
 D21  DATA – D21     PWR/GND (digital sample for slump/bump detection)<br>
 D20  DATA – D20     (32KHz timer)   EXTERNAL TIMER PULSE<br>
@@ -27,16 +26,15 @@ It is preferred that high frequency signals are collocated on a 32-bit container
 -----------------------------------------------------------------------------------
 
 # SPI FORMAT FOR (4 BIT SPI, CE0, CE1, CLK, D3-D0)<br>
-
 CE0  : CHIP ENABLE 0 USED FOR READ DATA<br>
 CE1  : CHIP ENABLE 1 USED FOR COMMAND SEQUENCE<br>
 
 **COMMAND**<br>
-C07  : COMMAND : 8 BITS<br>
-            SETSECT      : SET SECTOR NUMBER<br>
-            SETTRIG      :<br>
-            STOPTRIG     :<br>
-C00         STARTTRIG    :<br>
+## C07  : COMMAND : 8 BITS<br>
+- SETSECT      : SET SECTOR NUMBER<br>
+- SETTRIG      :<br>
+- STOPTRIG     :<br>
+- STARTTRIG    :<br>
 
 T00  : TRIG PIN : (0-40) pins<br>
 
