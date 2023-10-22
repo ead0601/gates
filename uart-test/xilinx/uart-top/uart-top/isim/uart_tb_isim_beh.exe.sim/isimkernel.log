@@ -2,9 +2,9 @@ Command line:
    uart_tb_isim_beh.exe
      -simmode  gui
      -simrunnum  0
-     -socket  47047
+     -socket  38323
 
-Thu Oct 19 23:46:05 2023
+Fri Oct 20 17:28:04 2023
 
 
  Elaboration Time: 0.04 sec
@@ -21,9 +21,9 @@ Thu Oct 19 23:46:05 2023
  Total Scalar Nets and Variables : 442
 Total Line Count : 152
 
- Total Simulation Time: 0.06 sec
+ Total Simulation Time: 0.17 sec
 
  Current Memory Usage: 268.984 Meg
 
-Thu Oct 19 23:48:21 2023
+Fri Oct 20 20:23:05 2023
 

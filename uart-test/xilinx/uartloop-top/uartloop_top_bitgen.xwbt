@@ -1,0 +1,8 @@
+INTSTYLE=ise
+INFILE=/build/repo/gates/uart-test/xilinx/uartloop-top/uartloop_top.ncd
+OUTFILE=/build/repo/gates/uart-test/xilinx/uartloop-top/uartloop_top.bit
+FAMILY=Spartan6
+PART=xc6slx16-3ftg256
+WORKINGDIR=/build/repo/gates/uart-test/xilinx/uartloop-top
+LICENSE=WebPack
+USER_INFO=212536042_0_0_773

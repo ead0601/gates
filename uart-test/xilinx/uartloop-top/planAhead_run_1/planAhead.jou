@@ -1,0 +1,24 @@
+#-----------------------------------------------------------
+# PlanAhead v14.7 (64-bit)
+# Build 321239 by xbuild on Fri Sep 27 19:24:36 MDT 2013
+# Start of session at: Sat Oct 21 23:14:58 2023
+# Process ID: 170011
+# Log file: /build/repo/gates/uart-test/xilinx/uartloop-top/planAhead_run_1/planAhead.log
+# Journal file: /build/repo/gates/uart-test/xilinx/uartloop-top/planAhead_run_1/planAhead.jou
+#-----------------------------------------------------------
+start_gui
+source /build/repo/gates/uart-test/xilinx/uartloop-top/pa.fromNetlist.tcl
+startgroup
+set_property package_pin T8 [get_ports clk]
+endgroup
+startgroup
+set_property package_pin P4 [get_ports rx_serial]
+endgroup
+startgroup
+set_property package_pin N5 [get_ports tx_serial]
+endgroup
+set_property iostandard LVCMOS33 [get_ports [list clk]]
+set_property iostandard LVCMOS33 [get_ports [list rx_serial]]
+set_property iostandard LVCMOS33 [get_ports [list tx_serial]]
+save_constraints
+close_design

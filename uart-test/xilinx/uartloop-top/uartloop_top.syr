@@ -1,0 +1,547 @@
+Release 14.7 - xst P.20131013 (lin64)
+Copyright (c) 1995-2013 Xilinx, Inc.  All rights reserved.
+--> 
+Parameter TMPDIR set to xst/projnav.tmp
+
+
+Total REAL time to Xst completion: 0.00 secs
+Total CPU time to Xst completion: 0.07 secs
+ 
+--> 
+Parameter xsthdpdir set to xst
+
+
+Total REAL time to Xst completion: 0.00 secs
+Total CPU time to Xst completion: 0.07 secs
+ 
+--> 
+Reading design: uartloop_top.prj
+
+TABLE OF CONTENTS
+  1) Synthesis Options Summary
+  2) HDL Parsing
+  3) HDL Elaboration
+  4) HDL Synthesis
+       4.1) HDL Synthesis Report
+  5) Advanced HDL Synthesis
+       5.1) Advanced HDL Synthesis Report
+  6) Low Level Synthesis
+  7) Partition Report
+  8) Design Summary
+       8.1) Primitive and Black Box Usage
+       8.2) Device utilization summary
+       8.3) Partition Resource Summary
+       8.4) Timing Report
+            8.4.1) Clock Information
+            8.4.2) Asynchronous Control Signals Information
+            8.4.3) Timing Summary
+            8.4.4) Timing Details
+            8.4.5) Cross Clock Domains Report
+
+
+=========================================================================
+*                      Synthesis Options Summary                        *
+=========================================================================
+---- Source Parameters
+Input File Name                    : "uartloop_top.prj"
+Ignore Synthesis Constraint File   : NO
+
+---- Target Parameters
+Output File Name                   : "uartloop_top"
+Output Format                      : NGC
+Target Device                      : xc6slx16-3-ftg256
+
+---- Source Options
+Top Module Name                    : uartloop_top
+Automatic FSM Extraction           : YES
+FSM Encoding Algorithm             : Auto
+Safe Implementation                : No
+FSM Style                          : LUT
+RAM Extraction                     : Yes
+RAM Style                          : Auto
+ROM Extraction                     : Yes
+Shift Register Extraction          : YES
+ROM Style                          : Auto
+Resource Sharing                   : YES
+Asynchronous To Synchronous        : NO
+Shift Register Minimum Size        : 2
+Use DSP Block                      : Auto
+Automatic Register Balancing       : No
+
+---- Target Options
+LUT Combining                      : Auto
+Reduce Control Sets                : Auto
+Add IO Buffers                     : YES
+Global Maximum Fanout              : 100000
+Add Generic Clock Buffer(BUFG)     : 16
+Register Duplication               : YES
+Optimize Instantiated Primitives   : NO
+Use Clock Enable                   : Auto
+Use Synchronous Set                : Auto
+Use Synchronous Reset              : Auto
+Pack IO Registers into IOBs        : Auto
+Equivalent register Removal        : YES
+
+---- General Options
+Optimization Goal                  : Speed
+Optimization Effort                : 1
+Power Reduction                    : NO
+Keep Hierarchy                     : No
+Netlist Hierarchy                  : As_Optimized
+RTL Output                         : Yes
+Global Optimization                : AllClockNets
+Read Cores                         : YES
+Write Timing Constraints           : NO
+Cross Clock Analysis               : NO
+Hierarchy Separator                : /
+Bus Delimiter                      : <>
+Case Specifier                     : Maintain
+Slice Utilization Ratio            : 100
+BRAM Utilization Ratio             : 100
+DSP48 Utilization Ratio            : 100
+Auto BRAM Packing                  : NO
+Slice Utilization Ratio Delta      : 5
+
+=========================================================================
+
+
+=========================================================================
+*                          HDL Parsing                                  *
+=========================================================================
+Analyzing Verilog file "/build/repo/gates/uart-test/uart_top/uartloop_top.v" into library work
+Parsing verilog file "/build/repo/gates/uart-test/uart_top/uart_top.v" included at line 7.
+Parsing verilog file "/build/repo/gates/uart-test/uart_top/uart_tx.v" included at line 22.
+Parsing module <uart_tx>.
+INFO:HDLCompiler:693 - "/build/repo/gates/uart-test/uart_top/uart_tx.v" Line 23. parameter declaration becomes local in uart_tx with formal parameter declaration list
+INFO:HDLCompiler:693 - "/build/repo/gates/uart-test/uart_top/uart_tx.v" Line 24. parameter declaration becomes local in uart_tx with formal parameter declaration list
+INFO:HDLCompiler:693 - "/build/repo/gates/uart-test/uart_top/uart_tx.v" Line 25. parameter declaration becomes local in uart_tx with formal parameter declaration list
+INFO:HDLCompiler:693 - "/build/repo/gates/uart-test/uart_top/uart_tx.v" Line 26. parameter declaration becomes local in uart_tx with formal parameter declaration list
+INFO:HDLCompiler:693 - "/build/repo/gates/uart-test/uart_top/uart_tx.v" Line 27. parameter declaration becomes local in uart_tx with formal parameter declaration list
+Parsing verilog file "/build/repo/gates/uart-test/uart_top/uart_rx.v" included at line 23.
+Parsing module <uart_rx>.
+INFO:HDLCompiler:693 - "/build/repo/gates/uart-test/uart_top/uart_rx.v" Line 21. parameter declaration becomes local in uart_rx with formal parameter declaration list
+INFO:HDLCompiler:693 - "/build/repo/gates/uart-test/uart_top/uart_rx.v" Line 22. parameter declaration becomes local in uart_rx with formal parameter declaration list
+INFO:HDLCompiler:693 - "/build/repo/gates/uart-test/uart_top/uart_rx.v" Line 23. parameter declaration becomes local in uart_rx with formal parameter declaration list
+INFO:HDLCompiler:693 - "/build/repo/gates/uart-test/uart_top/uart_rx.v" Line 24. parameter declaration becomes local in uart_rx with formal parameter declaration list
+INFO:HDLCompiler:693 - "/build/repo/gates/uart-test/uart_top/uart_rx.v" Line 25. parameter declaration becomes local in uart_rx with formal parameter declaration list
+Parsing module <uart_top>.
+Parsing module <uartloop_top>.
+
+=========================================================================
+*                            HDL Elaboration                            *
+=========================================================================
+
+Elaborating module <uartloop_top>.
+
+Elaborating module <uart_top(c_CLKS_PER_BIT=87)>.
+
+Elaborating module <uart_rx(CLKS_PER_BIT=87)>.
+WARNING:HDLCompiler:413 - "/build/repo/gates/uart-test/uart_top/uart_rx.v" Line 78: Result of 9-bit expression is truncated to fit in 8-bit target.
+WARNING:HDLCompiler:413 - "/build/repo/gates/uart-test/uart_top/uart_rx.v" Line 89: Result of 9-bit expression is truncated to fit in 8-bit target.
+WARNING:HDLCompiler:413 - "/build/repo/gates/uart-test/uart_top/uart_rx.v" Line 100: Result of 4-bit expression is truncated to fit in 3-bit target.
+WARNING:HDLCompiler:413 - "/build/repo/gates/uart-test/uart_top/uart_rx.v" Line 118: Result of 9-bit expression is truncated to fit in 8-bit target.
+
+Elaborating module <uart_tx(CLKS_PER_BIT=87)>.
+WARNING:HDLCompiler:413 - "/build/repo/gates/uart-test/uart_top/uart_tx.v" Line 66: Result of 9-bit expression is truncated to fit in 8-bit target.
+WARNING:HDLCompiler:413 - "/build/repo/gates/uart-test/uart_top/uart_tx.v" Line 84: Result of 9-bit expression is truncated to fit in 8-bit target.
+WARNING:HDLCompiler:413 - "/build/repo/gates/uart-test/uart_top/uart_tx.v" Line 94: Result of 4-bit expression is truncated to fit in 3-bit target.
+WARNING:HDLCompiler:413 - "/build/repo/gates/uart-test/uart_top/uart_tx.v" Line 114: Result of 9-bit expression is truncated to fit in 8-bit target.
+
+=========================================================================
+*                           HDL Synthesis                               *
+=========================================================================
+
+Synthesizing Unit <uartloop_top>.
+    Related source file is "/build/repo/gates/uart-test/uart_top/uartloop_top.v".
+        c_CLOCK_PERIOD_NS = 100
+        c_CLKS_PER_BIT = 87
+        c_BIT_PERIOD = 8600
+INFO:Xst:3210 - "/build/repo/gates/uart-test/uart_top/uartloop_top.v" line 30: Output port <o_Tx_Active> of the instance <UART_TOP_INST> is unconnected or connected to loadless signal.
+INFO:Xst:3210 - "/build/repo/gates/uart-test/uart_top/uartloop_top.v" line 30: Output port <o_Tx_Done> of the instance <UART_TOP_INST> is unconnected or connected to loadless signal.
+    Summary:
+	no macro.
+Unit <uartloop_top> synthesized.
+
+Synthesizing Unit <uart_top>.
+    Related source file is "/build/repo/gates/uart-test/uart_top/uart_top.v".
+        c_CLKS_PER_BIT = 87
+    Summary:
+	no macro.
+Unit <uart_top> synthesized.
+
+Synthesizing Unit <uart_rx>.
+    Related source file is "/build/repo/gates/uart-test/uart_top/uart_rx.v".
+        CLKS_PER_BIT = 87
+    Found 1-bit register for signal <r_Rx_Data>.
+    Found 3-bit register for signal <r_SM_Main>.
+    Found 1-bit register for signal <r_Rx_DV>.
+    Found 8-bit register for signal <r_Clock_Count>.
+    Found 1-bit register for signal <r_Rx_Byte<7>>.
+    Found 1-bit register for signal <r_Rx_Byte<6>>.
+    Found 1-bit register for signal <r_Rx_Byte<5>>.
+    Found 1-bit register for signal <r_Rx_Byte<4>>.
+    Found 1-bit register for signal <r_Rx_Byte<3>>.
+    Found 1-bit register for signal <r_Rx_Byte<2>>.
+    Found 1-bit register for signal <r_Rx_Byte<1>>.
+    Found 1-bit register for signal <r_Rx_Byte<0>>.
+    Found 3-bit register for signal <r_Bit_Index>.
+    Found 1-bit register for signal <r_Rx_Data_R>.
+    Found finite state machine <FSM_0> for signal <r_SM_Main>.
+    -----------------------------------------------------------------------
+    | States             | 5                                              |
+    | Transitions        | 11                                             |
+    | Inputs             | 4                                              |
+    | Outputs            | 4                                              |
+    | Clock              | i_Clock (rising_edge)                          |
+    | Power Up State     | 000                                            |
+    | Encoding           | auto                                           |
+    | Implementation     | LUT                                            |
+    -----------------------------------------------------------------------
+    Found 3-bit adder for signal <r_Bit_Index[2]_GND_3_o_add_15_OUT> created at line 100.
+    Found 8-bit adder for signal <r_Clock_Count[7]_GND_3_o_add_23_OUT> created at line 118.
+    Found 3-bit comparator greater for signal <r_Bit_Index[2]_PWR_3_o_LessThan_15_o> created at line 98
+    Found 8-bit comparator greater for signal <r_Clock_Count[7]_GND_3_o_LessThan_23_o> created at line 116
+    Summary:
+	inferred   2 Adder/Subtractor(s).
+	inferred  22 D-type flip-flop(s).
+	inferred   2 Comparator(s).
+	inferred   6 Multiplexer(s).
+	inferred   1 Finite State Machine(s).
+Unit <uart_rx> synthesized.
+
+Synthesizing Unit <uart_tx>.
+    Related source file is "/build/repo/gates/uart-test/uart_top/uart_tx.v".
+        CLKS_PER_BIT = 87
+    Found 1-bit register for signal <r_Tx_Done>.
+    Found 1-bit register for signal <o_Tx_Serial>.
+    Found 8-bit register for signal <r_Clock_Count>.
+    Found 1-bit register for signal <r_Tx_Active>.
+    Found 3-bit register for signal <r_Bit_Index>.
+    Found 8-bit register for signal <r_Tx_Data>.
+    Found 3-bit register for signal <r_SM_Main>.
+    Found finite state machine <FSM_1> for signal <r_SM_Main>.
+    -----------------------------------------------------------------------
+    | States             | 5                                              |
+    | Transitions        | 10                                             |
+    | Inputs             | 3                                              |
+    | Outputs            | 6                                              |
+    | Clock              | i_Clock (rising_edge)                          |
+    | Power Up State     | 000                                            |
+    | Encoding           | auto                                           |
+    | Implementation     | LUT                                            |
+    -----------------------------------------------------------------------
+    Found 3-bit adder for signal <r_Bit_Index[2]_GND_4_o_add_12_OUT> created at line 94.
+    Found 8-bit adder for signal <r_Clock_Count[7]_GND_4_o_add_19_OUT> created at line 114.
+    Found 1-bit 8-to-1 multiplexer for signal <r_Bit_Index[2]_r_Tx_Data[7]_Mux_8_o> created at line 80.
+    Found 3-bit comparator greater for signal <r_Bit_Index[2]_PWR_5_o_LessThan_12_o> created at line 92
+    Found 8-bit comparator greater for signal <r_Clock_Count[7]_GND_4_o_LessThan_19_o> created at line 112
+    Summary:
+	inferred   2 Adder/Subtractor(s).
+	inferred  22 D-type flip-flop(s).
+	inferred   2 Comparator(s).
+	inferred   8 Multiplexer(s).
+	inferred   1 Finite State Machine(s).
+Unit <uart_tx> synthesized.
+
+=========================================================================
+HDL Synthesis Report
+
+Macro Statistics
+# Adders/Subtractors                                   : 4
+ 3-bit adder                                           : 2
+ 8-bit adder                                           : 2
+# Registers                                            : 19
+ 1-bit register                                        : 14
+ 3-bit register                                        : 2
+ 8-bit register                                        : 3
+# Comparators                                          : 4
+ 3-bit comparator greater                              : 2
+ 8-bit comparator greater                              : 2
+# Multiplexers                                         : 14
+ 1-bit 2-to-1 multiplexer                              : 2
+ 1-bit 8-to-1 multiplexer                              : 1
+ 3-bit 2-to-1 multiplexer                              : 4
+ 8-bit 2-to-1 multiplexer                              : 7
+# FSMs                                                 : 2
+
+=========================================================================
+
+=========================================================================
+*                       Advanced HDL Synthesis                          *
+=========================================================================
+
+
+=========================================================================
+Advanced HDL Synthesis Report
+
+Macro Statistics
+# Adders/Subtractors                                   : 4
+ 3-bit adder                                           : 2
+ 8-bit adder                                           : 2
+# Registers                                            : 44
+ Flip-Flops                                            : 44
+# Comparators                                          : 4
+ 3-bit comparator greater                              : 2
+ 8-bit comparator greater                              : 2
+# Multiplexers                                         : 14
+ 1-bit 2-to-1 multiplexer                              : 2
+ 1-bit 8-to-1 multiplexer                              : 1
+ 3-bit 2-to-1 multiplexer                              : 4
+ 8-bit 2-to-1 multiplexer                              : 7
+# FSMs                                                 : 2
+
+=========================================================================
+
+=========================================================================
+*                         Low Level Synthesis                           *
+=========================================================================
+Analyzing FSM <MFsm> for best encoding.
+Optimizing FSM <UART_TOP_INST/UART_TX_INST/FSM_1> on signal <r_SM_Main[1:3]> with user encoding.
+-------------------
+ State | Encoding
+-------------------
+ 000   | 000
+ 001   | 001
+ 010   | 010
+ 011   | 011
+ 100   | 100
+-------------------
+Analyzing FSM <MFsm> for best encoding.
+Optimizing FSM <UART_TOP_INST/UART_RX_INST/FSM_0> on signal <r_SM_Main[1:3]> with user encoding.
+-------------------
+ State | Encoding
+-------------------
+ 000   | 000
+ 001   | 001
+ 010   | 010
+ 011   | 011
+ 100   | 100
+-------------------
+
+Optimizing unit <uartloop_top> ...
+
+Optimizing unit <uart_tx> ...
+
+Optimizing unit <uart_rx> ...
+WARNING:Xst:2677 - Node <UART_TOP_INST/UART_TX_INST/r_Tx_Active> of sequential type is unconnected in block <uartloop_top>.
+WARNING:Xst:2677 - Node <UART_TOP_INST/UART_TX_INST/r_Tx_Done> of sequential type is unconnected in block <uartloop_top>.
+WARNING:Xst:1293 - FF/Latch <UART_TOP_INST/UART_TX_INST/r_Clock_Count_7> has a constant value of 0 in block <uartloop_top>. This FF/Latch will be trimmed during the optimization process.
+INFO:Xst:2261 - The FF/Latch <UART_TOP_INST/UART_RX_INST/r_SM_Main_FSM_FFd1> in Unit <uartloop_top> is equivalent to the following FF/Latch, which will be removed : <UART_TOP_INST/UART_RX_INST/r_Rx_DV> 
+
+Mapping all equations...
+Building and optimizing final netlist ...
+Found area constraint ratio of 100 (+ 5) on block uartloop_top, actual ratio is 0.
+
+Final Macro Processing ...
+
+Processing Unit <uartloop_top> :
+	Found 2-bit shift register for signal <UART_TOP_INST/UART_RX_INST/r_Rx_Data>.
+Unit <uartloop_top> processed.
+
+=========================================================================
+Final Register Report
+
+Macro Statistics
+# Registers                                            : 44
+ Flip-Flops                                            : 44
+# Shift Registers                                      : 1
+ 2-bit shift register                                  : 1
+
+=========================================================================
+
+=========================================================================
+*                           Partition Report                            *
+=========================================================================
+
+Partition Implementation Status
+-------------------------------
+
+  No Partitions were found in this design.
+
+-------------------------------
+
+=========================================================================
+*                            Design Summary                             *
+=========================================================================
+
+Top Level Output File Name         : uartloop_top.ngc
+
+Primitive and Black Box Usage:
+------------------------------
+# BELS                             : 80
+#      GND                         : 1
+#      INV                         : 3
+#      LUT2                        : 6
+#      LUT3                        : 8
+#      LUT4                        : 18
+#      LUT5                        : 9
+#      LUT6                        : 34
+#      VCC                         : 1
+# FlipFlops/Latches                : 45
+#      FD                          : 6
+#      FDE                         : 39
+# Shift Registers                  : 1
+#      SRLC16E                     : 1
+# Clock Buffers                    : 1
+#      BUFGP                       : 1
+# IO Buffers                       : 2
+#      IBUF                        : 1
+#      OBUF                        : 1
+
+Device utilization summary:
+---------------------------
+
+Selected Device : 6slx16ftg256-3 
+
+
+Slice Logic Utilization: 
+ Number of Slice Registers:              45  out of  18224     0%  
+ Number of Slice LUTs:                   79  out of   9112     0%  
+    Number used as Logic:                78  out of   9112     0%  
+    Number used as Memory:                1  out of   2176     0%  
+       Number used as SRL:                1
+
+Slice Logic Distribution: 
+ Number of LUT Flip Flop pairs used:     86
+   Number with an unused Flip Flop:      41  out of     86    47%  
+   Number with an unused LUT:             7  out of     86     8%  
+   Number of fully used LUT-FF pairs:    38  out of     86    44%  
+   Number of unique control sets:        10
+
+IO Utilization: 
+ Number of IOs:                           3
+ Number of bonded IOBs:                   3  out of    186     1%  
+
+Specific Feature Utilization:
+ Number of BUFG/BUFGCTRLs:                1  out of     16     6%  
+
+---------------------------
+Partition Resource Summary:
+---------------------------
+
+  No Partitions were found in this design.
+
+---------------------------
+
+
+=========================================================================
+Timing Report
+
+NOTE: THESE TIMING NUMBERS ARE ONLY A SYNTHESIS ESTIMATE.
+      FOR ACCURATE TIMING INFORMATION PLEASE REFER TO THE TRACE REPORT
+      GENERATED AFTER PLACE-and-ROUTE.
+
+Clock Information:
+------------------
+-----------------------------------+------------------------+-------+
+Clock Signal                       | Clock buffer(FF name)  | Load  |
+-----------------------------------+------------------------+-------+
+clk                                | BUFGP                  | 46    |
+-----------------------------------+------------------------+-------+
+
+Asynchronous Control Signals Information:
+----------------------------------------
+No asynchronous control signals found in this design
+
+Timing Summary:
+---------------
+Speed Grade: -3
+
+   Minimum period: 4.005ns (Maximum Frequency: 249.694MHz)
+   Minimum input arrival time before clock: 1.801ns
+   Maximum output required time after clock: 3.597ns
+   Maximum combinational path delay: No path found
+
+Timing Details:
+---------------
+All values displayed in nanoseconds (ns)
+
+=========================================================================
+Timing constraint: Default period analysis for Clock 'clk'
+  Clock period: 4.005ns (frequency: 249.694MHz)
+  Total number of paths / destination ports: 698 / 83
+-------------------------------------------------------------------------
+Delay:               4.005ns (Levels of Logic = 2)
+  Source:            UART_TOP_INST/UART_RX_INST/r_Clock_Count_3 (FF)
+  Destination:       UART_TOP_INST/UART_RX_INST/r_Rx_Byte_0 (FF)
+  Source Clock:      clk rising
+  Destination Clock: clk rising
+
+  Data Path: UART_TOP_INST/UART_RX_INST/r_Clock_Count_3 to UART_TOP_INST/UART_RX_INST/r_Rx_Byte_0
+                                Gate     Net
+    Cell:in->out      fanout   Delay   Delay  Logical Name (Net Name)
+    ----------------------------------------  ------------
+     FDE:C->Q             13   0.447   1.161  UART_TOP_INST/UART_RX_INST/r_Clock_Count_3 (UART_TOP_INST/UART_RX_INST/r_Clock_Count_3)
+     LUT6:I3->O           15   0.205   0.982  UART_TOP_INST/UART_RX_INST/r_Clock_Count[7]_GND_3_o_LessThan_23_o11 (UART_TOP_INST/UART_RX_INST/r_Clock_Count[7]_GND_3_o_LessThan_23_o1)
+     LUT6:I5->O            4   0.205   0.683  UART_TOP_INST/UART_RX_INST/_n0160_inv11 (UART_TOP_INST/UART_RX_INST/_n0160_inv1)
+     FDE:CE                    0.322          UART_TOP_INST/UART_RX_INST/r_Rx_Byte_0
+    ----------------------------------------
+    Total                      4.005ns (1.179ns logic, 2.826ns route)
+                                       (29.4% logic, 70.6% route)
+
+=========================================================================
+Timing constraint: Default OFFSET IN BEFORE for Clock 'clk'
+  Total number of paths / destination ports: 1 / 1
+-------------------------------------------------------------------------
+Offset:              1.801ns (Levels of Logic = 1)
+  Source:            rx_serial (PAD)
+  Destination:       UART_TOP_INST/UART_RX_INST/Mshreg_r_Rx_Data (FF)
+  Destination Clock: clk rising
+
+  Data Path: rx_serial to UART_TOP_INST/UART_RX_INST/Mshreg_r_Rx_Data
+                                Gate     Net
+    Cell:in->out      fanout   Delay   Delay  Logical Name (Net Name)
+    ----------------------------------------  ------------
+     IBUF:I->O             1   1.222   0.579  rx_serial_IBUF (rx_serial_IBUF)
+     SRLC16E:D                -0.060          UART_TOP_INST/UART_RX_INST/Mshreg_r_Rx_Data
+    ----------------------------------------
+    Total                      1.801ns (1.222ns logic, 0.579ns route)
+                                       (67.9% logic, 32.1% route)
+
+=========================================================================
+Timing constraint: Default OFFSET OUT AFTER for Clock 'clk'
+  Total number of paths / destination ports: 1 / 1
+-------------------------------------------------------------------------
+Offset:              3.597ns (Levels of Logic = 1)
+  Source:            UART_TOP_INST/UART_TX_INST/o_Tx_Serial (FF)
+  Destination:       tx_serial (PAD)
+  Source Clock:      clk rising
+
+  Data Path: UART_TOP_INST/UART_TX_INST/o_Tx_Serial to tx_serial
+                                Gate     Net
+    Cell:in->out      fanout   Delay   Delay  Logical Name (Net Name)
+    ----------------------------------------  ------------
+     FDE:C->Q              1   0.447   0.579  UART_TOP_INST/UART_TX_INST/o_Tx_Serial (UART_TOP_INST/UART_TX_INST/o_Tx_Serial)
+     OBUF:I->O                 2.571          tx_serial_OBUF (tx_serial)
+    ----------------------------------------
+    Total                      3.597ns (3.018ns logic, 0.579ns route)
+                                       (83.9% logic, 16.1% route)
+
+=========================================================================
+
+Cross Clock Domains Report:
+--------------------------
+
+Clock to Setup on destination clock clk
+---------------+---------+---------+---------+---------+
+               | Src:Rise| Src:Fall| Src:Rise| Src:Fall|
+Source Clock   |Dest:Rise|Dest:Rise|Dest:Fall|Dest:Fall|
+---------------+---------+---------+---------+---------+
+clk            |    4.005|         |         |         |
+---------------+---------+---------+---------+---------+
+
+=========================================================================
+
+
+Total REAL time to Xst completion: 7.00 secs
+Total CPU time to Xst completion: 6.44 secs
+ 
+--> 
+
+
+Total memory usage is 376660 kilobytes
+
+Number of errors   :    0 (   0 filtered)
+Number of warnings :   11 (   0 filtered)
+Number of infos    :    3 (   0 filtered)
+

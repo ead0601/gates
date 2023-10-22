@@ -1,0 +1,18 @@
+
+#Created by Constraints Editor (xc6slx16-ftg256-3) - 2023/10/21
+NET "clk" TNM_NET = "clk";
+TIMESPEC TS_clk = PERIOD "clk" 20 ns HIGH 50 %;
+NET "rx_serial" OFFSET = IN 20 ns VALID 20 ns BEFORE "clk" RISING;
+NET "tx_serial" OFFSET = OUT 20 ns AFTER "clk";
+
+# PlanAhead Generated physical constraints 
+
+NET "clk" LOC = T8;
+NET "rx_serial" LOC = P4;
+NET "tx_serial" LOC = N5;
+
+# PlanAhead Generated IO constraints 
+
+NET "clk" IOSTANDARD = LVCMOS33;
+NET "rx_serial" IOSTANDARD = LVCMOS33;
+NET "tx_serial" IOSTANDARD = LVCMOS33;

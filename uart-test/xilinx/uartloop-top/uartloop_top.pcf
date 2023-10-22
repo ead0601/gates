@@ -1,0 +1,59 @@
+//! **************************************************************************
+// Written by: Map P.20131013 on Sat Oct 21 23:21:09 2023
+//! **************************************************************************
+
+SCHEMATIC START;
+COMP "clk" LOCATE = SITE "T8" LEVEL 1;
+COMP "rx_serial" LOCATE = SITE "P4" LEVEL 1;
+COMP "tx_serial" LOCATE = SITE "N5" LEVEL 1;
+TIMEGRP clk = BEL "UART_TOP_INST/UART_TX_INST/r_SM_Main_FSM_FFd2" BEL
+        "UART_TOP_INST/UART_TX_INST/r_SM_Main_FSM_FFd3" BEL
+        "UART_TOP_INST/UART_TX_INST/r_SM_Main_FSM_FFd1" BEL
+        "UART_TOP_INST/UART_TX_INST/o_Tx_Serial" BEL
+        "UART_TOP_INST/UART_TX_INST/r_Clock_Count_6" BEL
+        "UART_TOP_INST/UART_TX_INST/r_Clock_Count_5" BEL
+        "UART_TOP_INST/UART_TX_INST/r_Clock_Count_4" BEL
+        "UART_TOP_INST/UART_TX_INST/r_Clock_Count_3" BEL
+        "UART_TOP_INST/UART_TX_INST/r_Clock_Count_2" BEL
+        "UART_TOP_INST/UART_TX_INST/r_Clock_Count_1" BEL
+        "UART_TOP_INST/UART_TX_INST/r_Clock_Count_0" BEL
+        "UART_TOP_INST/UART_TX_INST/r_Bit_Index_2" BEL
+        "UART_TOP_INST/UART_TX_INST/r_Bit_Index_1" BEL
+        "UART_TOP_INST/UART_TX_INST/r_Bit_Index_0" BEL
+        "UART_TOP_INST/UART_TX_INST/r_Tx_Data_7" BEL
+        "UART_TOP_INST/UART_TX_INST/r_Tx_Data_6" BEL
+        "UART_TOP_INST/UART_TX_INST/r_Tx_Data_5" BEL
+        "UART_TOP_INST/UART_TX_INST/r_Tx_Data_4" BEL
+        "UART_TOP_INST/UART_TX_INST/r_Tx_Data_3" BEL
+        "UART_TOP_INST/UART_TX_INST/r_Tx_Data_2" BEL
+        "UART_TOP_INST/UART_TX_INST/r_Tx_Data_1" BEL
+        "UART_TOP_INST/UART_TX_INST/r_Tx_Data_0" BEL
+        "UART_TOP_INST/UART_RX_INST/r_SM_Main_FSM_FFd2" BEL
+        "UART_TOP_INST/UART_RX_INST/r_SM_Main_FSM_FFd3" BEL
+        "UART_TOP_INST/UART_RX_INST/r_SM_Main_FSM_FFd1" BEL
+        "UART_TOP_INST/UART_RX_INST/r_Clock_Count_7" BEL
+        "UART_TOP_INST/UART_RX_INST/r_Clock_Count_6" BEL
+        "UART_TOP_INST/UART_RX_INST/r_Clock_Count_5" BEL
+        "UART_TOP_INST/UART_RX_INST/r_Clock_Count_4" BEL
+        "UART_TOP_INST/UART_RX_INST/r_Clock_Count_3" BEL
+        "UART_TOP_INST/UART_RX_INST/r_Clock_Count_2" BEL
+        "UART_TOP_INST/UART_RX_INST/r_Clock_Count_1" BEL
+        "UART_TOP_INST/UART_RX_INST/r_Clock_Count_0" BEL
+        "UART_TOP_INST/UART_RX_INST/r_Bit_Index_2" BEL
+        "UART_TOP_INST/UART_RX_INST/r_Bit_Index_1" BEL
+        "UART_TOP_INST/UART_RX_INST/r_Bit_Index_0" BEL
+        "UART_TOP_INST/UART_RX_INST/r_Rx_Byte_0" BEL
+        "UART_TOP_INST/UART_RX_INST/r_Rx_Byte_2" BEL
+        "UART_TOP_INST/UART_RX_INST/r_Rx_Byte_3" BEL
+        "UART_TOP_INST/UART_RX_INST/r_Rx_Byte_1" BEL
+        "UART_TOP_INST/UART_RX_INST/r_Rx_Byte_5" BEL
+        "UART_TOP_INST/UART_RX_INST/r_Rx_Byte_6" BEL
+        "UART_TOP_INST/UART_RX_INST/r_Rx_Byte_4" BEL
+        "UART_TOP_INST/UART_RX_INST/r_Rx_Byte_7" BEL "clk_BUFGP/BUFG" BEL
+        "UART_TOP_INST/UART_RX_INST/Mshreg_r_Rx_Data" BEL
+        "UART_TOP_INST/UART_RX_INST/r_Rx_Data";
+TS_clk = PERIOD TIMEGRP "clk" 20 ns HIGH 50%;
+COMP "rx_serial" OFFSET = IN 20 ns VALID 20 ns BEFORE COMP "clk" "RISING";
+COMP "tx_serial" OFFSET = OUT 20 ns AFTER COMP "clk";
+SCHEMATIC END;
+

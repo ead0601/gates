@@ -55,13 +55,13 @@ module uart_tb();
   //  
   uart_top #(.c_CLKS_PER_BIT(c_CLKS_PER_BIT)) UART_TOP_INST
     (
-	  // RX signals
-	  .i_Clock(r_Clock),
+     // RX signals
+     .i_Clock(r_Clock),
      .i_Rx_Serial(r_Rx_Serial),
      .o_Rx_DV(),
      .o_Rx_Byte(w_Rx_Byte),
    
-	  // TX signals
+     // TX signals
      .i_Tx_DV(r_Tx_DV),
      .i_Tx_Byte(r_Tx_Byte),
      .o_Tx_Active(),
