@@ -41,7 +41,7 @@ C06  : SETSECT	 : SET SECTOR NUMBER<br>
 C03  : SETTRIG	 : SET TRIG PIN<br>
 C04  : STOPACQ	 : STOP ACQ<br>
 C01  : STARTACQ	 : START ACQ (wait for trigger)<br>
-C00  : RESERVED<br>
+C00  : RESETALL  : ALL DEVICES RESET<br>
 (followed by : MSB first)<br>
 T0X  : TRIG PIN ( 8bits) : (0-40) pins<br>
 (or : MSB first)<br>
