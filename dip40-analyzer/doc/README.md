@@ -30,23 +30,22 @@ It is preferred that high frequency signals are collocated on a 32-bit container
 -----------------------------------------------------------------------------------
 
 # SPI FORMAT FOR (4 BIT SPI, CE0, CE1, CLK, D3-D0)<br>
-CE0  : CHIP ENABLE 0 USED FOR READ DATA<br>
 CE1  : CHIP ENABLE 1 USED FOR COMMAND SEQUENCE<br>
+CE0  : CHIP ENABLE 0 USED FOR READ DATA<br>
 
 **COMMAND**<br>
-C07  : DEVICEID[0]<br>
+C07  : DEVICEID[2]<br>
 C06  : DEVICEID[1]<br>
-C05  : SETSECT  : SET SECTOR NUMBER<br>
-C04  : SETTRIG  : SET TRIG PIN<br>
-C03  : STOPACQ  : STOP ACQ<br>
-C02  : STARTACQ : START ACQ<br>
-C01  : RESERVED<br>
+C05  : DEVICEID[0]<br>
+C06  : SETSECT  : SET SECTOR NUMBER<br>
+C03  : SETTRIG  : SET TRIG PIN<br>
+C04  : STOPACQ  : STOP ACQ<br>
+C01  : STARTACQ : START ACQ<br>
 C00  : RESERVED<br>
 (followed by)<br>
 T00  : TRIG PIN ( 8bits) : (0-40) pins<br>
 (or)<br>
 S00  : SECTOR NUMBER (64 bits) : UPDATE CURRENT START SECTOR<br>
-
 
 **DATA**<br>
 D7   : MSB  : BYTE 0<br>
