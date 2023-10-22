@@ -3,14 +3,14 @@ We will break a 40 pin header into 2 sets of 20pin sections, where each 20 pin s
 
 **[32 BIT CONTAINER]**<br>
 D31  T9..............(100Mhz timer)  INTERNAL TIMER COUNT<br>
-D30  T8..............<br>
-D29  T7..............<br>
-D28  T6..............<br>
-D27  T5..............<br>
-D26  T4..............<br>
-D25  T3..............<br>
-D24  T2..............<br>
-D23  T1..............<br>
+D30  T8<br>
+D29  T7<br>
+D28  T6<br>
+D27  T5<br>
+D26  T4<br>
+D25  T3<br>
+D24  T2<br>
+D23  T1<br>
 D22  T0..............100Mhz timer)  INTERNAL TIMER COUNT<br>
 D21  DATA : D21......PWR/GND (digital sample for slump/bump detection)<br>
 D20  DATA : D20......(32KHz timer)   EXTERNAL TIMER PULSE<br>
@@ -30,15 +30,18 @@ CE0  : CHIP ENABLE 0 USED FOR READ DATA<br>
 CE1  : CHIP ENABLE 1 USED FOR COMMAND SEQUENCE<br>
 
 **COMMAND**<br>
-C07  : COMMAND : 8 BITS<br>
-- SETSECT......: SET SECTOR NUMBER<br>
-- SETTRIG......:<br>
-- STOPTRIG.....:<br>
-- STARTTRIG....:<br>
-
-T00  : TRIG PIN : (0-40) pins<br>
-
-S00  : SECTOR NUMBER : 64 bits<br>
+C07  : DEVICEID[0]<br>
+C06  : DEVICEID[1]<br>
+C05  : SETSECT  : SET SECTOR NUMBER<br>
+C04  : SETTRIG  : SET TRIG PIN<br>
+C03  : STOPACQ  : STOP ACQ<br>
+C02  : STARTACQ : START ACQ<br>
+C01  : RESERVED
+C00  : RESERVED
+(followed by)
+T00  : TRIG PIN ( 8bits) : (0-40) pins<br>
+(or)
+S00  : SECTOR NUMBER (64 bits) : UPDATE CURRENT START SECTOR<br>
 
 
 **DATA**<br>
