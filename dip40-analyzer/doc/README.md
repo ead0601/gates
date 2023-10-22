@@ -33,7 +33,7 @@ It is preferred that high frequency signals are collocated on a 32-bit container
 CE1  : CHIP ENABLE 1 USED FOR COMMAND SEQUENCE<br>
 CE0  : CHIP ENABLE 0 USED FOR READ DATA<br>
 
-**COMMAND**<br>
+**COMMAND : CE1**<br>
 C07  : ENABLEDEV : DEVICEID[2]<br>
 C06  : ENABLEDEV : DEVICEID[1]<br>
 C05  : ENABLEDEV : DEVICEID[0]<br>
@@ -47,7 +47,7 @@ T0X  : TRIG PIN ( 8bits) : (0-40) pins<br>
 (or : MSB first)<br>
 SXX  : SECTOR NUMBER (64 bits) : UPDATE CURRENT START SECTOR<br>
 
-**DATA**<br>
+**DATA : CE0**<br>
 D7   : MSB  : BYTE 0<br>
 . . .<br>
 D0   : LSB  : BYTE 0<br>
