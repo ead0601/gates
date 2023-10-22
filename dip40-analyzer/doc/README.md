@@ -42,10 +42,10 @@ C03  : SETTRIG	 : SET TRIG PIN<br>
 C04  : STOPACQ	 : STOP ACQ<br>
 C01  : STARTACQ	 : START ACQ (wait for trigger)<br>
 C00  : RESERVED<br>
-(followed by)<br>
-T00  : TRIG PIN ( 8bits) : (0-40) pins<br>
-(or)<br>
-S00  : SECTOR NUMBER (64 bits) : UPDATE CURRENT START SECTOR<br>
+(followed by : MSB first)<br>
+T0X  : TRIG PIN ( 8bits) : (0-40) pins<br>
+(or : MSB first)<br>
+SXX  : SECTOR NUMBER (64 bits) : UPDATE CURRENT START SECTOR<br>
 
 **DATA**<br>
 D7   : MSB  : BYTE 0<br>
