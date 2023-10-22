@@ -11,7 +11,7 @@ D26  T4 : " <br>
 D25  T3 : " <br>
 D24  T2 : " <br>
 D23  T1 : " <br>
-D22  T0 : 100Mhz timer)  INTERNAL TIMER COUNT<br>
+D22  T0 : (100Mhz timer)  INTERNAL TIMER COUNT<br>
 <br>
 D21  DATA : D21......PWR/GND (digital sample for slump/bump detection)<br>
 D20  DATA : D20......(32KHz timer)   EXTERNAL TIMER PULSE<br>
