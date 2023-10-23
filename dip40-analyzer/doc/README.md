@@ -2,8 +2,9 @@
 We will break a 40 pin header into 2 sets of 20pin sections, where each 20 pin section will be stored in a 32 bit container.
 
 **[32 BIT CONTAINER]**<br>
-D31  T9 : (100Mhz timer)  INTERNAL TIMER COUNT<br>
-D30  T8 : " <br>
+D31  CSEL : CONTAINER NUMBER
+
+D30  T8 : (100Mhz timer)  INTERNAL TIMER COUNT<br>
 D29  T7 : " <br>
 D28  T6 : " <br>
 D27  T5 : " <br>
