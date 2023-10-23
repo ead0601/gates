@@ -34,21 +34,26 @@ It is preferred that high frequency signals are collocated on a 32-bit container
 CE1  : CHIP ENABLE 1 USED FOR COMMAND SEQUENCE<br>
 CE0  : CHIP ENABLE 0 USED FOR READ DATA<br>
 
-**COMMAND : CE1**<br>
-C07  : ENABLEDEV : DEVICEID[2]<br>
-C06  : ENABLEDEV : DEVICEID[1]<br>
-C05  : ENABLEDEV : DEVICEID[0]<br>
+**COMMAND : only for CE1**<br>
+C07  : ENABLEDEV : DEVICEID[1]<br>
+C06  : ENABLEDEV : DEVICEID[0]<br>
+C05  : SETRATE   : SET SAMPLING RATE<br>
 C06  : SETSECT	 : SET SECTOR NUMBER<br>
 C03  : SETTRIG	 : SET TRIG PIN<br>
 C04  : STOPACQ	 : STOP ACQ<br>
 C01  : STARTACQ	 : START ACQ (wait for trigger)<br>
 C00  : RESETALL  : ALL DEVICES RESET<br>
-(followed by : MSB first)<br>
+. . .
+(SET DATA : followed by either : MSB first)<br>
+<br>
 T0X  : TRIG PIN ( 8bits) : (0-40) pins<br>
-(or : MSB first)<br>
+(or)<br>
+R0X  : SAMPLE RATE (8 bits) : EVERY HOW MANY TIMER COUNTS<br>
+(or)<br>
 SXX  : SECTOR NUMBER (64 bits) : UPDATE CURRENT START SECTOR<br>
 
-**DATA : CE0**<br>
+
+**DATA : only for CE0**<br>
 D7   : MSB  : BYTE 0<br>
 . . .<br>
 D0   : LSB  : BYTE 0<br>
