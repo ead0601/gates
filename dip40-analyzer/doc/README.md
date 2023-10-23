@@ -43,7 +43,7 @@ C03  : SETTRIG	 : SET TRIG PIN<br>
 C04  : STOPACQ	 : STOP ACQ<br>
 C01  : STARTACQ	 : START ACQ (wait for trigger)<br>
 C00  : RESETALL  : ALL DEVICES RESET<br>
-. . .
+. . .<br>
 (SET DATA : followed by either : MSB first)<br>
 <br>
 T0X  : TRIG PIN ( 8bits) : (0-40) pins<br>
