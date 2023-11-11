@@ -1,21 +1,34 @@
 """
-This python program was created to model a Verilog implmentation of an SDIO controller.
-It will be used to debug SDR and DDR burst read/write transactions, by using a FT232H
-module to SDIO 4bit module. Once all transactions are verified, the implmentation will
-be converted to Verilog.
+[DESIGN]
+  This python program was created to model a Verilog implmentation of an SDIO controller.
+  It will be used to debug SDR and DDR burst read/write transactions, by using a FT232H
+  module to SDIO 4bit module. Once all transactions are verified, the implmentation will
+  be converted to Verilog.
 
--Edward Diaz
+  Still a work in progress.
 
-CRC7 generator: https://rndtool.info/CRC-step-by-step-calculator/
+  -Edward Diaz
 
-Generator polynomial: G(x) = x7 + x3 + 1
-CRC poly: 10001001
+[IMPLEMENTATION]
+  This code is executed on a:
+  Adafruit FT232H Breakout General Purpose USB to GPIO+SPI+I2C
+  https://a.co/d/0TVW8vm
 
-CRC7 Examples
-The CRC section of the command/response is bolded.
-CMD0 (Argument=0) --> 01 000000 00000000000000000000000000000000 "1001010" 1
-CMD17 (Argument=0) --> 01 010001 00000000000000000000000000000000 "0101010" 1
-Response of CMD17 --> 00 010001 00000000000000000000100100000000 "0110011" 1
+  Connected to a 4bit SDIO card module on a breadboard: 
+  Pzsmocn Micro-SD/TF Memory Card Reader Adapter Slot Socket Module
+  https://a.co/d/c1gekBk
+
+[CRC7 GENERATOR]
+  CRC7 generator: https://rndtool.info/CRC-step-by-step-calculator/
+
+  Generator polynomial: G(x) = x7 + x3 + 1
+  CRC poly: 10001001
+
+  CRC7 Examples
+  The CRC section of the command/response is bolded.
+  CMD0 (Argument=0) --> 01 000000 00000000000000000000000000000000 "1001010" 1
+  CMD17 (Argument=0) --> 01 010001 00000000000000000000000000000000 "0101010" 1
+  Response of CMD17 --> 00 010001 00000000000000000000100100000000 "0110011" 1
 
 """
 
@@ -161,10 +174,13 @@ def push_next_value_fifo(gpio, reg, fifo, depth):
 
     # The FT232H has an internal FIFO, and we are using the GPIO API of PYFTDI.
     # the async mode is not used because control of reads is unpredictable.
-    # In sync mode both writes and reads occur in unison with the exchange function.
-    # The verilog model had to modified to account for this burst transaction method.
+    # In sync mode both writes and reads occur in unison with the exchange() function.
+    # The verilog model had to be modified to account for this burst transaction method.
+    # In addition to the internal FT232H FIFO, we implment a 1024 deep python FIFO that
+    # is used to burst into the internal FT232H FIFO. By using the Sync FIFO mode of
+    # the FT232H we should be able to obtain a 4 bit 50MHz DDR mode, yielding 50MB/ses
     
-    # Assemble infividual states into byte value. (incl. clk and cmd)
+    # Assemble individual states into byte value. (incl. clk and cmd)
     #
     value = 0x00
     index =  PIN_IDX["D0_PIN"];  value = value | (PIN_STATE[ index ] << index)
