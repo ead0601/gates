@@ -40,6 +40,10 @@ from pyftdi.gpio import GpioSyncController
 from time import sleep
 import argparse
 
+# ############################################# Command parser #########################################
+
+# To enter custom command mode start python with --cmd
+# > python3 ft232h-sdio-gpio.py --cmd
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--cmd", action="store_true", 
