@@ -38,7 +38,20 @@ from pyftdi.gpio import GpioMpsseController
 from pyftdi.gpio import GpioAsyncController
 from pyftdi.gpio import GpioSyncController
 from time import sleep
-import struct
+import argparse
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--cmd", action="store_true", 
+                    help="Enter interactive command mode") 
+args = parser.parse_args()
+cmd_mode = args.cmd
+
+if (cmd_mode):
+    print("Entering command mode")
+    print(" ")
+
+# ######################################################################################################
 
 # List all devices
 #
@@ -59,6 +72,78 @@ PIN_7 =0x000
 PIN_IDX    = { "CMD_PIN" : 0, "CLK_PIN" : 1, "D0_PIN" : 2, "D1_PIN" : 3, "D2_PIN" : 4, "D3_PIN" : 5 } 
 PIN_LIST   = [ (0,"CMD_PIN"), (1,"CLK_PIN"), (2,"D0_PIN"), (3,"D1_PIN"), (4,"D2_PIN"), (5,"D3_PIN") ]
 PIN_STATE  = [ 1 , 1 , 1 , 1 , 1 , 1 ]
+
+# ################################################# CRC GEN ############################################
+
+def xor(a, b):
+    # initialize result
+    result = []
+ 
+    # Traverse all bits, if bits are
+    # same, then XOR is 0, else 1
+    for i in range(1, len(b)):
+        if a[i] == b[i]:
+            result.append('0')
+        else:
+            result.append('1')
+ 
+    return ''.join(result)
+ 
+# Performs Modulo-2 division
+def mod2div(dividend, divisor):
+ 
+    # Number of bits to be XORed at a time.
+    pick = len(divisor)
+ 
+    # Slicing the dividend to appropriate
+    # length for particular step
+    tmp = dividend[0 : pick]
+ 
+    while pick < len(dividend):
+        if tmp[0] == '1':
+ 
+            # replace the dividend by the result
+            # of XOR and pull 1 bit down
+            tmp = xor(divisor, tmp) + dividend[pick]
+ 
+        else: # If leftmost bit is '0'
+ 
+            # If the leftmost bit of the dividend (or the
+            # part used in each step) is 0, the step cannot
+            # use the regular divisor; we need to use an
+            # all-0s divisor.
+            tmp = xor('0'*pick, tmp) + dividend[pick]
+ 
+        # increment pick to move further
+        pick += 1
+ 
+    # For the last n bits, we have to carry it out
+    # normally as increased value of pick will cause
+    # Index Out of Bounds.
+    if tmp[0] == '1':
+        tmp = xor(divisor, tmp)
+    else:
+        tmp = xor('0'*pick, tmp)
+ 
+    checkword = tmp
+    return checkword
+ 
+# Function used at the sender side to encode
+# data by appending remainder of modular division
+# at the end of data.
+def encodeData(data, key):
+ 
+    l_key = len(key)
+ 
+    # Appends n-1 zeroes at end of data
+    appended_data = data + '0'*(l_key-1)
+    remainder = mod2div(appended_data, key)
+ 
+    # Append remainder in the original data
+    codeword = data + remainder
+    return codeword    
+     
+# ###################################################################################################
 
 def setup_ftdi_device():
 
@@ -98,6 +183,7 @@ class parameters:
     DESELECT            = 16  # 5'd16;  // De-select the SD card and send some clock pulses (Must enter with sclk at zero.)
     PULSE_SCLK          = 17  # 5'd17;  // Issue some clock pulses. (Must enter with sclk at zero.)
     REPORT_ERROR        = 18  # 5'd18;  // Report error and stall until reset.
+    CMD_MODE            = 19  # 5'd19;  // Python only interactive command mode
     
     CMD0_C              = 0x40 + 0 
     CMD8_C              = 0x40 + 8 
@@ -389,13 +475,38 @@ def assign_next_state(gpio, par, reg, fifo):
         reg.n_clk      = 0
         reg.n_cmd_o    = 1 
         reg.n_cstate   = par.START_TX 
-        #reg.n_rstate   = par.GET_CMD8_RESPONSE
-        reg.n_rstate   = par.SEND_CMD41
         reg.n_pindir   = "110000"   # 0x30, 1=>output
         reg.n_bitcnt   = 49
         reg.n_cmd_reg  = "0" + bin(par.CMD8_C)[2:] + "0000"*5 + "000110101010" + "10000111" + "11" # // 0x87 is correct CRC
         reg.n_get_resp = 1
-    
+        if (cmd_mode == 1):
+            reg.n_rstate   = par.CMD_MODE             # Python only interactive command mode
+        else:
+            reg.n_rstate   = par.SEND_CMD41
+
+    # Special interactive mode for python debug
+    #            
+    elif (reg.cstate == par.CMD_MODE):
+        print(" ")
+        print("SEND_CUSTOM_CMD")
+        sleep(0.020)
+        reg.n_clk      = 0
+        reg.n_cmd_o    = 1 
+        reg.n_cstate   = par.START_TX 
+        reg.n_pindir   = "110000"   # 0x30, 1=>output
+        reg.n_get_resp = 1
+        reg.n_rstate   = par.CMD_MODE             # Python only interactive command mode
+        print("Enter command to send (do not include CRC or stop bit)")
+        data = input("Enter CMD:")
+        key = "10001001"
+        enc = encodeData(data,key)
+        enc_len = len(encodeData(data,key)) + 1    # result should be 48
+        reg.n_bitcnt   = enc_len + 1               # 49 instead of 48, need to debug
+        print("encoded:  ",enc)
+        enc = enc + "111"                          # Add stop bit sequence
+        reg.n_cmd_reg  = enc
+        
+        
     elif (reg.cstate == par.SEND_CMD41):
         print("SEND_CMD41")
         sleep(0.020)
@@ -406,7 +517,7 @@ def assign_next_state(gpio, par, reg, fifo):
         reg.n_pindir   = "110000"   # 0x30, 1=>output
         reg.n_bitcnt   = 49       
         #reg.n_cmd_reg  = "0" + bin(par.CMD41_C)[2:] + "0100" + "0000"*7 + par.FAKE_CRC_C + "11"
-        reg.n_cmd_reg  = "0" + bin(par.CMD41_C)[2:] + "0100" + "0000"*7 + "0111011" + "111"	
+        reg.n_cmd_reg  = "0" + bin(par.CMD41_C)[2:] + "0100" + "0000"*7 + "0111011" + "111"     
         reg.n_get_resp = 1
         
     elif (reg.cstate == par.START_TX):
@@ -539,6 +650,20 @@ def main():
 
     # Main process loop
     #
+    print("CRC7 test")
+    
+    # Generator polynomial: G(x) = x7 + x3 + 1
+    # CRC poly: 10001001
+    key = "10001001"
+
+    # CMD17 (Argument=0) --> 01 010001 00000000000000000000000000000000 "0101010" 1
+    #
+    #data = "0101000100000000000000000000000000000000"
+    #ans = encodeData(data,key)
+    #print("generated: ", ans)
+    #print("expected:  ", "01010001000000000000000000000000000000000101010")
+    print(" ")
+
     while(1):
         # Display current state
         # print(edge_count,reg.cstate,reg.n_cstate)
@@ -552,4 +677,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
