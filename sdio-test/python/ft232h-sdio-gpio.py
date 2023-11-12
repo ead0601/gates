@@ -500,11 +500,11 @@ def assign_next_state(gpio, par, reg, fifo):
         reg.n_rstate   = par.CMD_MODE             # Python only interactive command mode
         print("Enter command to send (do not include CRC or stop bit)")
         data = input("Enter command : ")
-        key = "10001001"
-        enc = encodeData(data,key)
-        enc_len = len(encodeData(data,key)) + 1    # result should be 48
+        key = "10001001"                           # Generator polynomial: G(x) = x7 + x3 + 1
+        enc = encodeData(data,key)                 # returns command minus stop bit
+        enc_len = len(encodeData(data,key)) + 1    # and one for stop bit, result should be 48
         print("length to send (bits): ",enc_len)
-        reg.n_bitcnt   = enc_len + 1               # 49 instead of 48, need to debug
+        reg.n_bitcnt   = enc_len + 1               # 49 instead of 48, need to debug pointer isue
         print("encoded:  ",enc)
         enc = enc + "111"                          # Add stop bit sequence
         reg.n_cmd_reg  = enc
