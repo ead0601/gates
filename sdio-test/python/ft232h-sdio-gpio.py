@@ -18,13 +18,11 @@
   Pzsmocn Micro-SD/TF Memory Card Reader Adapter Slot Socket Module
   https://a.co/d/c1gekBk
 
-[CRC7 GENERATOR]
-  CRC7 generator: https://rndtool.info/CRC-step-by-step-calculator/
-
+[CRC7]
   Generator polynomial: G(x) = x7 + x3 + 1
   CRC poly: 10001001
 
-  CRC7 Examples
+  CRC7 Test Examples:
   The CRC section of the command/response is bolded.
   CMD0 (Argument=0) --> 01 000000 00000000000000000000000000000000 "1001010" 1
   CMD17 (Argument=0) --> 01 010001 00000000000000000000000000000000 "0101010" 1
@@ -40,7 +38,7 @@ from pyftdi.gpio import GpioSyncController
 from time import sleep
 import argparse
 
-# ############################################# Command parser #########################################
+# ############################################# COMMAND PARSER #########################################
 
 # To enter custom command mode start python with --cmd
 # > python3 ft232h-sdio-gpio.py --cmd
@@ -501,10 +499,11 @@ def assign_next_state(gpio, par, reg, fifo):
         reg.n_get_resp = 1
         reg.n_rstate   = par.CMD_MODE             # Python only interactive command mode
         print("Enter command to send (do not include CRC or stop bit)")
-        data = input("Enter CMD:")
+        data = input("Enter command : ")
         key = "10001001"
         enc = encodeData(data,key)
         enc_len = len(encodeData(data,key)) + 1    # result should be 48
+        print("length to send (bits): ",enc_len)
         reg.n_bitcnt   = enc_len + 1               # 49 instead of 48, need to debug
         print("encoded:  ",enc)
         enc = enc + "111"                          # Add stop bit sequence
@@ -654,12 +653,11 @@ def main():
 
     # Main process loop
     #
-    print("CRC7 test")
-    
+
     # Generator polynomial: G(x) = x7 + x3 + 1
     # CRC poly: 10001001
-    key = "10001001"
-
+    #key = "10001001"
+    #
     # CMD17 (Argument=0) --> 01 010001 00000000000000000000000000000000 "0101010" 1
     #
     #data = "0101000100000000000000000000000000000000"
