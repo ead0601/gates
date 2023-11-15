@@ -75,6 +75,8 @@ PIN_IDX    = { "CMD_PIN" : 0, "CLK_PIN" : 1, "D0_PIN" : 2, "D1_PIN" : 3, "D2_PIN
 PIN_LIST   = [ (0,"CMD_PIN"), (1,"CLK_PIN"), (2,"D0_PIN"), (3,"D1_PIN"), (4,"D2_PIN"), (5,"D3_PIN") ]
 PIN_STATE  = [ 1 , 1 , 1 , 1 , 1 , 1 ]
 
+FIFODEPTH = 1024
+
 # ################################################# CRC GEN ############################################
 
 def xor(a, b):
@@ -157,7 +159,8 @@ def setup_ftdi_device():
     gpio.configure(url, direction=0x0FF) # ALL OUTPUTS
     #gpio.set_frequency(1000000)     #  1MHz
     #gpio.set_frequency(10000000)   # 10MHz
-    gpio.set_frequency(16000)      # 16Khz
+    #gpio.set_frequency(16000)      # 16Khz
+    gpio.set_frequency(400000)      # 400Khz
     return gpio
                 
 
@@ -171,21 +174,27 @@ class parameters:
     CHK_CMD0_RESPONSE   =  2  # 5'd02;  // Check card's R1 response to the CMD0.
     SEND_CMD8           =  3  # 5'd03;  // This command is needed to initialize SDHC cards.
     GET_CMD8_RESPONSE   =  4  # 5'd04;  // Get the R7 response to CMD8.
-    SEND_CMD55          =  5  # 5'd05;  // Send CMD55 to the SD card. 
-    SEND_CMD41          =  6  # 5'd06;  // Send CMD41 to the SD card.
-    CHK_ACMD41_RESPONSE =  7  # 5'd07;  // Check if the SD card has left the IDLE state.     
-    WAIT_FOR_HOST_RW    =  8  # 5'd08;  // Wait for the host to issue a read or write command.
-    RD_BLK              =  9  # 5'd09;  // Read a block of data from the SD card.
-    WR_BLK              = 10  # 5'd10;  // Write a block of data to the SD card.
-    WR_WAIT             = 11  # 5'd11;  // Wait for SD card to finish writing the data block.
-    START_TX            = 12  # 5'd12;  // Start sending command/data.
-    TX_BITS             = 13  # 5'd13;  // Shift out remaining command/data bits.
-    GET_CMD_RESPONSE    = 14  # 5'd14;  // Get the R1 response of the SD card to a command.
-    RX_BITS             = 15  # 5'd15;  // Receive response/data from the SD card.
-    DESELECT            = 16  # 5'd16;  // De-select the SD card and send some clock pulses (Must enter with sclk at zero.)
-    PULSE_SCLK          = 17  # 5'd17;  // Issue some clock pulses. (Must enter with sclk at zero.)
-    REPORT_ERROR        = 18  # 5'd18;  // Report error and stall until reset.
-    CMD_MODE            = 19  # 5'd19;  // Python only interactive command mode
+
+    SEND_QUERY_CMD55    =  5  # 5'd05;  // Send CMD55 to the SD card. 
+    SEND_QUERY_CMD41    =  6  # 5'd06;  // Send CMD41 to the SD card.
+    SEND_INIT_CMD55     =  7  # 5'd07;  // Send CMD55 to the SD card. 
+    SEND_INIT_CMD41     =  8  # 5'd08;  // Send CMD41 to the SD card.
+    SEND_QUERY2_CMD55   =  9  # 5'd09;  // Send CMD55 to the SD card. 
+    SEND_QUERY2_CMD41   = 10  # 5'd10;  // Send CMD41 to the SD card.
+    
+    CHK_ACMD41_RESPONSE = 11  # 5'd11;  // Check if the SD card has left the IDLE state.     
+    WAIT_FOR_HOST_RW    = 12  # 5'd12;  // Wait for the host to issue a read or write command.
+    RD_BLK              = 13  # 5'd13;  // Read a block of data from the SD card.
+    WR_BLK              = 14  # 5'd14;  // Write a block of data to the SD card.
+    WR_WAIT             = 15  # 5'd15;  // Wait for SD card to finish writing the data block.
+    START_TX            = 16  # 5'd16;  // Start sending command/data.
+    TX_BITS             = 17  # 5'd17;  // Shift out remaining command/data bits.
+    GET_CMD_RESPONSE    = 18  # 5'd18;  // Get the R1 response of the SD card to a command.
+    RX_BITS             = 19  # 5'd19;  // Receive response/data from the SD card.
+    DESELECT            = 20  # 5'd20;  // De-select the SD card and send some clock pulses (Must enter with sclk at zero.)
+    PULSE_SCLK          = 21  # 5'd21;  // Issue some clock pulses. (Must enter with sclk at zero.)
+    REPORT_ERROR        = 22  # 5'd22;  // Report error and stall until reset.
+    CMD_MODE            = 23  # 5'd23;  // Python only interactive command mode
     
     CMD0_C              = 0x40 + 0 
     CMD8_C              = 0x40 + 8 
@@ -205,7 +214,9 @@ class registers:
     pindir              = "110000"     # // 6'h7F, pin direction, 1=>output
     n_pindir            = "110000"     # // 6'h7F, pin direction, 1=>output
     bitcnt              = 0 
-    n_bitcnt            = 0 
+    n_bitcnt            = 0
+    cmdcnt              = 0
+    n_cmdcnt            = 0
     toutcnt             = 0 
     n_toutcnt           = 0 
     clk                 = 0 
@@ -258,7 +269,7 @@ def extract_response(data):
 
 # Push next value into the FIFO
 #
-def push_next_value_fifo(gpio, reg, fifo, depth):
+def push_next_value_fifo(gpio, par, reg, fifo, depth):
 
     # The FT232H has an internal FIFO, and we are using the GPIO API of PYFTDI.
     # the async mode is not used because control of reads is unpredictable.
@@ -289,7 +300,7 @@ def push_next_value_fifo(gpio, reg, fifo, depth):
     # Push into FIFO, and flush FIFO out when full
     # (when called with flush, no NEW value will be pushed in)
     #
-    if (reg.flush_fifo == 1):
+    if ((reg.flush_fifo == 1) and (len(fifo.outfifo)>=0)):
         # Forced flush event
         gpio.set_direction(0x3F,dir)
 
@@ -315,9 +326,19 @@ def push_next_value_fifo(gpio, reg, fifo, depth):
         # Buffer overflow occurred, force flush and insert new value
         gpio.set_direction(0x3F,dir)
 
-        # Send writes
+        #if (reg.cstate == par.PULSE_SCLK):
+        #    # Send writes
+        #    while (reg.bitcnt>=0):
+        #        pinread = gpio.exchange(bytearray(fifo.outfifo))
+        #        if (reg.bitcnt>=depth):
+        #            reg.bitcnt = reg.bitcnt - depth
+        #        else:
+        #            reg.bitcnt = 0
+        #    reg.bitcnt = 0
+        #else:
+        #    pinread = gpio.exchange(bytearray(fifo.outfifo))
         pinread = gpio.exchange(bytearray(fifo.outfifo))
-
+            
         # Process reads
         intlist = list(pinread)
         reads = [bin(x) for x in intlist]
@@ -378,6 +399,7 @@ def sync_process(gpio, par, reg, fifo):
         reg.d2_i         = reg.n_d2_i     # // next d2 pin value
         reg.d3_i         = reg.n_d3_i     # // next d3 pin value            
         reg.bitcnt       = reg.n_bitcnt
+        reg.cmdcnt       = reg.n_cmdcnt
         reg.toutcnt      = reg.n_toutcnt
         reg.cmd_reg      = reg.n_cmd_reg 
         reg.get_resp     = reg.n_get_resp  
@@ -438,7 +460,8 @@ def assign_next_state(gpio, par, reg, fifo):
     reg.n_cstate   = reg.cstate 
     reg.n_rstate   = reg.rstate 
     reg.n_pindir   = reg.pindir 
-    reg.n_bitcnt   = reg.bitcnt 
+    reg.n_bitcnt   = reg.bitcnt
+    reg.n_cmdcnt   = reg.cmdcnt     
     reg.n_toutcnt  = reg.toutcnt
     reg.n_cmd_reg  = reg.cmd_reg
     reg.n_get_resp = reg.get_resp  
@@ -453,10 +476,15 @@ def assign_next_state(gpio, par, reg, fifo):
         reg.n_rstate = par.SEND_CMD8
         reg.n_bitcnt = 80
         key = input("Press any key to continue.")
+        print("PULSE_CLK")
+        sleep(0.100)
 
+    # ##################################################################################
+
+    # SEND CLOCK TRAIN and CMD8
 
     elif (reg.cstate == par.PULSE_SCLK):
-        reg.n_clk         = not reg.clk            # // Toggle clock line
+        reg.n_clk = 0                              # // Toggle clock line
 
         if (reg.bitcnt == 0):
             reg.n_clk = 0
@@ -464,7 +492,7 @@ def assign_next_state(gpio, par, reg, fifo):
             reg.n_cstate = reg.rstate
             
             reg.flush_fifo = 1                      # // Force fifo to be flushed
-            push_next_value_fifo(gpio, reg, fifo, 1024)
+            push_next_value_fifo(gpio, par, reg, fifo, FIFODEPTH)
             reg.flush_fifo = 0                      # // Force fifo to be flushed
 
         else:
@@ -473,7 +501,7 @@ def assign_next_state(gpio, par, reg, fifo):
 
     elif (reg.cstate == par.SEND_CMD8):
         print("SEND_CMD8")
-        sleep(0.020)
+        sleep(0.100)
         reg.n_clk      = 0
         reg.n_cmd_o    = 1 
         reg.n_cstate   = par.START_TX 
@@ -481,48 +509,176 @@ def assign_next_state(gpio, par, reg, fifo):
         reg.n_bitcnt   = 49
         reg.n_cmd_reg  = "0" + bin(par.CMD8_C)[2:] + "0000"*5 + "000110101010" + "10000111" + "11" # // 0x87 is correct CRC
         reg.n_get_resp = 1
-        if (cmd_mode == 1):
-            reg.n_rstate   = par.CMD_MODE             # Python only interactive command mode
-        else:
-            reg.n_rstate   = par.SEND_CMD41
+        reg.n_rstate   = par.SEND_QUERY_CMD41
 
+    # ##################################################################################    
+
+    # SEND FIRST QUERY ACMD41, used to obtain response to seed INIT_ACMD41
+    
+    elif (reg.cstate == par.SEND_QUERY_CMD55):
+        print("SEND_CMD55")
+        sleep(0.100)
+        reg.n_clk      = 0
+        reg.n_cmd_o    = 1 
+        reg.n_cstate   = par.START_TX
+        reg.n_rstate   = par.SEND_QUERY_CMD41        
+        reg.n_pindir   = "110000"   # 0x30, 1=>output
+        reg.n_bitcnt   = 49
+        reg.n_cmd_reg  = "011101110000000000000000000000000000000001100101111"
+        reg.n_get_resp = 1
+        
+    # Query version does not start init process
+    #
+    elif (reg.cstate == par.SEND_QUERY_CMD41):
+        print("SEND_CMD41")
+        sleep(0.100)
+        reg.n_clk       = 0
+        reg.n_cmd_o     = 1 
+        reg.n_cstate    = par.START_TX
+        reg.n_rstate    = par.SEND_INIT_CMD55 
+        reg.n_pindir    = "110000"   # 0x30, 1=>output
+        reg.n_bitcnt    = 49       
+        reg.n_cmd_reg   = "011010010100000000000000000000000000000001110111111"
+        reg.n_get_resp  = 1
+
+    # ##################################################################################    
+
+    # SEND INIT VERSION of ACMD41, used to start card init process
+    
+    elif (reg.cstate == par.SEND_INIT_CMD55):
+        print("SEND_INIT_CMD55")
+        sleep(0.100)
+        reg.n_clk      = 0
+        reg.n_cmd_o    = 1 
+        reg.n_cstate   = par.START_TX
+        reg.n_rstate   = par.SEND_INIT_CMD41        
+        reg.n_pindir   = "110000"   # 0x30, 1=>output
+        reg.n_bitcnt   = 49
+        reg.n_cmd_reg  = "011101110000000000000000000000000000000001100101111"
+        reg.n_get_resp = 1
+
+    # Send init version of ACMD41 
+    #
+    elif (reg.cstate == par.SEND_INIT_CMD41):
+        print("SEND_INIT_CMD41")
+        sleep(0.100)
+        reg.n_clk       = 0
+        reg.n_cmd_o     = 1 
+        reg.n_cstate    = par.START_TX
+        reg.n_rstate    = par.SEND_QUERY2_CMD55
+        reg.n_pindir    = "110000"   # 0x30, 1=>output
+        reg.n_bitcnt    = 49       
+        reg.n_cmd_reg   = "011010010100000011111111100000000000000000010111111"
+        reg.n_get_resp  = 1
+
+    # ##################################################################################    
+
+    # LOOP FOLLOW UP QUERY TO CHECK IF INIT IS COMPLETE
+    
+    elif (reg.cstate == par.SEND_QUERY2_CMD55):
+        print("SEND_QUERY2_CMD55")
+        sleep(0.100)
+        reg.n_clk      = 0
+        reg.n_cmd_o    = 1 
+        reg.n_cstate   = par.START_TX
+        reg.n_rstate   = par.SEND_QUERY2_CMD41        
+        reg.n_pindir   = "110000"   # 0x30, 1=>output
+        reg.n_bitcnt   = 49
+        reg.n_cmd_reg  = "011101110000000000000000000000000000000001100101111"
+        reg.n_get_resp = 1
+        
+    # Query version does not start init process
+    #
+    elif (reg.cstate == par.SEND_QUERY2_CMD41):
+        print("SEND_QUERY2_CMD41")
+        sleep(0.100)
+        reg.n_clk       = 0
+        reg.n_cmd_o     = 1 
+        reg.n_cstate    = par.START_TX
+        reg.n_rstate    = par.CHK_ACMD41_RESPONSE
+        reg.n_pindir    = "110000"   # 0x30, 1=>output
+        reg.n_bitcnt    = 49       
+        reg.n_cmd_reg   = "011010010100000000000000000000000000000001110111111"
+        reg.n_get_resp  = 1
+
+    # ##################################################################################    
+
+    # CHECK FOR COMPLETE INIT
+    
+    elif (reg.cstate == par.CHK_ACMD41_RESPONSE):
+        print("CHECK_INITDONE_CMD41")
+        sleep(0.100)        
+        reg.n_clk       = 0                         # // Lower the SCLK (although it should already be low).
+        reg.n_cmd_o     = 1         
+        print("CHK_ACMD41_RESPONSE: " + reg.cmd_reg)
+
+        # Is INIT done?
+        #
+        if (reg.cmd_resp[8] == "1"):
+            print("CARD INITIALIZED!!")
+            reg.n_cstate = par.CMD_MODE
+            reg.n_pindir = "010000"                 # 0x30, 1=>output            
+        else:
+            reg.n_cstate = par.CHK_ACMD41_RESPONSE
+
+    # ##################################################################################            
+
+    # PYTHON INTERACTIVE MODE
+    
     # Special interactive mode for python debug
     #            
     elif (reg.cstate == par.CMD_MODE):
         print(" ")
         print("SEND_CUSTOM_CMD")
-        sleep(0.020)
+        sleep(0.100)
         reg.n_clk      = 0
         reg.n_cmd_o    = 1 
         reg.n_cstate   = par.START_TX 
         reg.n_pindir   = "110000"   # 0x30, 1=>output
         reg.n_get_resp = 1
-        reg.n_rstate   = par.CMD_MODE             # Python only interactive command mode
+        reg.n_rstate   = par.CMD_MODE                  # Python only interactive command mode
+        reg.n_cmdcnt   = 0
+        
         print("Enter command to send (do not include CRC or stop bit)")
         data = input("Enter command : ")
-        key = "10001001"                           # Generator polynomial: G(x) = x7 + x3 + 1
-        enc = encodeData(data,key)                 # returns command minus stop bit
-        enc_len = len(encodeData(data,key)) + 1    # and one for stop bit, result should be 48
-        print("length to send (bits): ",enc_len)
-        reg.n_bitcnt   = enc_len + 1               # 49 instead of 48, need to debug pointer isue
-        print("encoded:  ",enc)
-        enc = enc + "111"                          # Add stop bit sequence
-        reg.n_cmd_reg  = enc
-        
-        
-    elif (reg.cstate == par.SEND_CMD41):
-        print("SEND_CMD41")
-        sleep(0.020)
-        reg.n_clk      = 0
-        reg.n_cmd_o    = 1 
-        reg.n_cstate   = par.START_TX 
-        reg.n_rstate   = par.CHK_ACMD41_RESPONSE 
-        reg.n_pindir   = "110000"   # 0x30, 1=>output
-        reg.n_bitcnt   = 49       
-        #reg.n_cmd_reg  = "0" + bin(par.CMD41_C)[2:] + "0100" + "0000"*7 + par.FAKE_CRC_C + "11"
-        reg.n_cmd_reg  = "0" + bin(par.CMD41_C)[2:] + "0100" + "0000"*7 + "0111011" + "111"     
-        reg.n_get_resp = 1
-        
+        data = data.strip()                            # strip out any spaces or nondigits
+        if (data.find("acmd41=")>=0):            
+            reg.n_clk      = 0
+            reg.n_cmd_o    = 1 
+            reg.n_cmdcnt   = int(data.split("=")[1])
+            reg.n_cstate   = par.SEND_CMD55
+            reg.n_pindir   = "110000"   # 0x30, 1=>output            
+            
+        elif (data.find("clk=")>=0):
+            reg.n_clk    = 0;
+            reg.n_pindir = "010000"                    # only drive clock pin
+            reg.n_cmd_o  = 1
+            reg.n_cstate = par.PULSE_SCLK
+            reg.n_rstate = par.CMD_MODE
+            reg.n_bitcnt = int(data.split("=")[1])
+
+        elif (len(data)==40):            
+            key = "10001001"                           # Generator polynomial: G(x) = x7 + x3 + 1
+            enc = encodeData(data,key)                 # returns command minus stop bit
+            enc_len = len(encodeData(data,key)) + 1    # and one for stop bit, result should be 48
+            print("length to send (bits): ",enc_len)
+            reg.n_bitcnt   = enc_len + 1               # 49 instead of 48, need to debug pointer isue
+            print("encoded:  ",enc)
+            enc = enc + "111"                          # Add stop bit sequence
+            reg.n_cmd_reg  = enc
+        else:
+            reg.n_clk      = 0
+            reg.n_cmd_o    = 1 
+            reg.n_cstate   = par.CMD_MODE 
+            reg.n_pindir   = "110000"   # 0x30, 1=>output
+            reg.n_get_resp = 0
+            reg.n_rstate   = par.CMD_MODE                  # Python only interactive command mode
+            reg.n_cmdcnt   = 0
+            
+    # ##################################################################################
+
+    # TX / RX STATES
+            
     elif (reg.cstate == par.START_TX):
         # // Start sending command/data by lowering SCLK and outputing MSB of command/data
         # // so it has plenty of setup before the rising edge of SCLK.
@@ -551,7 +707,7 @@ def assign_next_state(gpio, par, reg, fifo):
                 reg.n_pindir = "010000"            # // 0x10, 1=>output, cmd become input
 
                 reg.flush_fifo = 1                      # // Force fifo to be flushed
-                push_next_value_fifo(gpio, reg, fifo, 1024)
+                push_next_value_fifo(gpio, par, reg, fifo, FIFODEPTH)
                 reg.flush_fifo = 0                 # // Force fifo to be flushed
 
                 print("command:  ",reg.cmd_resp)
@@ -592,20 +748,14 @@ def assign_next_state(gpio, par, reg, fifo):
             reg.get_resp   = 0
             
             reg.flush_fifo = 1                      # // Force fifo to be flushed
-            push_next_value_fifo(gpio, reg, fifo, 1024)
+            push_next_value_fifo(gpio, par, reg, fifo, FIFODEPTH)
             reg.flush_fifo = 0                      # // Force fifo to be flushed
             
             print("response: ",reg.cmd_resp)
-            
-    elif (reg.cstate == par.CHK_ACMD41_RESPONSE):
-        # // The CMD55, CMD41 sequence should cause the SD card to leave the IDLE state
-        # // and become ready for SPI read/write operations. If still IDLE, then repeat the CMD55, CMD41 sequence.
-        # // If one of the R1 error flags is set, then report the error and stall.
 
-        #print("CHK_ACMD41_RESPONSE: " + reg.cmd_reg)
-        reg.n_clk = 0                               # // Lower the SCLK (although it should already be low).  
-        reg.n_cstate = par.START_INIT
-        reg.n_pindir = "010000"                     # // Keep CMD as input until TX, 1=>output, cmd become input 
+    # ##################################################################################
+
+    # SHOULD NOT ENTER HERE
             
     else:
         print("Warning!! Default case: reached")
@@ -674,7 +824,7 @@ def main():
         sync_process(gpio, par, reg, fifo)
         
         # Update pins
-        push_next_value_fifo(gpio, reg, fifo, 1024)         
+        push_next_value_fifo(gpio, par, reg, fifo, FIFODEPTH)         
                       
 
 if __name__ == '__main__':
