@@ -36,22 +36,9 @@ from pyftdi.gpio import GpioMpsseController
 from pyftdi.gpio import GpioAsyncController
 from pyftdi.gpio import GpioSyncController
 from time import sleep
-import argparse
 
-# ############################################# COMMAND PARSER #########################################
-
-# To enter custom command mode start python with --cmd
-# > python3 ft232h-sdio-gpio.py --cmd
-
-parser = argparse.ArgumentParser()
-parser.add_argument("--cmd", action="store_true", 
-                    help="Enter interactive command mode") 
-args = parser.parse_args()
-cmd_mode = args.cmd
-
-if (cmd_mode):
-    print("Entering command mode")
-    print(" ")
+print("Python-verilog SDIO model:")
+print(" ")
 
 # ######################################################################################################
 
@@ -300,7 +287,7 @@ def push_next_value_fifo(gpio, par, reg, fifo, depth):
     # Push into FIFO, and flush FIFO out when full
     # (when called with flush, no NEW value will be pushed in)
     #
-    if ((reg.flush_fifo == 1) and (len(fifo.outfifo)>=0)):
+    if ((reg.flush_fifo == 1)):
         # Forced flush event
         gpio.set_direction(0x3F,dir)
 
@@ -468,28 +455,31 @@ def assign_next_state(gpio, par, reg, fifo):
 
     # Used IF/ELSE and needs to be converted to a CASE since python-3.8 does not have a case statement
     #
-    if (reg.cstate == par.START_INIT):
-        reg.n_clk    = 0;
-        reg.n_pindir = "110000"
-        reg.n_cmd_o  = 1
-        reg.n_cstate = par.PULSE_SCLK
-        reg.n_rstate = par.SEND_CMD8
-        reg.n_bitcnt = 80
-        key = input("Press any key to continue.")
-        print("PULSE_CLK")
-        sleep(0.100)
 
     # ##################################################################################
 
-    # SEND CLOCK TRAIN and CMD8
+    # POWER ON CLOCK TRAIN THEN CMD0 RETURN TO IDLE
+    
+    if (reg.cstate == par.START_INIT):
+        reg.n_clk      = 0;
+        reg.n_pindir   = "110000"
+        reg.n_cmd_o    = 1
+        reg.n_cstate   = par.PULSE_SCLK
+        reg.n_rstate   = par.SEND_CMD0
+        reg.n_bitcnt   = 0
+        reg.n_cmdcnt   = 1
+        reg.n_get_resp = 1        
+        key = input("Press any key to continue.")
 
     elif (reg.cstate == par.PULSE_SCLK):
         reg.n_clk = 0                              # // Toggle clock line
 
         if (reg.bitcnt == 0):
+            print("CLK_PULSE_DONE")
+            sleep(0.100)
             reg.n_clk = 0
             reg.n_cmd_o = 1
-            reg.n_cstate = reg.rstate
+            reg.n_cstate = reg.rstate 
             
             reg.flush_fifo = 1                      # // Force fifo to be flushed
             push_next_value_fifo(gpio, par, reg, fifo, FIFODEPTH)
@@ -498,8 +488,31 @@ def assign_next_state(gpio, par, reg, fifo):
         else:
             reg.n_cstate = par.PULSE_SCLK
             reg.n_bitcnt = reg.bitcnt - 1
+        
+        
+    # ##################################################################################
 
+    # SEND CMD0 (return to idle) and CMD8 (query voltage rails)
+
+    elif (reg.cstate == par.SEND_CMD0):
+        sleep(0.500)
+        reg.n_clk      = 0
+        reg.n_cmd_o    = 1 
+        reg.n_pindir   = "110000"   # 0x30, 1=>output
+        reg.n_bitcnt   = 49
+        reg.n_cmd_reg  = "01000000000000000000000000000000000000001001010111"
+        reg.n_get_resp = 1
+        if (reg.cmdcnt == 0):
+            reg.n_cstate = par.SEND_CMD8 
+            reg.n_rstate = par.SEND_QUERY_CMD55
+        else:
+            print("SEND_CMD0")            
+            reg.n_cstate = par.START_TX
+            reg.n_rstate = par.SEND_CMD0            
+            reg.n_cmdcnt = reg.cmdcnt - 1
+            
     elif (reg.cstate == par.SEND_CMD8):
+        sleep(1.000)        
         print("SEND_CMD8")
         sleep(0.100)
         reg.n_clk      = 0
@@ -509,14 +522,14 @@ def assign_next_state(gpio, par, reg, fifo):
         reg.n_bitcnt   = 49
         reg.n_cmd_reg  = "0" + bin(par.CMD8_C)[2:] + "0000"*5 + "000110101010" + "10000111" + "11" # // 0x87 is correct CRC
         reg.n_get_resp = 1
-        reg.n_rstate   = par.SEND_QUERY_CMD41
+        reg.n_rstate   = par.SEND_QUERY_CMD55
 
     # ##################################################################################    
 
     # SEND FIRST QUERY ACMD41, used to obtain response to seed INIT_ACMD41
     
     elif (reg.cstate == par.SEND_QUERY_CMD55):
-        print("SEND_CMD55")
+        print("SEND_QUERY_CMD55")
         sleep(0.100)
         reg.n_clk      = 0
         reg.n_cmd_o    = 1 
@@ -530,7 +543,7 @@ def assign_next_state(gpio, par, reg, fifo):
     # Query version does not start init process
     #
     elif (reg.cstate == par.SEND_QUERY_CMD41):
-        print("SEND_CMD41")
+        print("SEND_QUERY_CMD41")
         sleep(0.100)
         reg.n_clk       = 0
         reg.n_cmd_o     = 1 
@@ -614,13 +627,17 @@ def assign_next_state(gpio, par, reg, fifo):
 
         # Is INIT done?
         #
-        if (reg.cmd_resp[8] == "1"):
-            print("CARD INITIALIZED!!")
+        if (len(reg.cmd_resp)==40):
+            if (reg.cmd_resp[8] == "1"):
+                print("CARD INITIALIZED!!")
+                reg.n_cstate = par.CMD_MODE
+                reg.n_pindir = "010000"                 # 0x30, 1=>output            
+            else:
+                reg.n_cstate = par.CHK_ACMD41_RESPONSE
+        else:
             reg.n_cstate = par.CMD_MODE
             reg.n_pindir = "010000"                 # 0x30, 1=>output            
-        else:
-            reg.n_cstate = par.CHK_ACMD41_RESPONSE
-
+                
     # ##################################################################################            
 
     # PYTHON INTERACTIVE MODE
@@ -642,21 +659,19 @@ def assign_next_state(gpio, par, reg, fifo):
         print("Enter command to send (do not include CRC or stop bit)")
         data = input("Enter command : ")
         data = data.strip()                            # strip out any spaces or nondigits
-        if (data.find("acmd41=")>=0):            
+        if (data.find("start")>=0):
             reg.n_clk      = 0
             reg.n_cmd_o    = 1 
-            reg.n_cmdcnt   = int(data.split("=")[1])
-            reg.n_cstate   = par.SEND_CMD55
-            reg.n_pindir   = "110000"   # 0x30, 1=>output            
-            
-        elif (data.find("clk=")>=0):
-            reg.n_clk    = 0;
-            reg.n_pindir = "010000"                    # only drive clock pin
-            reg.n_cmd_o  = 1
-            reg.n_cstate = par.PULSE_SCLK
-            reg.n_rstate = par.CMD_MODE
-            reg.n_bitcnt = int(data.split("=")[1])
+            reg.n_cstate   = par.START_INIT
 
+        elif (data.find("clk=")>=0):
+            print("SEND_CLOCK_TRAIN")
+            reg.n_clk      = 0
+            reg.n_cmd_o    = 1
+            reg.n_bitcnt   = int(data.split("=")[1])
+            reg.n_cstate   = par.PULSE_SCLK
+            reg.n_rstate   = par.CMD_MODE            
+            
         elif (len(data)==40):            
             key = "10001001"                           # Generator polynomial: G(x) = x7 + x3 + 1
             enc = encodeData(data,key)                 # returns command minus stop bit
@@ -760,7 +775,7 @@ def assign_next_state(gpio, par, reg, fifo):
     else:
         print("Warning!! Default case: reached")
         reg.n_clk = 0                               # // Lower the SCLK (although it should already be low).  
-        reg.n_cstate = par.START_INIT
+        reg.n_cstate = par.CMD_MODE
         reg.n_pindir = "010000"                     # // Keep CMD as input until TX, 1=>output, cmd become input 
         
     return(par,reg,fifo)
@@ -783,12 +798,12 @@ def main():
     #
     reg.flush_fifo = 0
 
-    reg.cstate     = par.START_INIT   # // 5'h00, current stat
-    reg.n_cstate   = par.START_INIT   # // 5'h00, next current state
-    reg.rstate     = par.START_INIT   # // 5'h00, return state 
-    reg.n_rstate   = par.START_INIT   # // 5'h00, next return state   
-    reg.pindir     = "110000"         # // 6'h7F, pin direction, 1=>output
-    reg.n_pindir   = "110000"         # // 6'h7F, pin direction, 1=>output
+    reg.cstate     = par.CMD_MODE   # // 5'h00, current stat
+    reg.n_cstate   = par.CMD_MODE   # // 5'h00, next current state
+    reg.rstate     = par.CMD_MODE   # // 5'h00, return state 
+    reg.n_rstate   = par.CMD_MODE   # // 5'h00, next return state   
+    reg.pindir     = "110000"       # // 6'h7F, pin direction, 1=>output
+    reg.n_pindir   = "110000"       # // 6'h7F, pin direction, 1=>output
     
     reg.cmd_o   = 1 
     reg.n_cmd_o = 1 
