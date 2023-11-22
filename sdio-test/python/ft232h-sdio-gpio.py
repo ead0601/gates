@@ -740,6 +740,12 @@ def assign_next_state(gpio, par, reg, fifo):
         reg.n_cmdcnt   = 0
         
         print("Enter command to send (do not include CRC or stop bit)")
+        print("Commands:")
+        print("clk=#  - Number of clocks to be sent.")
+        print("R1=#   - 40 bit sequence, R1 response, CRC calculated.")
+        print("R6=#   - 40 bit sequence, R6 response, CRC calculated.")
+        print("init   - init sequence.")
+        print("stby   - indent to standby state sequence.")                
         data = input("Enter command : ")
         data = data.strip()                            # strip out any spaces or nondigits
         if (data.find("init")>=0):
@@ -774,7 +780,7 @@ def assign_next_state(gpio, par, reg, fifo):
                 
                 if (data[1]=="1"):
                     reg.n_respcnt = 48
-                elif (data[1]=="2"):
+                elif (data[1]=="6"):
                     reg.n_respcnt = 136
                 else:
                     reg.n_respcnt = 48
