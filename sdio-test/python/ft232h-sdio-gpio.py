@@ -169,19 +169,24 @@ class parameters:
     SEND_QUERY2_CMD55   =  9  # 5'd09;  // Send CMD55 to the SD card. 
     SEND_QUERY2_CMD41   = 10  # 5'd10;  // Send CMD41 to the SD card.
     
-    CHK_ACMD41_RESPONSE = 11  # 5'd11;  // Check if the SD card has left the IDLE state.     
-    WAIT_FOR_HOST_RW    = 12  # 5'd12;  // Wait for the host to issue a read or write command.
-    RD_BLK              = 13  # 5'd13;  // Read a block of data from the SD card.
-    WR_BLK              = 14  # 5'd14;  // Write a block of data to the SD card.
-    WR_WAIT             = 15  # 5'd15;  // Wait for SD card to finish writing the data block.
-    START_TX            = 16  # 5'd16;  // Start sending command/data.
-    TX_BITS             = 17  # 5'd17;  // Shift out remaining command/data bits.
-    GET_CMD_RESPONSE    = 18  # 5'd18;  // Get the R1 response of the SD card to a command.
-    RX_BITS             = 19  # 5'd19;  // Receive response/data from the SD card.
-    DESELECT            = 20  # 5'd20;  // De-select the SD card and send some clock pulses (Must enter with sclk at zero.)
-    PULSE_CLK           = 21  # 5'd21;  // Issue some clock pulses. (Must enter with sclk at zero.)
-    REPORT_ERROR        = 22  # 5'd22;  // Report error and stall until reset.
-    CMD_MODE            = 23  # 5'd23;  // Python only interactive command mode
+    CHK_ACMD41_RESPONSE = 11  # 5'd11;  // Check if the SD card has left the IDLE state.
+
+    SEND_CMD2           = 12
+    SEND_CMD3           = 13
+    SEND_CMD13          = 14
+    
+    WAIT_FOR_HOST_RW    = 15  # 5'd12;  // Wait for the host to issue a read or write command.
+    RD_BLK              = 16  # 5'd13;  // Read a block of data from the SD card.
+    WR_BLK              = 17  # 5'd14;  // Write a block of data to the SD card.
+    WR_WAIT             = 18  # 5'd15;  // Wait for SD card to finish writing the data block.
+    START_TX            = 19  # 5'd16;  // Start sending command/data.
+    TX_BITS             = 20  # 5'd17;  // Shift out remaining command/data bits.
+    GET_CMD_RESPONSE    = 21  # 5'd18;  // Get the R1 response of the SD card to a command.
+    RX_BITS             = 22  # 5'd19;  // Receive response/data from the SD card.
+    DESELECT            = 23  # 5'd20;  // De-select the SD card and send some clock pulses (Must enter with sclk at zero.)
+    PULSE_CLK           = 24  # 5'd21;  // Issue some clock pulses. (Must enter with sclk at zero.)
+    REPORT_ERROR        = 25  # 5'd22;  // Report error and stall until reset.
+    CMD_MODE            = 26  # 5'd23;  // Python only interactive command mode
     
     CMD0_C              = 0x40 + 0 
     CMD8_C              = 0x40 + 8 
@@ -200,14 +205,16 @@ class registers:
     n_rstate            = 0
     pindir              = "110000"     # // 6'h7F, pin direction, 1=>output
     n_pindir            = "110000"     # // 6'h7F, pin direction, 1=>output
+    rca                 = ""
+    n_rca               = ""
     bitcnt              = 0
     n_bitcnt            = 0
     respcnt             = 0     
     n_respcnt           = 0
     cmdcnt              = 0
     n_cmdcnt            = 0
-    toutcnt             = 0 
-    n_toutcnt           = 0 
+    #toutcnt             = 0 
+    #n_toutcnt           = 0 
     clk                 = 0 
     n_clk               = 0 
     cmd_o               = 1            
@@ -387,10 +394,11 @@ def sync_process(gpio, par, reg, fifo):
         reg.d1_i         = reg.n_d1_i     # // next d1 pin value
         reg.d2_i         = reg.n_d2_i     # // next d2 pin value
         reg.d3_i         = reg.n_d3_i     # // next d3 pin value            
+        reg.rca          = reg.n_rca
         reg.bitcnt       = reg.n_bitcnt
         reg.respcnt      = reg.n_respcnt        
         reg.cmdcnt       = reg.n_cmdcnt
-        reg.toutcnt      = reg.n_toutcnt
+        #reg.toutcnt      = reg.n_toutcnt
         reg.cmd_reg      = reg.n_cmd_reg 
         reg.get_resp     = reg.n_get_resp  
 
@@ -450,10 +458,11 @@ def assign_next_state(gpio, par, reg, fifo):
     reg.n_cstate   = reg.cstate 
     reg.n_rstate   = reg.rstate 
     reg.n_pindir   = reg.pindir 
+    reg.n_rca      = reg.rca
     reg.n_bitcnt   = reg.bitcnt
     reg.n_respcnt  = reg.respcnt    
     reg.n_cmdcnt   = reg.cmdcnt     
-    reg.n_toutcnt  = reg.toutcnt
+    #reg.n_toutcnt  = reg.toutcnt
     reg.n_cmd_reg  = reg.cmd_reg
     reg.n_get_resp = reg.get_resp  
 
@@ -470,6 +479,7 @@ def assign_next_state(gpio, par, reg, fifo):
         reg.n_cmd_o    = 1
         reg.n_cstate   = par.PULSE_CLK
         reg.n_rstate   = par.SEND_CMD0
+        reg.n_rca      = ""
         reg.n_bitcnt   = 0
         reg.n_cmdcnt   = 1
         reg.n_get_resp = 1        
@@ -495,7 +505,9 @@ def assign_next_state(gpio, par, reg, fifo):
         
         
     # ##################################################################################
-
+    #                                      INIT
+    # ##################################################################################
+        
     # SEND CMD0 (return to idle) and CMD8 (query voltage rails)
 
     elif (reg.cstate == par.SEND_CMD0):
@@ -649,10 +661,69 @@ def assign_next_state(gpio, par, reg, fifo):
         else:
             reg.n_cstate = par.CMD_MODE
             reg.n_pindir = "010000"                 # 0x30, 1=>output            
-                
-    # ##################################################################################            
 
-    # PYTHON INTERACTIVE MODE
+
+    # ##################################################################################            
+    #                                IDEN to STBY
+    # ##################################################################################
+
+    elif (reg.cstate == par.SEND_CMD2):
+        sleep(1.000)        
+        print("SEND_CMD2")
+        sleep(0.100)
+        reg.n_clk      = 0
+        reg.n_cmd_o    = 1 
+        reg.n_cstate   = par.START_TX 
+        reg.n_pindir   = "110000"   # 0x30, 1=>output
+        reg.n_bitcnt   = 49
+        reg.n_respcnt  = 136              
+        reg.n_cmd_reg  = "01000010000000000000000000000000000000000100110111"
+        reg.n_get_resp = 1
+        reg.n_rstate   = par.SEND_CMD3
+
+    elif (reg.cstate == par.SEND_CMD3):
+        sleep(1.000)        
+        print("SEND_CMD3")
+        sleep(0.100)
+        reg.n_clk      = 0
+        reg.n_cmd_o    = 1 
+        reg.n_cstate   = par.START_TX 
+        reg.n_pindir   = "110000"   # 0x30, 1=>output
+        reg.n_bitcnt   = 49
+        reg.n_respcnt  = 48                
+        reg.n_cmd_reg  = "01000011000000000000000000000000000000000010000111"
+        reg.n_get_resp = 1
+        reg.n_rstate   = par.SEND_CMD13
+
+    elif (reg.cstate == par.SEND_CMD13):
+        sleep(1.000)        
+        print("SEND_CMD13")
+        sleep(0.100)
+        reg.n_clk      = 0
+        reg.n_cmd_o    = 1 
+        reg.n_cstate   = par.START_TX 
+        reg.n_pindir   = "110000"   # 0x30, 1=>output
+        reg.n_bitcnt   = 49
+        reg.n_respcnt  = 48                
+        reg.n_get_resp = 1
+        reg.n_rca      = str(reg.cmd_resp[8:24])   # CMD3 was issued previously
+        print("CMD3 RCA:",reg.n_rca)
+        dat = "01001101"+reg.n_rca+("0"*16)
+        key = "10001001"                           # Generator polynomial: G(x) = x7 + x3 + 1
+        enc = encodeData(dat,key)                  # returns command minus stop bit
+        enc_len = len(encodeData(dat,key)) + 1     # and one for stop bit, result should be 48
+        print("cmd13 length to send (bits): ",enc_len)
+        reg.n_bitcnt   = enc_len + 1               # 49 instead of 48, need to debug pointer isue
+        print("cmd13 encoded:  ",enc)
+        enc = enc + "111"                          # Add stop bit sequence
+        reg.n_cmd_reg  = enc                
+        reg.n_respcnt  = 48
+        reg.n_rstate   = par.CMD_MODE
+
+            
+    # ##################################################################################            
+    #                             PYTHON INTERACTIVE MODE
+    # ##################################################################################
     
     # Special interactive mode for python debug
     #            
@@ -676,6 +747,11 @@ def assign_next_state(gpio, par, reg, fifo):
             reg.n_cmd_o    = 1 
             reg.n_cstate   = par.START_INIT
 
+        elif (data.find("stby")>=0):
+            reg.n_clk      = 0
+            reg.n_cmd_o    = 1 
+            reg.n_cstate   = par.SEND_CMD2
+            
         elif (data.find("clk=")>=0):
             print("SEND_CLOCK_TRAIN")
             reg.n_clk      = 0
@@ -717,9 +793,9 @@ def assign_next_state(gpio, par, reg, fifo):
             reg.n_cmdcnt   = 0
             
     # ##################################################################################
-
-    # TX / RX STATES
-            
+    #                                   TX / RX STATES
+    # ##################################################################################
+    
     elif (reg.cstate == par.START_TX):
         # // Start sending command/data by lowering CLK and outputing MSB of command/data
         # // so it has plenty of setup before the rising edge of CLK.
@@ -744,7 +820,7 @@ def assign_next_state(gpio, par, reg, fifo):
                 # !!!!!!!!!!!!!!!!!!!!!!  TEMP WORK AROUND DUE TO PYFTDI SYNC FIFO READ METHOD !!!!!!!!!!!!!  
                 reg.n_bitcnt  = reg.respcnt+20  # 60  # // Length of the expected response.
 
-                reg.n_toutcnt = 1 #  64            # // Set thetimeout counter
+                #reg.n_toutcnt = 1 #  64            # // Set thetimeout counter
 
                 reg.n_pindir = "010000"            # // 0x10, 1=>output, cmd become input
 
@@ -760,22 +836,26 @@ def assign_next_state(gpio, par, reg, fifo):
     elif (reg.cstate == par.GET_CMD_RESPONSE):     # // Get the response of the SD card to a command.
         reg.n_clk       = 0                        # // Toggle clock line
         reg.flush_fifo  = 0
+        #reg.n_cmd_reg =  "0" * 512 + str(reg.cmd_i)
+        
+        #if (reg.cmd_i == 0):                       # wait for response start bit going low
+        #      reg.n_cmd_reg =  "0" * 512 + str(reg.cmd_i)
+        #      reg.n_bitcnt  = reg.bitcnt - 1 
+        #      reg.n_cstate  = par.RX_BITS          # // Now receive the reset of the response.
+        #      #reg.n_toutcnt = 500                  # got a response, no longer need to check timeout
+        #else:
+        #    #reg.n_toutcnt  = reg.toutcnt - 1 
+        #    if (reg.toutcnt == 0):
+        #      # !!!!!!!!!!!!!!!!!!!!!!  TEMP WORK AROUND DUE TO PYFTDI SYNC FIFO READ METHOD !!!!!!!!!!!!!  
+        #      reg.n_cstate  = par.RX_BITS          # // Now receive the reset of the response.                
+        #      #reg.n_cstate = par.START_INIT 
+        #      #print("GET_CMD_RESPONSE: timeout counter expired, no response.")
+        #    else:
+        #      reg.n_cstate = par.GET_CMD_RESPONSE
 
-        if (reg.cmd_i == 0):                       # wait for response start bit going low
-              reg.n_cmd_reg =  "0" * 512 + str(reg.cmd_i)
-              reg.n_bitcnt  = reg.bitcnt - 1 
-              reg.n_cstate  = par.RX_BITS          # // Now receive the reset of the response.
-              #reg.n_toutcnt = 500                  # got a response, no longer need to check timeout
-        else:
-            reg.n_toutcnt  = reg.toutcnt - 1 
-            if (reg.toutcnt == 0):
-              # !!!!!!!!!!!!!!!!!!!!!!  TEMP WORK AROUND DUE TO PYFTDI SYNC FIFO READ METHOD !!!!!!!!!!!!!  
-              reg.n_cstate  = par.RX_BITS          # // Now receive the reset of the response.                
-              #reg.n_cstate = par.START_INIT 
-              #print("GET_CMD_RESPONSE: timeout counter expired, no response.")
-            else:
-              reg.n_cstate = par.GET_CMD_RESPONSE
+        reg.n_cstate  = par.RX_BITS
 
+        
     elif (reg.cstate == par.RX_BITS):               # // Receive bits from the SD card.
         reg.n_clk       = 0                         # // Toggle clock line
         reg.flush_fifo  = 0
@@ -796,8 +876,8 @@ def assign_next_state(gpio, par, reg, fifo):
             print("response: ",reg.cmd_resp)
 
     # ##################################################################################
-
-    # SHOULD NOT ENTER HERE
+    #                                  SHOULD NOT ENTER HERE
+    # ##################################################################################                
             
     else:
         print("Warning!! Default case: reached")
