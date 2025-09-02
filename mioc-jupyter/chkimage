@@ -1,0 +1,6 @@
+#!/usr/bin/bash
+
+python3 mioc_overlay.py -i ./images/ncr_8338d_mcmaster_mz_mit20x2.jpg -a mioc_annotated_netlist.txt -o annotated.jpg --thickness 10
+
+xdg-open annotated.jpg &
+
