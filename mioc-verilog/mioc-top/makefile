@@ -3,18 +3,19 @@
 
 build ?= rtl
 
-ifneq ($(filter $(build),rtl nmos xilinx),$(build))
-  $(error Invalid build="$(build)". Must be rtl, nmos, or xilinx)
+#ifneq ($(filter $(build),rtl nmos xilinx),$(build))
+ifneq ($(filter $(build),rtl nmos),$(build))
+  $(error Invalid build="$(build)". Must be rtl, or nmos)
 endif
 
 .PHONY: help
 help:
-	@echo "Usage: make [run|waves|clean|check] test=<name> [build=rtl|nmos|xilinx]"
+	@echo "Usage: make [run|waves|clean|check] test=<name> [build=rtl|nmos]"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make run   test=mytest        (defaults to build=rtl)"
 	@echo "  make check test=mytest build=nmos"
-	@echo "  make waves test=mytest build=xilinx"
+	@echo "  make waves test=mytest build=rtl"
 
 # Require test=... for real goals (not help/clean) only
 ifneq ($(strip $(MAKECMDGOALS)),)
@@ -33,8 +34,9 @@ RM    = /usr/bin/rm
 TL    = /usr/bin/tail
 CWD   = $(shell pwd)
 
-# Use build selector to pick sources
-V_SRC = $(shell find ../. -name "*mioc*.v" | grep "_$(build)" 2>/dev/null)
+# Use build selector to pick sources, grab "./mioc-*" only directories
+#
+V_SRC = $(shell find ../. -name "*mioc*.v" | grep "\./mioc-" | grep "_$(build)" 2>/dev/null)
 
 # ---------- targets ----------
 .PHONY: all clean run waves tester_build waves_build tester_run check

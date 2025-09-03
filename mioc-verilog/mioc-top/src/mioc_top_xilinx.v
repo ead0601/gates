@@ -7,11 +7,11 @@
 
 // Abstract devices
 //
-`define mioc_nor3        mioc_nor3_xilinx           
 `define mioc_flop        mioc_flop_xilinx       
-`define mioc_xnor2       mioc_xnor2_xilinx      
-`define mioc_nand4_nor2  mioc_nand4_nor2_xilinx 
-`define mioc_nand2       mioc_nand2_xilinx      
+`define mioc_nor3        mioc_nor3_xilinx
+`define mioc_xnor2       mioc_xnor2_xilinx
+`define mioc_nand4_nor2  mioc_nand4_nor2_xilinx
+`define mioc_nand2       mioc_nand2_xilinx     
 `define mioc_inv1        mioc_inv1_xilinx       
 `define mioc_nor2        mioc_nor2_xilinx       
  
@@ -118,6 +118,6 @@ module mioc_top(
    
    // WIRE ASSIGNMENTS
    //
-  `include "./src/mioc_pin_assigments.v"
+  `include "./src/mioc_pin_assignments.v"
    
 endmodule
