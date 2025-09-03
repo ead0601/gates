@@ -1,24 +1,44 @@
-# MIOC verilog make file
-#
-#
+# ---------- CLI args & defaults ----------
+.DEFAULT_GOAL := help
 
+build ?= rtl
+
+ifneq ($(filter $(build),rtl nmos xilinx),$(build))
+  $(error Invalid build="$(build)". Must be rtl, nmos, or xilinx)
+endif
+
+.PHONY: help
+help:
+	@echo "Usage: make [run|waves|clean|check] test=<name> [build=rtl|nmos|xilinx]"
+	@echo ""
+	@echo "Examples:"
+	@echo "  make run   test=mytest        (defaults to build=rtl)"
+	@echo "  make check test=mytest build=nmos"
+	@echo "  make waves test=mytest build=xilinx"
+
+# Require test=... for real goals (not help/clean) only
+ifneq ($(strip $(MAKECMDGOALS)),)
+  NEED_TEST := $(filter-out help clean,$(MAKECMDGOALS))
+  ifneq ($(NEED_TEST),)
+    ifeq ($(strip $(test)),)
+      $(error Missing required variable: test. Try: make help)
+    endif
+  endif
+endif
+
+# ---------- your variables ----------
 COMP  = $(shell which iverilog)
 RUN   = $(shell which vvp)
-WAVES = $(shell which )
+RM    = /usr/bin/rm
+TL    = /usr/bin/tail
+CWD   = $(shell pwd)
 
-# Define variables
-#
-CWD = $(shell pwd)
+# Use build selector to pick sources
+V_SRC = $(shell find ../. -name "*mioc*.v" | grep "_$(build)" 2>/dev/null)
 
-RM = /usr/bin/rm
-MD = /usr/bin/mkdir
-TL = /usr/bin/tail
-
-V_SRC = $(shell find ../. -name "*mioc*.v" | grep "_rtl" 2>/dev/null)
-
-
-# Build design
-#
+# ---------- targets ----------
+.PHONY: all clean run waves tester_build waves_build tester_run check
+all: run
 
 tester_build : clean $(V_SRC)
 	$(COMP) -DTESTER $(V_SRC) ./tests/$(test)/testbench.v
@@ -26,46 +46,27 @@ tester_build : clean $(V_SRC)
 waves_build : clean $(V_SRC)
 	$(COMP) $(V_SRC) ./tests/$(test)/testbench.v
 
-
-# Used for wave viewing
-#
-# (used to capture all levels of signal transitions)
-#
-
-run :   waves_build
-	@echo "Running test $(test)"
+run : waves_build
+	@printf "Running test %s [build=%s]\n" "$(test)" "$(build)"
 	$(RM) -f ./tests/$(test)/DATA_OUT/*.*
 	$(RUN) a.out
-	$(TL) -n +4 ./waves.vcd > ./tests/$(test)/DATA_OUT/waves.vcd 
-	$(RM) -f ./waves.vcd 
+	$(TL) -n +4 ./waves.vcd > ./tests/$(test)/DATA_OUT/waves.vcd
+	$(RM) -f ./waves.vcd
 
-waves:  run
+waves: run
 	gtkwave ./tests/$(test)/DATA_OUT/waves.vcd ./tests/$(test)/waves.gtkw
 
-
-# Used for regression testing
-#
-# (tester avoids capture on internal signals, and only captures the toplevel pins)
-#
-tester_run :   tester_build
-	@echo "Running tester version of: $(test)"
+tester_run : tester_build
+	@printf "Running tester version of: %s [build=%s]\n" "$(test)" "$(build)"
 	$(RM) -f ./tests/$(test)/DATA_OUT/*.*
 	$(RUN) a.out
-	$(TL) -n +4 ./waves.vcd > ./tests/$(test)/DATA_OUT/tester.vcd 
-	$(RM) -f ./waves.vcd 
+	$(TL) -n +4 ./waves.vcd > ./tests/$(test)/DATA_OUT/tester.vcd
+	$(RM) -f ./waves.vcd
 
-check:	tester_run ./tests/$(test)/DATA_GOLD/tester.vcd ./tests/$(test)/DATA_OUT/tester.vcd 
-	$(eval ERRORS := $(shell diff ./tests/$(test)/DATA_OUT/tester.vcd  ./tests/$(test)/DATA_GOLD/tester.vcd | wc -l 2>/dev/null))
-	@echo "\n\nCompared DATA_OUT vcd to DATA_GOLD vcd"
-	@echo $(ERRORS) " errors found.\n"
+check: tester_run ./tests/$(test)/DATA_GOLD/tester.vcd ./tests/$(test)/DATA_OUT/tester.vcd
+	@errors=$$(diff ./tests/$(test)/DATA_OUT/tester.vcd ./tests/$(test)/DATA_GOLD/tester.vcd | wc -l 2>/dev/null); \
+	printf "\n\nCompared DATA_OUT vcd to DATA_GOLD vcd\n"; \
+	printf "%s errors found.\n" "$$errors"
 
-# Clean
-#
-clean :
+clean:
 	$(RM) -f a.out *.xcf
-
-# Remove builtin rules
-#
-.SUFFIXES:
-
-.SECONDARY:
