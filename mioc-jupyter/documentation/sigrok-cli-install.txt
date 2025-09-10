@@ -1,0 +1,153 @@
+GOAL: Use sigrok-cli with Kingst LA1010 (16 ch @ up to 16 MHz) reliably:
+      firmware upload, patched driver, udev permissions, triggers & thresholds.
+
+──────────────────────────────────────────────────────────────────────────────
+0) Prereqs (build tools & common libs)
+──────────────────────────────────────────────────────────────────────────────
+sudo apt-get update
+sudo apt-get install -y git build-essential autoconf automake libtool pkg-config \
+  libglib2.0-dev libzip-dev libusb-1.0-0-dev libhidapi-dev libserialport-dev doxygen
+
+──────────────────────────────────────────────────────────────────────────────
+1) Build & install the AlexUg libsigrok fork (with Kingst LA1010 driver)
+──────────────────────────────────────────────────────────────────────────────
+cd ~/libsigrok
+# If you haven’t cloned:
+#   git clone https://github.com/AlexUg/libsigrok.git ~/libsigrok
+# Checkpoint #1:
+test -f src/hardware/Makefile.am && echo "OK: Makefile.am present" || echo "MISSING"
+./autogen.sh
+./configure --enable-hardware --prefix=/usr/local
+make -j"$(nproc)"
+sudo make install
+sudo ldconfig
+# Confirm sigrok-cli links to /usr/local/lib/libsigrok.so.4
+which sigrok-cli
+ldd "$(which sigrok-cli)" | grep -i libsigrok
+
+──────────────────────────────────────────────────────────────────────────────
+2) Firmware extraction (needed by sigrok-cli)
+──────────────────────────────────────────────────────────────────────────────
+# Use Alex’s Python extractor; confirm files live here:
+ls -l ~/.local/share/sigrok-firmware/kingst/
+# Expect:
+#   fw01A2.hex (FX2) and LA1010A?.bitstream (Spartan, A2 ≈ 342 KB)
+
+──────────────────────────────────────────────────────────────────────────────
+3) udev rules & permissions (YOUR REQUESTED ECHO + RELOAD COMMANDS)
+──────────────────────────────────────────────────────────────────────────────
+# Create a local rule for the LA1010 VID:PID (77a1:01a2):
+echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="77a1", ATTR{idProduct}=="01a2", MODE="0664", GROUP="plugdev"' | \
+  sudo tee /etc/udev/rules.d/99-sigrok-kingst.rules
+
+# Reload rules and apply immediately:
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+
+# Ensure your user is in plugdev (log out/in if you just added it):
+getent group plugdev || sudo groupadd plugdev
+groups "$USER" | grep -q plugdev || sudo usermod -aG plugdev "$USER"
+
+# Unplug/replug the LA1010 after the reload to re-enumerate under the new rule.
+
+──────────────────────────────────────────────────────────────────────────────
+4) Patch the driver’s bitstream size cap (CRITICAL fix applied)
+──────────────────────────────────────────────────────────────────────────────
+# Symptom: "Size 342524 of 'kingst/LA1010A2.bitstream' exceeds limit 131072"
+# Cause: driver passed 0x020000 (128 KiB) as max_size to sr_resource_load()
+# Fix: bump to 0x100000 (1 MiB)
+cd ~/libsigrok
+cp src/hardware/kingst-la1010/protocol.c src/hardware/kingst-la1010/protocol.c.bak
+sed -i 's/0x020000/0x100000/' src/hardware/kingst-la1010/protocol.c
+grep -n 'sr_resource_load.*0x100000' src/hardware/kingst-la1010/protocol.c
+make -j"$(nproc)"
+sudo make install
+sudo ldconfig
+# Unplug/replug the LA1010 to reset FX2/FPGA state.
+
+──────────────────────────────────────────────────────────────────────────────
+5) Sanity checks (device & firmware upload)
+──────────────────────────────────────────────────────────────────────────────
+# USB enumeration (your lsusb ID is 77a1:01a2):
+lsusb | grep -i -E '77a1:01a2|kingst|logic'
+# Device scan (should show kingst-la1010:conn=X.Y):
+sigrok-cli --scan
+# Verbose firmware paths & upload messages:
+sigrok-cli -d kingst-la1010 --scan -l 5
+
+──────────────────────────────────────────────────────────────────────────────
+6) First captures & formats
+──────────────────────────────────────────────────────────────────────────────
+# Tiny VCD capture:
+sigrok-cli -d kingst-la1010 --channels D0,D1 --samples 1000 -O vcd -o ~/test.vcd
+# LED: fast-blinking red while capturing = NORMAL; idle once stopped.
+# srzip is compact; convert later if needed:
+#   sigrok-cli -i /tmp/cap.sr -O vcd -o /tmp/cap.vcd
+#   sigrok-cli -i /tmp/cap.sr -O binary -o /tmp/cap.bin
+
+──────────────────────────────────────────────────────────────────────────────
+7) 16ch @ 16 MHz examples (no PulseView)
+──────────────────────────────────────────────────────────────────────────────
+# 1 s, all channels → srzip
+sigrok-cli -d kingst-la1010 \
+  --channels D0,D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15 \
+  --config samplerate=16M \
+  --samples 16000000 \
+  -O srzip -o /tmp/16ch_16M_1s.sr
+
+# Triggered capture on rising D0, drop pre-trigger, 2.5 V threshold (5 V logic):
+sigrok-cli \
+  -d kingst-la1010:conn=BUS.ADDR \
+  --channels D0,D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15 \
+  --config samplerate=16M \
+  --config voltage_threshold=2.5 \
+  --samples 16000000 \
+  -t D0=r -w \
+  -O vcd -o /tmp/16ch_16M_trig_D0_rise.vcd
+
+# Discover your exact keys/options:
+sigrok-cli -d kingst-la1010:conn=BUS.ADDR --show | sed -n '1,200p'
+# (Your build exposes: voltage_threshold with allowed values including 2.5 V.)
+
+# Helpful variants / notes:
+
+# • --time T            : capture for T seconds (may stop earlier if an internal limit hits; use --samples for precision)
+# • -l 5                : verbose logging (shows firmware paths, USB transfers, computed buffers, etc.)
+# • --show              : print device capabilities (supported triggers, valid threshold values/keys, groups)
+# • Omitting :conn=...  : if only one LA1010 is attached, -d kingst-la1010 (no conn) is fine
+# • File formats:
+#     - srzip           : compact, lossless; convert later with: sigrok-cli -i cap.sr -O vcd -o cap.vcd
+#     - vcd             : event-based; small if signals are static, larger if many transitions
+#     - binary          : raw samples (e.g., 2 bytes/sample for 16 channels), fastest but biggest files
+# • Thresholds:
+#     - Your build exposes `voltage_threshold` with fixed choices (2.5, 1.6, 1.5, 1.2, 0.9, 0.8). Use 2.5 V for 5 V logic.
+#     - Confirm with: sigrok-cli -d kingst-la1010:conn=3.12 --show | grep -i voltage_threshold -A1
+# • Triggers:
+#     - Syntax: -t CH=COND (comma-separated for AND: e.g., -t D0=r,D1=1)
+#     - COND: 0 (low), 1 (high), r (rising), f (falling), e (either edge)
+# • LED behavior:
+#     - Fast-blinking red while capturing = normal streaming state; returns to idle after SR_DF_END.
+
+──────────────────────────────────────────────────────────────────────────────
+8) Multi-device recipe (3× LA1010), shared trigger & sync
+──────────────────────────────────────────────────────────────────────────────
+# Wire: All grounds tied; D0 = common trigger pulse; D1 = common continuous sync (e.g., 1 MHz)
+CHS=$(printf 'D%s,' {0..15} | sed 's/,$//'); SR=16M; SAMPLES=16000000; TH=2.5
+sigrok-cli -d kingst-la1010:conn=3.12 --channels "$CHS" --config samplerate=$SR --config voltage_threshold=$TH \
+  --samples $SAMPLES -t D0=r -w -O srzip -o /tmp/A_16ch_16M.sr &
+sigrok-cli -d kingst-la1010:conn=3.14 --channels "$CHS" --config samplerate=$SR --config voltage_threshold=$TH \
+  --samples $SAMPLES -t D0=r -w -O srzip -o /tmp/B_16ch_16M.sr &
+sigrok-cli -d kingst-la1010:conn=3.17 --channels "$CHS" --config samplerate=$SR --config voltage_threshold=$TH \
+  --samples $SAMPLES -t D0=r -w -O srzip -o /tmp/C_16ch_16M.sr &
+wait
+# Convert if needed:
+for f in /tmp/[ABC]_16ch_16M.sr; do sigrok-cli -i "$f" -O vcd -o "${f%.sr}.vcd"; done
+# Align in GTKWave using the shared D1 sync edges.
+
+──────────────────────────────────────────────────────────────────────────────
+9) What was fixed / why it works now
+──────────────────────────────────────────────────────────────────────────────
+• Raised the driver’s bitstream max-size so the ~342 KB A2 bitstream uploads cleanly.
+• Confirmed firmware paths under ~/.local/share/sigrok-firmware/kingst/ are used by libsigrok.
+• Added a udev rule (77a1:01a2) + reload/trigger so non-root access works consistently.
+• Verified captures, triggers, thresholds, and large-sample runs (LED fast-blink = capturing).
