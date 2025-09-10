@@ -28,10 +28,50 @@ ldd "$(which sigrok-cli)" | grep -i libsigrok
 ──────────────────────────────────────────────────────────────────────────────
 2) Firmware extraction (needed by sigrok-cli)
 ──────────────────────────────────────────────────────────────────────────────
-# Use Alex’s Python extractor; confirm files live here:
-ls -l ~/.local/share/sigrok-firmware/kingst/
-# Expect:
-#   fw01A2.hex (FX2) and LA1010A?.bitstream (Spartan, A2 ≈ 342 KB)
+
+# PURPOSE: produce these files (what libsigrok actually loads):
+#   ~/.local/share/sigrok-firmware/kingst/fw01A2.hex            (FX2 firmware)
+#   ~/.local/share/sigrok-firmware/kingst/LA1010A*.bitstream    (Spartan bitstreams)
+
+# A) If you already have Alex’s extractor script (typical names/paths):
+#    - tools/kingst_la1010_fw_extract.py
+#    - scripts/extract_kingst_la1010_firmware.py
+#    If unsure, locate it:
+find ~/ -maxdepth 4 -type f -iregex '.*\(kingst\|la1010\).*\(extract\|fw\).*\.py' -print
+
+# B) Get the Kingst application package that contains firmware (one of):
+#    - A downloaded Windows installer/exe (e.g., KingstVIS_x.y.z.exe)
+#    - A zipped driver package (Kingst *.zip)
+#    - Or an already-unpacked folder with the firmware files inside
+#    If it’s an .exe, you can unpack it with 7zip to a folder:
+7z x /path/to/KingstVIS_x.y.z.exe -o~/kingst_pkg_unpacked
+
+# C) Create the sigrok firmware target folder (libsigrok searches here by default):
+mkdir -p ~/.local/share/sigrok-firmware/kingst
+
+# D) Run the extractor (adjust the script name/path and input dir as found in step A/B):
+#    Common CLI pattern:
+#      python3 <extractor.py> --in <path_to_unpacked_kingst_pkg> --out <output_dir>
+#    Example:
+python3 ~/path/to/kingst_la1010_fw_extract.py \
+  --in  ~/kingst_pkg_unpacked \
+  --out ~/.local/share/sigrok-firmware/kingst
+
+#    If your extractor takes different flags, typical alternates are:
+#      --kingst-dir <dir>   or   --source <dir>   or   --kingst-zip <file.zip>
+#    (Use --help to see the exact arguments of your script.)
+python3 ~/path/to/kingst_la1010_fw_extract.py --help
+
+# E) Verify the outputs and sizes:
+ls -lh ~/.local/share/sigrok-firmware/kingst/
+# Expect (sizes approximate):
+#   LA1010A0.bitstream  ~124 KB
+#   LA1010A1.bitstream  ~125 KB
+#   LA1010A2.bitstream  ~342 KB   <-- this is the larger FPGA image we use
+#   fw01A2.hex          (FX2 firmware)
+
+# Optional: you can also point libsigrok somewhere else via env var if you prefer:
+#   export SIGROK_FIRMWARE_DIR=/some/other/dir
 
 ──────────────────────────────────────────────────────────────────────────────
 3) udev rules & permissions (YOUR REQUESTED ECHO + RELOAD COMMANDS)
