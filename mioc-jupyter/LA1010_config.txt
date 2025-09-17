@@ -1,0 +1,61 @@
+DEFINE LA1:conn=3.10
+DEFINE LA2:conn=3.8
+DEFINE LA3:conn=3.12
+
+PWM, LA1:PWM1, NAME=FAN_PWM, FREQ=100k, DUTY=50%, DUTY_TOL=10%, EDGE=r
+
+IN, LA1:D00, LA1_TRIG      #     input    LA1 Trig
+IN, LA1:D01, LA1_SYNC      #     input    Sync clk for LA1
+
+IN, LA1:D02, VCC           #  1  input    supply
+OUT, LA1:D03, RA7          #  2  output   8th bit DRAM refresh, gated out by /ADDRBUFEN
+IN, LA1:D04, BA15          #  3  input    Address BUS bit 15
+IN, LA1:D05, BA14          #  4  input    Address BUS bit 14
+IN, LA1:D06, BA13          #  5  input    Address BUS bit 13
+IN, LA1:D07, nCVRST        #  6  input    Active low, ColecoVision reset switch
+IO, LA1:D08, BD0           #  7  I/O      Data BUS bit 0
+IO, LA1:D09, BD1           #  8  I/O      Data BUS bit 1
+IO, LA1:D10, BD2           #  9  I/O      Data BUS bit 2
+IO, LA1:D11, BD3           #  10 I/O      Data BUS bit 3
+IN, LA1:D12, nBWR          #  11 input    made by complex logic from MA5, /IORQ, and A10
+IN, LA1:D13, BA6           #  12 input    Address BUS bit 6
+IN, LA1:D14, BA7           #  13 input    BA7, gated in by /ADDRBUFEN
+IN, LA1:D15, nIORQ         #  14 input    IO Request - Z80 Control
+
+IN, LA2:D00, LA2_TRIG      #     input    LA2 Trig
+IN, LA2:D01, LA2_SYNC      #     input    Sync clk for LA2
+
+IN, LA2:D02, nWAIT         #  15 input    Wait - Z80 control
+IN, LA2:D03, nBUSAK        #  16 input    BUS Acknowledge - Z80 Control
+IN, LA2:D04, nDMA          #  17 input    Asserted by Master 6801 to access Z80 RAM
+OUT, LA2:D05, nBUSRQ       #  18 output   BUS Request - Z80 Control
+OUT, LA2:D06, nEOS_ENABLE  #  19 output   (/SPINDIS_N) Spinner Int Disable,selects/deselects EOS ROM
+OUT, LA2:D07, nNET_RST     #  20 output   reset signal for ADAMNet
+OUT, LA2:D08, nAUX_DECODE1 #  22 output   selects/deselects OS7 ROM
+OUT, LA2:D09, nRST         #  23 output   reset signal for the Master 6801
+IN, LA2:D10, nCPRST        #  24 input    not connected on schematic, reset for something
+IN, LA2:D11, nPBRST        #  25 input    ADAM reset switch
+OUT, LA2:D12, nAUX_ROM_CS  #  26 output   selects/deselects expansion ROM (center slot)
+OUT, LA2:D13, nADDRBUFEN   #  27 output   enables/disables /BRD, /BWR, /BRFSH,/BMREQ, /BM1, and /BIORQ (disabled during DMA cycle)
+OUT, LA2:D14, nBOOT_ROM_CS #  28 output   selects/deselects SmartWriter ROM
+OUT, LA2:D15, nEN245       #  29 output   enables/disables BD0-BD7 (disabled during DMA cycle)
+
+IN, LA3:D00, LA3_TRIG      #     input    LA3 Trig
+IN, LA3:D01, LA3_SYNC      #     input    Sync clk for LA3
+
+OUT, LA3:D02, nIS3         #  30 output   input to Master 6801
+IN, LA3:D03, nOS3          #  31 input    output to Master 6801
+IN, LA3:D04, nBMREQ        #  32 input    Memory Request - Z80 Control
+IN, LA3:D05, nBRD          #  33 input    Z80 Control Signal
+IN, LA3:D06, nBRFSH        #  34 input    Z80 Control Signal
+IN, LA3:D07, nBM1          #  35 input    Z80 Machine Cycle 1
+IN, LA3:D08, BPHI          #  36 input    Z80 clock
+OUT, LA3:D09, MUX          #  37 output   multiplexing signal for DRAM Refresh
+OUT, LA3:D10, nRAS1        #  38 output   row address strobe, base 64K RAM
+OUT, LA3:D11, nCAS1        #  39 output   column address strobe, base 64K RAM
+OUT, LA3:D12, nCAS2        #  40 output   column address strobe, 64K XRAM
+
+IN, LA3:D13, UNUSED
+IN, LA3:D14, UNUSED
+IN, LA3:D15, UNUSED
+
