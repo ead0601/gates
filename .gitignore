@@ -1,0 +1,8 @@
+# Ignore any file that ends with '#'
+*#
+*~
+*.bak
+
+# Ignore directories named "backup" or "bak" at any level
+backup/
+bak/
