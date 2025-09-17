@@ -5,4 +5,5 @@
 
 # Ignore directories named "backup" or "bak" at any level
 backup/
+backups/
 bak/
