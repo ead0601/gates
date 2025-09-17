@@ -219,24 +219,24 @@ class registers:
     n_clk               = 0 
     cmd_o               = 1            
     n_cmd_o             = 1 
-    d0_o                = 0            
-    n_d0_o              = 0 
-    d1_o                = 0            
-    n_d1_o              = 0            
-    d2_o                = 0            
-    n_d2_o              = 0            
-    d3_o                = 0            
-    n_d3_o              = 0 
+    d0_o                = 1            
+    n_d0_o              = 1 
+    d1_o                = 1            
+    n_d1_o              = 1            
+    d2_o                = 1            
+    n_d2_o              = 1            
+    d3_o                = 1            
+    n_d3_o              = 1 
     cmd_i               = 1 
     n_cmd_i             = 1            
-    d0_i                = 0 
-    n_d0_i              = 0            
-    d1_i                = 0            
-    n_d1_i              = 0            
-    d2_i                = 0            
-    n_d2_i              = 0            
-    d3_i                = 0            
-    n_d3_i              = 0            
+    d0_i                = 1 
+    n_d0_i              = 1            
+    d1_i                = 1            
+    n_d1_i              = 1            
+    d2_i                = 1            
+    n_d2_i              = 1            
+    d3_i                = 1            
+    n_d3_i              = 1            
     cmd_reg             = 0 
     n_cmd_reg           = 0 
     get_resp            = 0 
@@ -419,10 +419,10 @@ def sync_process(gpio, par, reg, fifo):
           PIN_STATE[pin_d1] = int(reg.d1_o)       # // next d1 pin value
           PIN_STATE[pin_d2] = int(reg.d2_o)       # // next d2 pin value
           PIN_STATE[pin_d3] = int(reg.d3_o)       # // next d3 pin value            
-          reg.n_d0_i  = 0               # // next d0 pin value
-          reg.n_d1_i  = 0               # // next d1 pin value
-          reg.n_d2_i  = 0               # // next d2 pin value
-          reg.n_d3_i  = 0               # // next d3 pin value            
+          reg.n_d0_i  = 1               # // next d0 pin value
+          reg.n_d1_i  = 1               # // next d1 pin value
+          reg.n_d2_i  = 1               # // next d2 pin value
+          reg.n_d3_i  = 1               # // next d3 pin value            
         else:
           reg.n_d0_i  = PIN_STATE[pin_d0]     # // next d0 pin value
           reg.n_d1_i  = PIN_STATE[pin_d1]     # // next d1 pin value
@@ -475,7 +475,7 @@ def assign_next_state(gpio, par, reg, fifo):
     
     if (reg.cstate == par.START_INIT):
         reg.n_clk      = 0;
-        reg.n_pindir   = "110000"
+        reg.n_pindir   = "010000"
         reg.n_cmd_o    = 1
         reg.n_cstate   = par.PULSE_CLK
         reg.n_rstate   = par.SEND_CMD0
@@ -765,8 +765,10 @@ def assign_next_state(gpio, par, reg, fifo):
             reg.n_bitcnt   = int(data.split("=")[1])
             reg.n_cstate   = par.PULSE_CLK
             reg.n_rstate   = par.CMD_MODE            
-            
-        elif (data[0]=="R"):
+
+        # Response with no data
+        #
+        elif ( (data.find("R")>=0) and (data.find("=")>=0) ):
             dat = data.split("=")[1]
             if (len(dat)==40):
                 key = "10001001"                           # Generator polynomial: G(x) = x7 + x3 + 1
@@ -789,6 +791,32 @@ def assign_next_state(gpio, par, reg, fifo):
                 reg.n_pindir   = "110000"   # 0x30, 1=>output                    
                 reg.n_rstate   = par.CMD_MODE            
 
+        # Response with data
+        #
+        elif ( (data.find("D")>=0) and (data.find("=")>=0) ):
+            dat = data.split("=")[1]
+            if (len(dat)==40):
+                key = "10001001"                           # Generator polynomial: G(x) = x7 + x3 + 1
+                enc = encodeData(dat,key)                 # returns command minus stop bit
+                enc_len = len(encodeData(dat,key)) + 1    # and one for stop bit, result should be 48
+                print("length to send (bits): ",enc_len)
+                reg.n_bitcnt   = enc_len + 1               # 49 instead of 48, need to debug pointer isue
+                print("encoded:  ",enc)
+                enc = enc + "111"                          # Add stop bit sequence
+                reg.n_cmd_reg  = enc
+                
+                if (data[1]=="1"):
+                    reg.n_respcnt = 48 + 512 + 32
+                elif (data[1]=="6"):
+                    reg.n_respcnt = 136 + 512 + 32
+                else:
+                    reg.n_respcnt = 48 + 512 + 32
+                    
+                reg.n_cstate   = par.START_TX 
+                reg.n_pindir   = "110000"   # 0x30, 1=>output                    
+                reg.n_rstate   = par.CMD_MODE            
+
+                
         else:
             reg.n_clk      = 0
             reg.n_cmd_o    = 1 
@@ -922,10 +950,10 @@ def main():
     reg.n_cmd_o = 1 
     reg.cmd_i   = 1 
     reg.n_cmd_i = 1 
-    reg.n_d0_i  = 0               # // next d0 pin value
-    reg.n_d1_i  = 0               # // next d1 pin value
-    reg.n_d2_i  = 0               # // next d2 pin value
-    reg.n_d3_i  = 0               # // next d3 pin value            
+    reg.n_d0_i  = 1               # // next d0 pin value
+    reg.n_d1_i  = 1               # // next d1 pin value
+    reg.n_d2_i  = 1               # // next d2 pin value
+    reg.n_d3_i  = 1               # // next d3 pin value            
     reg.clk     = 0 
     reg.n_clk   = 0     
 
