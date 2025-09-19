@@ -7,7 +7,7 @@
 
 // mioc-nand2
 //
-module mioc_nand2_rtl(
+module mioc_nand2 (
     z,
 
     in1,            

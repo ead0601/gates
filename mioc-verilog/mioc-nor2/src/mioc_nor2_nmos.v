@@ -7,7 +7,7 @@
 
 // mioc-nor2
 //
-module mioc_nor2_nmos(
+module mioc_nor2 (
     z,
 
     in1,            

@@ -7,7 +7,7 @@
 
 // mioc-and2-nor
 //
-module mioc_nand4_nor2_rtl(
+module mioc_nand4_nor2 (
     z,
 
     in1,            

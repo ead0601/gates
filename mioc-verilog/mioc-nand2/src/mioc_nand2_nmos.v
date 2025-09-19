@@ -7,7 +7,7 @@
 
 // mioc-nand2
 //
-module mioc_nand2_nmos(
+module mioc_nand2 (
     z,
 
     in1,            

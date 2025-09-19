@@ -1,5 +1,5 @@
 
-module mioc_flop_xilinx(in1, 
+module mioc_flop (in1, 
                         in2, 
                         in3, 
                         in4, 

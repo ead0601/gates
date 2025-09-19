@@ -5,17 +5,9 @@
 // This is a mos representation of the original mos layout
 //  configuration that uses an open drain configuration.
 
-
-// Abstract devices
-//
-`define mioc_nor3        mioc_nor3_nmos           
-`define mioc_flop        mioc_flop_nmos       
-`define mioc_xnor2       mioc_xnor2_nmos      
-`define mioc_nand4_nor2  mioc_nand4_nor2_nmos 
-`define mioc_nand2       mioc_nand2_nmos      
-`define mioc_inv1        mioc_inv1_nmos       
-`define mioc_nor2        mioc_nor2_nmos       
-
+// mioc-top
+//      
+ 
 // Instantiate top
 //
 module mioc_top(
@@ -115,12 +107,13 @@ module mioc_top(
    output CAS2_N       ; //: pin 40 : Active low column address strobe 2                                                 
 
 
+   // Files located within test directory
+
    // COMPONENTS
-   `include "/build/repo/gates/mioc-verilog/mioc-top/src/mioc_components.v"   
+   `include "./mioc_components.v"   
    
    // WIRE ASSIGNMENTS
    //
-   `include "/build/repo/gates/mioc-verilog/mioc-top/src/mioc_pin_assignments.v"
-
+   `include "./mioc_pin_assignments.v"
    
 endmodule

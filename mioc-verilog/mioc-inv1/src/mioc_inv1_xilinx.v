@@ -7,7 +7,7 @@
 
 // mioc-inv1
 //
-module mioc_inv1_rtl(
+module mioc_inv1 (
     z,
 
     in1

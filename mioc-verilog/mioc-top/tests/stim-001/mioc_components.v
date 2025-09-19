@@ -157,7 +157,7 @@
 
    // ################################### ROW 1 #############################
    //
-   `mioc_flop     u1 (.q(w_u1q),
+   mioc_flop     u1 (.q(w_u1q),
 		      .qbar(w_u1qb),
 
 		      .in1(PIN_IN_25),      // posedge reset	     
@@ -166,7 +166,7 @@
 		      .in4(PIN_IN_6)        // posedge set           
 		     );
 
-   `mioc_flop     u2 (.q(w_u2q),      
+   mioc_flop     u2 (.q(w_u2q),      
 		      .qbar(w_u2qb),
 
 		      .in1(PIN_IN_25),     // posedge reset	     
@@ -175,58 +175,58 @@
 		      .in4(PIN_IN_6)	   // posedge set           
 	              );
 
-   `mioc_nor2    u3 (.z(w_u3z),
+   mioc_nor2    u3 (.z(w_u3z),
 		      .in1(PIN_IN_5),
 		      .in2(PIN_IN_4)
 		      );
 
-   `mioc_inv1    u4 (.z(w_u4z),
+   mioc_inv1    u4 (.z(w_u4z),
 		      .in1(w_u3z)
 		      );
 
-   `mioc_nand2    u5 (.z(w_u5z),
+   mioc_nand2    u5 (.z(w_u5z),
 		       .in1(w_u4z),
 		       .in2(w_u20z)
 		       );
    
-   `mioc_nor2    u6 (.z(w_u6z),
+   mioc_nor2    u6 (.z(w_u6z),
 		      .in1(w_u25z),
 		      .in2(w_u18z)
 		      );
 
-   `mioc_inv1    u7 (.z(w_u7z),
+   mioc_inv1    u7 (.z(w_u7z),
 		      .in1(w_u6z)
 		      ); 
 
-   `mioc_nand2    u8 (.z(w_u8z),
+   mioc_nand2    u8 (.z(w_u8z),
 		       .in1(w_u24z),
 		       .in2(w_u7z)
 		       );
    
-   `mioc_nand2    u9 (.z(w_u9z),
+   mioc_nand2    u9 (.z(w_u9z),
 		       .in1(w_u24z),
 		       .in2(w_u10z)
 		       );   
    
-   `mioc_inv1    u10 (.z(w_u10z),
+   mioc_inv1    u10 (.z(w_u10z),
 		      .in1(w_u13z)
 		      );
    
-   `mioc_inv1    u11 (.z(w_u11z),
+   mioc_inv1    u11 (.z(w_u11z),
 		      .in1(PIN_IN_3)
 		      );
 
-   `mioc_nor2    u12 (.z(w_u12z),
+   mioc_nor2    u12 (.z(w_u12z),
 		      .in1(w_u48z),
 		      .in2(w_u11z)
 		      );
 
-   `mioc_nor2    u13 (.z(w_u13z),
+   mioc_nor2    u13 (.z(w_u13z),
 		      .in1(w_u35z),
 		      .in2(w_u48z)
 		      );
    
-   `mioc_flop     u14 (.q(w_u14q),
+   mioc_flop     u14 (.q(w_u14q),
 		      .qbar(w_u14qb),
 
 		      .in1(1'b0),          // posedge reset	     
@@ -238,7 +238,7 @@
 
    // ################################### ROW 2 #############################
    //
-   `mioc_flop     u17 (.q(w_u17q),
+   mioc_flop     u17 (.q(w_u17q),
 		       .qbar(w_u17qb),
 		       
 		       .in1(PIN_IN_25),     // posedge reset	     
@@ -247,105 +247,105 @@
 		       .in4(PIN_IN_6)       // posedge set           
 		     );
 
-   `mioc_nor3    u18 (.z(w_u18z),
+   mioc_nor3    u18 (.z(w_u18z),
 		      .in1(w_u38qb),
 		      .in2(w_u17q),
 		      .in3(w_u19z)
 		      );
 
-   `mioc_inv1    u19 (.z(w_u19z),
+   mioc_inv1    u19 (.z(w_u19z),
 		      .in1(w_u31z)
 		      );
 
-   `mioc_nor3    u20 (.z(w_u20z),
+   mioc_nor3    u20 (.z(w_u20z),
 		      .in1(w_u38qb),
 		      .in2(w_u17qb),
 		      .in3(w_u19z)
 		      );
 
-   `mioc_inv1    u21 (.z(w_u21z),
+   mioc_inv1    u21 (.z(w_u21z),
 		      .in1(w_u26z)
 		      );
 
-   `mioc_nand2    u22 (.z(w_u22z),
+   mioc_nand2    u22 (.z(w_u22z),
 		       .in1(w_u3z),
 		       .in2(w_u20z)
 		       );      
 
-   `mioc_xnor2    u23 (.z(w_u23z),
+   mioc_xnor2    u23 (.z(w_u23z),
                         .in1(PIN_IN_13),    // ############# PIN 13 ############
                         .in2(w_u44z)
 			);
 
-   `mioc_inv1    u24 (.z(w_u24z),
+   mioc_inv1    u24 (.z(w_u24z),
 		      .in1(w_u56z)
 		      );
 
-   `mioc_nor3    u25 (.z(w_u25z),
+   mioc_nor3    u25 (.z(w_u25z),
 		      .in1(w_u1qb),
 		      .in2(w_u2q),
 		      .in3(w_u28z)
 		      );
    
-   `mioc_nor3    u26 (.z(w_u26z),
+   mioc_nor3    u26 (.z(w_u26z),
 		      .in1(w_u1qb),
 		      .in2(w_u2qb),
 		      .in3(w_u28z)
 		      );
 
-   `mioc_nor3    u27 (.z(w_u27z),
+   mioc_nor3    u27 (.z(w_u27z),
 		      .in1(w_u1q),
 		      .in2(w_u2qb),
 		      .in3(w_u28z)
 		      );
 
-   `mioc_inv1    u28 (.z(w_u28z),
+   mioc_inv1    u28 (.z(w_u28z),
 		      .in1(w_u12z)
 		      );   
    
-   `mioc_nand2    u29 (.z(w_u29z),
+   mioc_nand2    u29 (.z(w_u29z),
 		       .in1(w_u75z),
 		       .in2(w_u60q)
 		       );      
 
-   `mioc_nor3    u30 (.z(w_u30z),
+   mioc_nor3    u30 (.z(w_u30z),
 		      .in1(w_u1q),
 		      .in2(w_u2q),
 		      .in3(w_u28z)
 		      );
 
-   `mioc_xnor2    u31 (.z(w_u31z),
+   mioc_xnor2    u31 (.z(w_u31z),
                         .in1(PIN_IN_3),
                         .in2(w_u48z)
 			);   
 
-   `mioc_inv1    u32 (.z(w_u32z),
+   mioc_inv1    u32 (.z(w_u32z),
 		      .in1(w_u5z)
 		      );   
 
-   `mioc_inv1    u33 (.z(w_u33z),
+   mioc_inv1    u33 (.z(w_u33z),
 		      .in1(PIN_IN_36)
 		      );
 
-   `mioc_nor3    u34 (.z(w_u34z),
+   mioc_nor3    u34 (.z(w_u34z),
 		      .in1(w_u30z),
 		      .in2(w_u32z),
 		      .in3(w_u41z)
 		      );   
    
-   `mioc_inv1    u35 (.z(w_u35z),
+   mioc_inv1    u35 (.z(w_u35z),
 		      .in1(w_u34z)
 		      );
    
    
    // ################################### ROW 3 #############################
    //
-   `mioc_nand2    u37 (.z(w_u37z),
+   mioc_nand2    u37 (.z(w_u37z),
 		       .in1(PIN_IN_15),
 		       .in2(PIN_IN_14)
 		       );
 
-   `mioc_flop     u38 (.q(w_u38q),
+   mioc_flop     u38 (.q(w_u38q),
 		       .qbar(w_u38qb),
 		       
 		       .in1(PIN_IN_25),     // posedge reset	     
@@ -354,27 +354,27 @@
 		       .in4(PIN_IN_6)       // posedge set           
 		     );
    
-   `mioc_inv1    u39 (.z(w_u39z),
+   mioc_inv1    u39 (.z(w_u39z),
 		      .in1(w_u52z)
 		      );
 
 
-   `mioc_inv1    u40 (.z(w_u40z),
+   mioc_inv1    u40 (.z(w_u40z),
 		      .in1(w_u55z)
 		      );
 
-   `mioc_nor3    u41 (.z(w_u41z),
+   mioc_nor3    u41 (.z(w_u41z),
 		      .in1(w_u38q),
 		      .in2(w_u17qb),
 		      .in3(w_u19z)
 		      );
    
-   `mioc_nand2    u42 (.z(w_u42z),
+   mioc_nand2    u42 (.z(w_u42z),
 		       .in1(w_u21z),
 		       .in2(w_u22z)
 		       );
 
-   `mioc_flop     u43 (.q(w_u43q),
+   mioc_flop     u43 (.q(w_u43q),
 		       .qbar(w_u43qb),
 		       
 		       .in1(w_u91z),        // posedge reset	     
@@ -383,12 +383,12 @@
 		       .in4(1'b0)           // posedge set           
 		     );
 
-   `mioc_nor2    u44 (.z(w_u44z),
+   mioc_nor2    u44 (.z(w_u44z),
 		       .in1(w_u60q),
 		       .in2(w_u43qb)		       
 		      );
 
-   `mioc_flop     u45 (.q(w_u45q),
+   mioc_flop     u45 (.q(w_u45q),
 		       .qbar(w_u45qb),
 		       
 		       .in1(1'b0),         // posedge reset	     
@@ -397,43 +397,43 @@
 		       .in4(w_u75z)        // posedge set           
 		     );
 
-   `mioc_inv1    u46 (.z(w_u46z),
+   mioc_inv1    u46 (.z(w_u46z),
 		      .in1(w_u47z)
 		      );
 
-   `mioc_nor2    u47 (.z(w_u47z),
+   mioc_nor2    u47 (.z(w_u47z),
 		       .in1(w_u54qb),
 		       .in2(PIN_IN_36)		       
 		      );
 
-   `mioc_inv1    u48 (.z(w_u48z),
+   mioc_inv1    u48 (.z(w_u48z),
 		      .in1(w_u78z)
 		      );
 
-   `mioc_nand2    u49 (.z(w_u49z),
+   mioc_nand2    u49 (.z(w_u49z),
 		       .in1(w_u77q),
 		       .in2(w_u29z)
 		       );
 
-   `mioc_inv1    u50 (.z(w_u50z),
+   mioc_inv1    u50 (.z(w_u50z),
 		      .in1(w_u27z)
 		      );
 
    
    // ################################### ROW 4 #############################
    //
-   `mioc_nand2    u52 (.z(w_u52z),
+   mioc_nand2    u52 (.z(w_u52z),
 		       .in1(PIN_IN_12),
 		       .in2(w_u65z)
 		       );
    
-   `mioc_nor2    u53 (.z(w_u53z),
+   mioc_nor2    u53 (.z(w_u53z),
 		       .in1(PIN_IN_6),
 		       .in2(PIN_IN_25)		       
 		      );
 
    
-   `mioc_flop     u54 (.q(w_u54q),
+   mioc_flop     u54 (.q(w_u54q),
 		       .qbar(w_u54qb),
 		       
 		       .in1(1'b0),         // posedge reset	     
@@ -442,18 +442,18 @@
 		       .in4(w_u86z)        // posedge set           
 		     );
    
-   `mioc_nor3    u55 (.z(w_u55z),
+   mioc_nor3    u55 (.z(w_u55z),
 		      .in1(w_u38q),
 		      .in2(w_u17q),
 		      .in3(w_u19z)
 		      );
 
-   `mioc_nand2    u56 (.z(w_u56z),
+   mioc_nand2    u56 (.z(w_u56z),
 		       .in1(w_u72z),
 		       .in2(w_u73z)
 		       );
    
-   `mioc_flop     u57 (.q(w_u57q),
+   mioc_flop     u57 (.q(w_u57q),
 		       .qbar(w_u57qb),
 		       
 		       .in1(w_u91z),        // posedge reset	     
@@ -462,17 +462,17 @@
 		       .in4(1'b0)           // posedge set           
 		     );
 
-   `mioc_nor2    u58 (.z(w_u58z),
+   mioc_nor2    u58 (.z(w_u58z),
 		       .in1(w_u75z),
 		       .in2(w_u40z)		       
 		      );
 
-   `mioc_nor2    u59 (.z(w_u59z),
+   mioc_nor2    u59 (.z(w_u59z),
 		       .in1(w_u45q),
 		       .in2(w_u14qb)		       
 		      );
    
-   `mioc_flop     u60 (.q(w_u60q),
+   mioc_flop     u60 (.q(w_u60q),
 		       .qbar(w_u60qb),
 		       
 		       .in1(1'b0),           // posedge reset	     
@@ -481,75 +481,75 @@
 		       .in4(w_u91z)          // posedge set           
 		     );
 
-   `mioc_nor2    u61 (.z(w_u61z),
+   mioc_nor2    u61 (.z(w_u61z),
 		       .in1(w_u78z),
 		       .in2(w_u77q)		       
 		      );   
 
-  `mioc_inv1    u62 (.z(w_u62z),
+  mioc_inv1    u62 (.z(w_u62z),
 		      .in1(w_u84z)
 		      );
 
-  `mioc_inv1    u63 (.z(w_u63z),
+  mioc_inv1    u63 (.z(w_u63z),
 		      .in1(w_u61z)
 		      );
 
    
    // ################################### ROW 5 #############################
    //
-   `mioc_nor2    u65 (.z(w_u65z),
+   mioc_nor2    u65 (.z(w_u65z),
 		       .in1(PIN_IN_11),
 		       .in2(w_u67z)		       
 		      );
 
-   `mioc_inv1    u66 (.z(w_u66z),
+   mioc_inv1    u66 (.z(w_u66z),
 		      .in1(PIN_IN_12)
 		      );   
 
-   `mioc_nand2    u67 (.z(w_u67z),
+   mioc_nand2    u67 (.z(w_u67z),
 		       .in1(PIN_IN_13B),   // ############# PIN 13 ############
 		       .in2(PIN_IN_14)
 		       );
 
-   `mioc_nor2    u69 (.z(w_u69z),
+   mioc_nor2    u69 (.z(w_u69z),
 		       .in1(w_u86z),
 		       .in2(w_u54q)		       
 		      );
 
-   `mioc_nand2    u70 (.z(w_u70z),
+   mioc_nand2    u70 (.z(w_u70z),
 		       .in1(w_u67z), 
 		       .in2(w_u89z)
 		       );
 
-   `mioc_inv1    u71 (.z(w_u71z),
+   mioc_inv1    u71 (.z(w_u71z),
 		      .in1(w_u83z)
 		      );      
    
-   `mioc_nor2    u72 (.z(w_u72z),
+   mioc_nor2    u72 (.z(w_u72z),
 		       .in1(PIN_IN_11),
 		       .in2(w_u45q)		       
 		      );
 
-   `mioc_nor2    u73 (.z(w_u73z),
+   mioc_nor2    u73 (.z(w_u73z),
 		       .in1(w_u71z),
 		       .in2(w_u45q)		       
 		      );
 
-   `mioc_nor2    u74 (.z(w_u74z),
+   mioc_nor2    u74 (.z(w_u74z),
 		       .in1(w_u75z),
 		       .in2(w_u42z)		       
 		      );
    
-   `mioc_inv1    u75 (.z(w_u75z),
+   mioc_inv1    u75 (.z(w_u75z),
 		      .in1(w_u81z)
 		      );      
 
-   `mioc_inv1    u76 (.z(w_u76z),
+   mioc_inv1    u76 (.z(w_u76z),
 		      .in1(w_u58z)
 		      );      
    
 
-   `mioc_flop     u77 (.q(w_u77q),
+   mioc_flop     u77 (.q(w_u77q),
 		       .qbar(w_u77qb),
 		       
 		       .in1(1'b0),           // posedge reset	     
@@ -558,39 +558,39 @@
 		       .in4(w_u91z)          // posedge set           
 		     );
 
-   `mioc_nor2    u78 (.z(w_u78z),
+   mioc_nor2    u78 (.z(w_u78z),
 		       .in1(PIN_IN_16),
 		       .in2(w_u69z)		       
 		      );
 
-   `mioc_nand2    u79 (.z(w_u79z),
+   mioc_nand2    u79 (.z(w_u79z),
 		       .in1(w_u70z),
 		       .in2(w_u78z)		       
 		      );
    
-   `mioc_inv1    u80 (.z(w_u80z),
+   mioc_inv1    u80 (.z(w_u80z),
 		      .in1(PIN_IN_36)
 		      );      
    
-   `mioc_nand4_nor2     u81 (.z(w_u81z),		       
+   mioc_nand4_nor2     u81 (.z(w_u81z),		       
 			       .in1(PIN_IN_32),           
 			       .in2(w_u78z),         
 			       .in3(w_u93q),         
 			       .in4(w_u82z)          
 			       );
 
-   `mioc_inv1    u82 (.z(w_u82z),
+   mioc_inv1    u82 (.z(w_u82z),
 		       .in1(w_u78z)
 		       );      
 
-   `mioc_nand4_nor2     u83 (.z(w_u83z),		       
+   mioc_nand4_nor2     u83 (.z(w_u83z),		       
 			       .in1(PIN_IN_33),           
 			       .in2(w_u78z),         
 			       .in3(w_u93q),         
 			       .in4(w_u82z)          
 			       );
 
-   `mioc_nor2    u84 (.z(w_u84z),
+   mioc_nor2    u84 (.z(w_u84z),
 		       .in1(w_u77q),
 		       .in2(PIN_IN_35)		       
 		      );
@@ -599,20 +599,20 @@
    // ################################### ROW 6 #############################
    //
 
-   `mioc_inv1    u85 (.z(w_u85z),
+   mioc_inv1    u85 (.z(w_u85z),
 		       .in1(w_u87z)
 		       );      
 
-   `mioc_inv1    u86 (.z(w_u86z),
+   mioc_inv1    u86 (.z(w_u86z),
 		       .in1(PIN_IN_17)
 		       );      
 
-   `mioc_nand2    u87 (.z(w_u87z),
+   mioc_nand2    u87 (.z(w_u87z),
 		       .in1(w_u66z),
 		       .in2(w_u65z)		       
 		      );
 
-   `mioc_flop    u88 (.q(w_u88q),      
+   mioc_flop    u88 (.q(w_u88q),      
 		      .qbar(w_u88qb),
 
 		      .in1(w_u91z),      // posedge reset	     
@@ -621,12 +621,12 @@
 		      .in4(1'b0)	 // posedge set           
 	              );
 
-   `mioc_inv1    u89 (.z(w_u89z),
+   mioc_inv1    u89 (.z(w_u89z),
 		       .in1(w_u70z)
 		       );         
 
 
-   `mioc_flop    u90 (.q(w_u90q),      
+   mioc_flop    u90 (.q(w_u90q),      
 		      .qbar(w_u90qb),
 
 		      .in1(w_u91z),      // posedge reset	     
@@ -635,11 +635,11 @@
 		      .in4(1'b0)	 // posedge set           
 	              );
 
-   `mioc_inv1    u91 (.z(w_u91z),
+   mioc_inv1    u91 (.z(w_u91z),
 		       .in1(w_u53z)
 		       );         
 
-   `mioc_flop    u92 (.q(w_u92q),      
+   mioc_flop    u92 (.q(w_u92q),      
 		      .qbar(w_u92qb),
 
 		      .in1(w_u91z),      // posedge reset	     
@@ -648,7 +648,7 @@
 		      .in4(w_u59z)	 // posedge set           
 	              );   
 
-   `mioc_flop    u93 (.q(w_u93q),      
+   mioc_flop    u93 (.q(w_u93q),      
 		      .qbar(w_u93qb),
 
 		      .in1(w_u91z),      // posedge reset	     
@@ -657,7 +657,7 @@
 		      .in4(1'b0)	 // posedge set           
 	              );
 
-   `mioc_inv1    u94 (.z(w_u94z),
+   mioc_inv1    u94 (.z(w_u94z),
 		       .in1(PIN_IN_25)
 		       );  
    

@@ -8,10 +8,11 @@
 /build/repo/gates/mioc-verilog/mioc-inv1/src/mioc_inv1_rtl.v
 /build/repo/gates/mioc-verilog/mioc-nand2/src/mioc_nand2_rtl.v
 /build/repo/gates/mioc-verilog/mioc-xnor2/src/mioc_xnor2_rtl.v
-/build/repo/gates/mioc-verilog/mioc-top/src/mioc_top_rtl.v
 /build/repo/gates/mioc-verilog/mioc-nor3/src/mioc_nor3_rtl.v
 /build/repo/gates/mioc-verilog/mioc-nand4-nor2/src/mioc_nand4_nor2_rtl.v
-/build/repo/gates/mioc-verilog/mioc-replay/src/mioc_replay.v
 /build/repo/gates/mioc-verilog/mioc-flop/src/mioc_flop_rtl.v
+
+/build/repo/gates/mioc-verilog/mioc-replay/src/mioc_replay.v
+/build/repo/gates/mioc-verilog/mioc-top/src/mioc_top.v
 
 #./testbench.v

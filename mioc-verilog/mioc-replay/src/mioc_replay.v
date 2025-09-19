@@ -198,6 +198,7 @@ module mioc_replay (
 
    // Drive DUT pins from current stimulus vector
    assign BPHI       = stim_in_vec[2];
+
    assign BA15       = stim_in_vec[4];
    assign BA14       = stim_in_vec[5];
    assign BA13       = stim_in_vec[6];
@@ -210,28 +211,30 @@ module mioc_replay (
    assign BA6        = stim_in_vec[13];
    assign BA7        = stim_in_vec[14];
    assign nIORQ      = stim_in_vec[15];
-   assign nWAIT      = stim_in_vec[16];
-   assign nBUSAK     = stim_in_vec[17];
-   assign nDMA       = stim_in_vec[18];
-   assign nCPRST     = stim_in_vec[19];
-   assign nPBRST     = stim_in_vec[20];
-   assign nOS3       = stim_in_vec[21];
-   assign nBMREQ     = stim_in_vec[22];
-   assign nBRD       = stim_in_vec[23];
-   assign nBRFSH     = stim_in_vec[24];
-   assign nBM1       = stim_in_vec[25];
+
+   assign nWAIT      = stim_in_vec[18];
+   assign nBUSAK     = stim_in_vec[19];
+   assign nDMA       = stim_in_vec[20];
+   assign nCPRST     = stim_in_vec[21];
+   assign nPBRST     = stim_in_vec[22];
+
+   assign nOS3       = stim_in_vec[25];
+   assign nBMREQ     = stim_in_vec[26];
+   assign nBRD       = stim_in_vec[27];
+   assign nBRFSH     = stim_in_vec[28];
+   assign nBM1       = stim_in_vec[29];
 
    // Capture DUT outputs into compare vector
-   assign dut_out_vec[0] = RA7;
-   assign dut_out_vec[1] = nBUSRQ;
-   assign dut_out_vec[2] = nEOS_ENABLE;
-   assign dut_out_vec[3] = nNET_RST;
-   assign dut_out_vec[4] = nAUX_DECODE1;
-   assign dut_out_vec[5] = nRST;
-   assign dut_out_vec[6] = nAUX_ROM_CS;
-   assign dut_out_vec[7] = nADDRBUFEN;
-   assign dut_out_vec[8] = nBOOT_ROM_CS;
-   assign dut_out_vec[9] = nEN245;
+   assign dut_out_vec[0]  = RA7;
+   assign dut_out_vec[1]  = nBUSRQ;
+   assign dut_out_vec[2]  = nEOS_ENABLE;
+   assign dut_out_vec[3]  = nNET_RST;
+   assign dut_out_vec[4]  = nAUX_DECODE1;
+   assign dut_out_vec[5]  = nRST;
+   assign dut_out_vec[6]  = nAUX_ROM_CS;
+   assign dut_out_vec[7]  = nADDRBUFEN;
+   assign dut_out_vec[8]  = nBOOT_ROM_CS;
+   assign dut_out_vec[9]  = nEN245;
    assign dut_out_vec[10] = nIS3;
    assign dut_out_vec[11] = MUX;
    assign dut_out_vec[12] = nRAS1;
@@ -239,20 +242,21 @@ module mioc_replay (
    assign dut_out_vec[14] = nCAS2;
 
    // LA1010 captured signals
-   assign cap_RA7	    = out_word[0]; 
-   assign cap_nBUSRQ	    = out_word[1]; 
+   // (only for gtkwave comparison)
+   assign cap_RA7	          = out_word[0]; 
+   assign cap_nBUSRQ	      = out_word[1]; 
    assign cap_nEOS_ENABLE   = out_word[2]; 
    assign cap_nNET_RST	    = out_word[3]; 
    assign cap_nAUX_DECODE1  = out_word[4]; 
-   assign cap_nRST	    = out_word[5]; 
+   assign cap_nRST	        = out_word[5]; 
    assign cap_nAUX_ROM_CS   = out_word[6]; 
    assign cap_nADDRBUFEN    = out_word[7]; 
    assign cap_nBOOT_ROM_CS  = out_word[8]; 
-   assign cap_nEN245	    = out_word[9]; 
-   assign cap_nIS3	    = out_word[10]; 
-   assign cap_MUX	    = out_word[11]; 
-   assign cap_nRAS1	    = out_word[12]; 
-   assign cap_nCAS1	    = out_word[13]; 
+   assign cap_nEN245	      = out_word[9]; 
+   assign cap_nIS3	        = out_word[10]; 
+   assign cap_MUX	          = out_word[11]; 
+   assign cap_nRAS1	        = out_word[12]; 
+   assign cap_nCAS1	        = out_word[13]; 
    assign cap_nCAS2         = out_word[14];  
 
   endmodule

@@ -7,7 +7,7 @@
 
 // mioc-xnor2
 //
-module mioc_xnor2_rtl(
+module mioc_xnor2 (
     z,
 
     in1,            

@@ -28,6 +28,7 @@ module testbench ();
    wire   WAIT_N       ; //: pin15 : Active low wait signal, Memory wait state					    
    wire   BUSAK_N      ; //: pin16 : Active low bus acknowledge - Z80 Control					    
    wire   DMA_N        ; //: pin17 : Active low DMA transaction asserted by 6801 to signal DMA to RAM
+   wire   CPRST_N      ; //: pin 24 : Active low reset - not used		
    reg    PBRST_N      ; //: pin 25 : Active low ADAM Reset switch for computer mode					    
    wire   OS3_N        ; //:  pin 31 : Active low OS3 From Master 6801							 
    wire   BMREQ_N      ; //: pin 32 : Active low Buffered Memory Request						 
@@ -43,8 +44,7 @@ module testbench ();
    wire   SPINDIS_N    ; //: pin19 : Active low Controller Spinner Interrupt Disable				    
    wire   NETRST_N     ; //: pin20 : Active low - Reset for AdamNET                                                  
    wire   AUXDECODE1_N ; //: pin 22 : Active low - Disables the onboard mem decode on CV board?				 
-   wire   RST_N        ; //: pin 23 : Active low reset - System Reset circuitry						 
-   wire   CPRST_N      ; //: pin 24 : Active low reset - not used							 
+   wire   RST_N        ; //: pin 23 : Active low reset - System Reset circuitry						 					 
    wire   AUXROMCS_N   ; //: pin 26 : Active low aux rom chip select - Slot 2 Expansion ROM CS				 
    wire   ADDRBUFEN_N  ; //: pin 27 : Active low address buffer enable - ensables BMREQ, /BM1, and /BIORQ (disabled during DMA cycle) 
    wire   BOOTROMCS_N  ; //: pin 28 : Active low boot ROM chip select - For Smartwriter ROM				 

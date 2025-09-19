@@ -9,7 +9,7 @@
 
 // mioc-flop-mos
 //
-module mioc_flop_nmos(
+module mioc_flop (
     q,
     qbar,
 

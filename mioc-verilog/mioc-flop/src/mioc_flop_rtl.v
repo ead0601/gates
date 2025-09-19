@@ -12,7 +12,7 @@
 
 // mioc-flop-rtl
 //
-module mioc_flop_rtl (
+module mioc_flop (
     q,
     qbar,
 

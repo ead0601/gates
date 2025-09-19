@@ -13,10 +13,10 @@ IN, LA1:D04, BA15          #  3  input    Address BUS bit 15
 IN, LA1:D05, BA14          #  4  input    Address BUS bit 14
 IN, LA1:D06, BA13          #  5  input    Address BUS bit 13
 IN, LA1:D07, nCVRST        #  6  input    Active low, ColecoVision reset switch
-IO, LA1:D08, BD0           #  7  I/O      Data BUS bit 0
-IO, LA1:D09, BD1           #  8  I/O      Data BUS bit 1
-IO, LA1:D10, BD2           #  9  I/O      Data BUS bit 2
-IO, LA1:D11, BD3           #  10 I/O      Data BUS bit 3
+IN, LA1:D08, BD0           #  7  I/O      Data BUS bit 0
+IN, LA1:D09, BD1           #  8  I/O      Data BUS bit 1
+IN, LA1:D10, BD2           #  9  I/O      Data BUS bit 2
+IN, LA1:D11, BD3           #  10 I/O      Data BUS bit 3
 IN, LA1:D12, nBWR          #  11 input    made by complex logic from MA5, /IORQ, and A10
 IN, LA1:D13, BA6           #  12 input    Address BUS bit 6
 IN, LA1:D14, BA7           #  13 input    BA7, gated in by /ADDRBUFEN
