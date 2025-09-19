@@ -1,0 +1,80 @@
+[*]
+[*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
+[*] Fri Sep 19 08:45:58 2025
+[*]
+[dumpfile] "/build/repo/gates/mioc-verilog/mioc-top/tests/stim-001/DATA_OUT/waves.vcd"
+[dumpfile_mtime] "Fri Sep 19 08:34:21 2025"
+[dumpfile_size] 69369992
+[savefile] "/build/repo/gates/mioc-verilog/mioc-top/tests/stim-001/waves.gtkw"
+[timestart] 0
+[size] 1900 1031
+[pos] 176 25
+*-33.363197 2300 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] testbench.
+[sst_width] 480
+[signals_width] 158
+[sst_expanded] 1
+[sst_vpaned_height] 307
+@200
+-INPUTS
+@28
+testbench.BA6
+testbench.BA7
+testbench.BA13
+testbench.BA14
+testbench.BA15
+testbench.BD0
+testbench.BD1
+testbench.BD2
+testbench.BD3
+testbench.BM1_N
+testbench.BMREQ_N
+testbench.BRD_N
+testbench.BRFSH_N
+testbench.BUSAK_N
+testbench.B_PHI
+testbench.DMA_N
+testbench.IORQ_N
+testbench.N_BWR
+testbench.N_CVRST
+testbench.OS3_N
+testbench.PBRST_N
+testbench.WAIT_N
+@29
+testbench.CPRST_N
+@200
+-
+-OUTPUTS
+@28
+testbench.mioc_stim.cap_MUX
+testbench.mioc.MUX
+testbench.mioc_stim.cap_RA7
+testbench.mioc.RA7
+testbench.mioc_stim.cap_nADDRBUFEN
+testbench.ADDRBUFEN_N
+testbench.mioc_stim.cap_nAUX_DECODE1
+testbench.AUXDECODE1_N
+testbench.mioc_stim.cap_nAUX_ROM_CS
+testbench.AUXROMCS_N
+testbench.mioc_stim.cap_nBOOT_ROM_CS
+testbench.BOOTROMCS_N
+testbench.mioc_stim.cap_nBUSRQ
+testbench.BUSRQ_N
+testbench.mioc_stim.cap_nCAS1
+testbench.CAS1_N
+testbench.mioc_stim.cap_nCAS2
+testbench.CAS2_N
+testbench.mioc_stim.cap_nEN245
+testbench.EN245_N
+testbench.mioc_stim.cap_nEOS_ENABLE
+testbench.SPINDIS_N
+testbench.mioc_stim.cap_nIS3
+testbench.IS3_N
+testbench.mioc_stim.cap_nNET_RST
+testbench.NETRST_N
+testbench.mioc_stim.cap_nRAS1
+testbench.RAS_N
+testbench.mioc_stim.cap_nRST
+testbench.RST_N
+[pattern_trace] 1
+[pattern_trace] 0

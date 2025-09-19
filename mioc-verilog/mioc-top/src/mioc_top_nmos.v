@@ -116,10 +116,11 @@ module mioc_top(
 
 
    // COMPONENTS
-   `include "./src/mioc_components.v"   
-      
+   `include "/build/repo/gates/mioc-verilog/mioc-top/src/mioc_components.v"   
+   
    // WIRE ASSIGNMENTS
    //
-   `include "./src/mioc_pin_assignments.v"
+   `include "/build/repo/gates/mioc-verilog/mioc-top/src/mioc_pin_assignments.v"
+
    
 endmodule

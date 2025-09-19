@@ -117,11 +117,13 @@ module mioc_top(
    output CAS2_N       ; //: pin 40 : Active low column address strobe 2                                                 
 
 
+   // Files located within test directory
+
    // COMPONENTS
-   `include "./src/mioc_components.v"   
+   `include "./mioc_components.v"   
    
    // WIRE ASSIGNMENTS
    //
-   `include "./src/mioc_pin_assignments.v"
+   `include "./mioc_pin_assignments.v"
    
 endmodule
