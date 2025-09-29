@@ -6,6 +6,7 @@ Features:
 - fanin  <target> [--tree] [--endpoints] [--cross-ff] [--stage-limit N] [--depth N] [--branch N]
 - fanout <target> [--endpoints] [--depth N]
 - paths --from A[,B...] --to X[,Y...] [--depth N] [--max-paths N]
+- help [cmd] / ?
 - quit / exit
 
 Extras:
@@ -20,8 +21,11 @@ import os
 from pathlib import Path
 from typing import Dict, List, Tuple, Set, Optional
 
+APP_NAME = "vnlt"  # Verilog NetLisT
+VERSION  = "0.4.0"
+
 # ----------------------------
-# Helpers for printing and history
+# Helpers for printing, banner, and history
 # ----------------------------
 
 def _print_raw(text: str):
@@ -30,6 +34,10 @@ def _print_raw(text: str):
     if not text.endswith("\n"):
         sys.stdout.write("\n")
     sys.stdout.flush()
+
+def _print_banner():
+    _print_raw(f"{APP_NAME} v{VERSION} — Verilog Netlist CLI")
+    _print_raw("Type 'help' for a list of commands, or 'help <cmd>' for details.\n")
 
 def _setup_history():
     """Enable ↑/↓ history and persist it across runs (Linux/macOS built-in; Windows needs pyreadline3)."""
@@ -475,6 +483,83 @@ class Traversal:
 # Interpreter (commands → output)
 # ----------------------------
 
+HELP_SUMMARY = """\
+Commands:
+  show <target>
+      Inspect a net (drivers/loads) or an instance (type, pins, connections).
+
+  fanin <target> [--tree] [--endpoints] [--cross-ff] [--stage-limit N] [--depth N] [--branch N]
+      Explore drivers of <target>. --tree prints ASCII tree. --endpoints lists TOP_IN/CONST only.
+      --cross-ff to cross registers (optionally cap with --stage-limit). --branch limits tree children.
+
+  fanout <target> [--endpoints] [--depth N]
+      Explore loads of <target>. Combinational forward only (no FF crossing).
+      --endpoints lists TOP_OUT only.
+
+  paths --from A[,B...] --to X[,Y...] [--depth N] [--max-paths N]
+      Find combinational paths from sources to sinks (no FF crossing).
+
+  help [cmd] | ?
+      Show this help or per-command help.
+
+  quit | exit
+      Leave the REPL.
+
+General options:
+  --depth N   traversal depth cap (default 200)
+"""
+
+HELP_DETAIL = {
+    "show": """\
+Usage:
+  show <target>
+
+Target can be:
+  - net name (e.g., RA7, w_u23z)
+  - instance name (e.g., u23)
+  - instance pin (e.g., u23.z, u44.in1)
+""",
+    "fanin": """\
+Usage:
+  fanin <target> [--tree] [--endpoints] [--cross-ff] [--stage-limit N] [--depth N] [--branch N]
+
+Description:
+  Explore what drives <target>.
+  --tree         Render a pretty ASCII tree.
+  --endpoints    Show only terminal sources (TOP_IN / CONST).
+  --cross-ff     Allow crossing flip-flops.
+  --stage-limit  Cap number of FF stages when crossing (omit → unlimited).
+  --depth N      Limit traversal depth (default 200).
+  --branch N     In tree mode, cap children per node (omit → unlimited).
+""",
+    "fanout": """\
+Usage:
+  fanout <target> [--endpoints] [--depth N]
+
+Description:
+  Explore what <target> drives (combinational only; does not cross FFs).
+  --endpoints  List only terminal sinks (TOP_OUT).
+  --depth N    Limit traversal depth (default 200).
+""",
+    "paths": """\
+Usage:
+  paths --from A[,B,...] --to X[,Y,...] [--depth N] [--max-paths N]
+
+Description:
+  Find combinational paths from sources to sinks. No FF crossing.
+  --depth N      Limit traversal depth (default 200).
+  --max-paths N  Cap number of paths (default 200).
+""",
+    "help": """\
+Usage:
+  help [cmd]
+  ? [cmd]
+
+Description:
+  Show top-level help or details for a specific command.
+"""
+}
+
 class Interpreter:
     def __init__(self, graph_path: Path):
         self.graph_path = graph_path
@@ -488,9 +573,22 @@ class Interpreter:
     def _resolve(self, token: str) -> Optional[str]:
         return self.graph.resolve_target_to_net(token)
 
+    # ---- commands ----
+
+    def cmd_help(self, args: List[str]) -> dict:
+        if not args:
+            return {"__raw": HELP_SUMMARY}
+        topic = args[0]
+        text = HELP_DETAIL.get(topic)
+        if text is None:
+            # nearest matches?
+            known = ", ".join(sorted(HELP_DETAIL.keys()))
+            return {"__raw": f"No detailed help for '{topic}'. Known: {known}\n"}
+        return {"__raw": text}
+
     def cmd_show(self, args: List[str]) -> dict:
         if not args:
-            return {"cmd":"show","error":{"code":"USAGE","msg":"show <target>"}}
+            return {"__raw": HELP_DETAIL["show"]}
         target = args[0]
         net = self._resolve(target)
         if net is None:
@@ -532,7 +630,7 @@ class Interpreter:
 
     def cmd_fanin(self, args: List[str]):
         if not args:
-            return {"cmd":"fanin","error":{"code":"USAGE","msg":"fanin <target> [--tree|--endpoints] [--depth N] [--cross-ff] [--stage-limit N] [--branch N]"}}
+            return {"__raw": HELP_DETAIL["fanin"]}
         tree_mode = False
         endpoints_mode = False
         cross_ff = False
@@ -596,7 +694,7 @@ class Interpreter:
 
     def cmd_fanout(self, args: List[str]) -> dict:
         if not args:
-            return {"cmd":"fanout","error":{"code":"USAGE","msg":"fanout <target> [--endpoints] [--depth N]"}}
+            return {"__raw": HELP_DETAIL["fanout"]}
         endpoints_mode = False
         depth = 200
         tokens: List[str] = []
@@ -645,7 +743,7 @@ class Interpreter:
             elif a == "--max-paths":
                 max_paths = int(next(it))
             else:
-                return {"cmd":"paths","error":{"code":"USAGE","msg":"paths --from A[,B] --to X[,Y] [--depth N] [--max-paths N]"}}
+                return {"__raw": HELP_DETAIL["paths"]}
 
         if not froms or not tos:
             return {"cmd":"paths","error":{"code":"USAGE","msg":"paths --from A[,B] --to X[,Y]"}}
@@ -673,6 +771,8 @@ class Interpreter:
         if not parts:
             return None
         cmd, args = parts[0], parts[1:]
+        if cmd in ("help", "?"):
+            return self.cmd_help(args)
         if cmd == "show":
             return self.cmd_show(args)
         if cmd == "fanin":
@@ -683,13 +783,14 @@ class Interpreter:
             return self.cmd_paths(args)
         if cmd in ("quit","exit"):
             return {"cmd":"quit"}
-        return {"cmd":cmd,"error":{"code":"UNKNOWN_CMD","msg":"unknown command"}}
+        return {"__raw": f"Unknown command '{cmd}'. Type 'help' for a list of commands.\n"}
 
 # ----------------------------
 # REPL / Batch
 # ----------------------------
 
 def run_repl(interp: Interpreter):
+    _print_banner()
     histfile, hist_ok = _setup_history()
     try:
         while True:
