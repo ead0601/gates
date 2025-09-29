@@ -1,0 +1,3977 @@
+{
+  "version": 1,
+  "celllib_ref": "celllib.json",
+  "top": {
+    "inputs": [
+      "BA13",
+      "BA14",
+      "BA15",
+      "BA6",
+      "BA7",
+      "BD0",
+      "BD1",
+      "BD2",
+      "BD3",
+      "BM1_N",
+      "BMREQ_N",
+      "BRD_N",
+      "BRFSH_N",
+      "BUSAK_N",
+      "B_PHI",
+      "DMA_N",
+      "IORQ_N",
+      "N_BWR",
+      "N_CVRST",
+      "OS3_N",
+      "PBRST_N",
+      "WAIT_N"
+    ],
+    "outputs": [
+      "ADDRBUFEN_N",
+      "AUXDECODE1_N",
+      "AUXROMCS_N",
+      "BOOTROMCS_N",
+      "BUSRQ_N",
+      "CAS1_N",
+      "CAS2_N",
+      "CPRST_N",
+      "EN245_N",
+      "IS3_N",
+      "MUX",
+      "NETRST_N",
+      "RA7",
+      "RAS_N",
+      "RST_N",
+      "SPINDIS_N"
+    ]
+  },
+  "instances": [
+    {
+      "name": "assign_ADDRBUFEN_N",
+      "type": "buf1",
+      "pins": {
+        "in1": "w_u50z",
+        "z": "ADDRBUFEN_N"
+      }
+    },
+    {
+      "name": "assign_AUXDECODE1_N",
+      "type": "buf1",
+      "pins": {
+        "in1": "w_u42z",
+        "z": "AUXDECODE1_N"
+      }
+    },
+    {
+      "name": "assign_AUXROMCS_N",
+      "type": "buf1",
+      "pins": {
+        "in1": "w_u48z",
+        "z": "AUXROMCS_N"
+      }
+    },
+    {
+      "name": "assign_BOOTROMCS_N",
+      "type": "buf1",
+      "pins": {
+        "in1": "w_u76z",
+        "z": "BOOTROMCS_N"
+      }
+    },
+    {
+      "name": "assign_BUSRQ_N",
+      "type": "buf1",
+      "pins": {
+        "in1": "w_u86z",
+        "z": "BUSRQ_N"
+      }
+    },
+    {
+      "name": "assign_CAS1_N",
+      "type": "buf1",
+      "pins": {
+        "in1": "w_u9z",
+        "z": "CAS1_N"
+      }
+    },
+    {
+      "name": "assign_CAS2_N",
+      "type": "buf1",
+      "pins": {
+        "in1": "w_u8z",
+        "z": "CAS2_N"
+      }
+    },
+    {
+      "name": "assign_CPRST_N",
+      "type": "buf1",
+      "pins": {
+        "in1": "w_u94z",
+        "z": "CPRST_N"
+      }
+    },
+    {
+      "name": "assign_EN245_N",
+      "type": "buf1",
+      "pins": {
+        "in1": "w_u79z",
+        "z": "EN245_N"
+      }
+    },
+    {
+      "name": "assign_IS3_N",
+      "type": "buf1",
+      "pins": {
+        "in1": "w_u63z",
+        "z": "IS3_N"
+      }
+    },
+    {
+      "name": "assign_MUX",
+      "type": "buf1",
+      "pins": {
+        "in1": "w_u14qb",
+        "z": "MUX"
+      }
+    },
+    {
+      "name": "assign_NETRST_N",
+      "type": "buf1",
+      "pins": {
+        "in1": "w_u90qb",
+        "z": "NETRST_N"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_13",
+      "type": "buf1",
+      "pins": {
+        "in1": "BA7",
+        "z": "PIN_IN_13"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_14",
+      "type": "buf1",
+      "pins": {
+        "in1": "IORQ_N",
+        "z": "PIN_IN_14"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_15",
+      "type": "buf1",
+      "pins": {
+        "in1": "WAIT_N",
+        "z": "PIN_IN_15"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_16",
+      "type": "buf1",
+      "pins": {
+        "in1": "BUSAK_N",
+        "z": "PIN_IN_16"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_17",
+      "type": "buf1",
+      "pins": {
+        "in1": "DMA_N",
+        "z": "PIN_IN_17"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_34",
+      "type": "buf1",
+      "pins": {
+        "in1": "BRFSH_N",
+        "z": "PIN_IN_34"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_36",
+      "type": "buf1",
+      "pins": {
+        "in1": "B_PHI",
+        "z": "PIN_IN_36"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_6",
+      "type": "buf1",
+      "pins": {
+        "in1": "N_CVRST",
+        "z": "PIN_IN_6"
+      }
+    },
+    {
+      "name": "assign_RA7",
+      "type": "buf1",
+      "pins": {
+        "in1": "w_u23z",
+        "z": "RA7"
+      }
+    },
+    {
+      "name": "assign_RAS_N",
+      "type": "buf1",
+      "pins": {
+        "in1": "w_u49z",
+        "z": "RAS_N"
+      }
+    },
+    {
+      "name": "assign_RST_N",
+      "type": "buf1",
+      "pins": {
+        "in1": "w_u53z",
+        "z": "RST_N"
+      }
+    },
+    {
+      "name": "assign_SPINDIS_N",
+      "type": "buf1",
+      "pins": {
+        "in1": "w_u88qb",
+        "z": "SPINDIS_N"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_10",
+      "type": "inv1",
+      "pins": {
+        "in1": "BD3",
+        "z": "PIN_IN_10"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_11",
+      "type": "inv1",
+      "pins": {
+        "in1": "N_BWR",
+        "z": "PIN_IN_11"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_12",
+      "type": "inv1",
+      "pins": {
+        "in1": "BA6",
+        "z": "PIN_IN_12"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_13N",
+      "type": "inv1",
+      "pins": {
+        "in1": "BA7",
+        "z": "PIN_IN_13N"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_25",
+      "type": "inv1",
+      "pins": {
+        "in1": "PBRST_N",
+        "z": "PIN_IN_25"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_3",
+      "type": "inv1",
+      "pins": {
+        "in1": "BA15",
+        "z": "PIN_IN_3"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_31",
+      "type": "inv1",
+      "pins": {
+        "in1": "OS3_N",
+        "z": "PIN_IN_31"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_32",
+      "type": "inv1",
+      "pins": {
+        "in1": "BMREQ_N",
+        "z": "PIN_IN_32"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_33",
+      "type": "inv1",
+      "pins": {
+        "in1": "BRD_N",
+        "z": "PIN_IN_33"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_35",
+      "type": "inv1",
+      "pins": {
+        "in1": "BM1_N",
+        "z": "PIN_IN_35"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_4",
+      "type": "inv1",
+      "pins": {
+        "in1": "BA14",
+        "z": "PIN_IN_4"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_5",
+      "type": "inv1",
+      "pins": {
+        "in1": "BA13",
+        "z": "PIN_IN_5"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_7",
+      "type": "inv1",
+      "pins": {
+        "in1": "BD0",
+        "z": "PIN_IN_7"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_8",
+      "type": "inv1",
+      "pins": {
+        "in1": "BD1",
+        "z": "PIN_IN_8"
+      }
+    },
+    {
+      "name": "assign_PIN_IN_9",
+      "type": "inv1",
+      "pins": {
+        "in1": "BD2",
+        "z": "PIN_IN_9"
+      }
+    },
+    {
+      "name": "u1",
+      "type": "mioc_flop",
+      "pins": {
+        "q": "w_u1q",
+        "qbar": "w_u1qb",
+        "in1": "PIN_IN_25",
+        "in2": "w_u39z",
+        "in3": "PIN_IN_10",
+        "in4": "PIN_IN_6"
+      }
+    },
+    {
+      "name": "u14",
+      "type": "mioc_flop",
+      "pins": {
+        "q": "w_u14q",
+        "qbar": "w_u14qb",
+        "in1": "1'b0",
+        "in2": "PIN_IN_36",
+        "in3": "w_u49z",
+        "in4": "PIN_IN_34"
+      }
+    },
+    {
+      "name": "u17",
+      "type": "mioc_flop",
+      "pins": {
+        "q": "w_u17q",
+        "qbar": "w_u17qb",
+        "in1": "PIN_IN_25",
+        "in2": "w_u39z",
+        "in3": "PIN_IN_7",
+        "in4": "PIN_IN_6"
+      }
+    },
+    {
+      "name": "u2",
+      "type": "mioc_flop",
+      "pins": {
+        "q": "w_u2q",
+        "qbar": "w_u2qb",
+        "in1": "PIN_IN_25",
+        "in2": "w_u39z",
+        "in3": "PIN_IN_9",
+        "in4": "PIN_IN_6"
+      }
+    },
+    {
+      "name": "u38",
+      "type": "mioc_flop",
+      "pins": {
+        "q": "w_u38q",
+        "qbar": "w_u38qb",
+        "in1": "PIN_IN_25",
+        "in2": "w_u39z",
+        "in3": "PIN_IN_8",
+        "in4": "PIN_IN_6"
+      }
+    },
+    {
+      "name": "u43",
+      "type": "mioc_flop",
+      "pins": {
+        "q": "w_u43q",
+        "qbar": "w_u43qb",
+        "in1": "w_u91z",
+        "in2": "w_u57qb",
+        "in3": "w_u43qb",
+        "in4": "1'b0"
+      }
+    },
+    {
+      "name": "u45",
+      "type": "mioc_flop",
+      "pins": {
+        "q": "w_u45q",
+        "qbar": "w_u45qb",
+        "in1": "1'b0",
+        "in2": "w_u33z",
+        "in3": "w_u14q",
+        "in4": "w_u75z"
+      }
+    },
+    {
+      "name": "u54",
+      "type": "mioc_flop",
+      "pins": {
+        "q": "w_u54q",
+        "qbar": "w_u54qb",
+        "in1": "1'b0",
+        "in2": "w_u46z",
+        "in3": "w_u37z",
+        "in4": "w_u86z"
+      }
+    },
+    {
+      "name": "u57",
+      "type": "mioc_flop",
+      "pins": {
+        "q": "w_u57q",
+        "qbar": "w_u57qb",
+        "in1": "w_u91z",
+        "in2": "w_u60qb",
+        "in3": "PIN_IN_12",
+        "in4": "1'b0"
+      }
+    },
+    {
+      "name": "u60",
+      "type": "mioc_flop",
+      "pins": {
+        "q": "w_u60q",
+        "qbar": "w_u60qb",
+        "in1": "1'b0",
+        "in2": "PIN_IN_36",
+        "in3": "w_u62z",
+        "in4": "w_u91z"
+      }
+    },
+    {
+      "name": "u77",
+      "type": "mioc_flop",
+      "pins": {
+        "q": "w_u77q",
+        "qbar": "w_u77qb",
+        "in1": "1'b0",
+        "in2": "w_u33z",
+        "in3": "w_u45q",
+        "in4": "w_u91z"
+      }
+    },
+    {
+      "name": "u88",
+      "type": "mioc_flop",
+      "pins": {
+        "q": "w_u88q",
+        "qbar": "w_u88qb",
+        "in1": "w_u91z",
+        "in2": "w_u85z",
+        "in3": "PIN_IN_8",
+        "in4": "1'b0"
+      }
+    },
+    {
+      "name": "u90",
+      "type": "mioc_flop",
+      "pins": {
+        "q": "w_u90q",
+        "qbar": "w_u90qb",
+        "in1": "w_u91z",
+        "in2": "w_u85z",
+        "in3": "PIN_IN_7",
+        "in4": "1'b0"
+      }
+    },
+    {
+      "name": "u92",
+      "type": "mioc_flop",
+      "pins": {
+        "q": "w_u92q",
+        "qbar": "w_u92qb",
+        "in1": "w_u91z",
+        "in2": "PIN_IN_31",
+        "in3": "1'b0",
+        "in4": "w_u59z"
+      }
+    },
+    {
+      "name": "u93",
+      "type": "mioc_flop",
+      "pins": {
+        "q": "w_u93q",
+        "qbar": "w_u93qb",
+        "in1": "w_u91z",
+        "in2": "w_u80z",
+        "in3": "w_u92q",
+        "in4": "1'b0"
+      }
+    },
+    {
+      "name": "u10",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u10z",
+        "in1": "w_u13z"
+      }
+    },
+    {
+      "name": "u11",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u11z",
+        "in1": "PIN_IN_3"
+      }
+    },
+    {
+      "name": "u19",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u19z",
+        "in1": "w_u31z"
+      }
+    },
+    {
+      "name": "u21",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u21z",
+        "in1": "w_u26z"
+      }
+    },
+    {
+      "name": "u24",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u24z",
+        "in1": "w_u56z"
+      }
+    },
+    {
+      "name": "u28",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u28z",
+        "in1": "w_u12z"
+      }
+    },
+    {
+      "name": "u32",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u32z",
+        "in1": "w_u5z"
+      }
+    },
+    {
+      "name": "u33",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u33z",
+        "in1": "PIN_IN_36"
+      }
+    },
+    {
+      "name": "u35",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u35z",
+        "in1": "w_u34z"
+      }
+    },
+    {
+      "name": "u39",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u39z",
+        "in1": "w_u52z"
+      }
+    },
+    {
+      "name": "u4",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u4z",
+        "in1": "w_u3z"
+      }
+    },
+    {
+      "name": "u40",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u40z",
+        "in1": "w_u55z"
+      }
+    },
+    {
+      "name": "u46",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u46z",
+        "in1": "w_u47z"
+      }
+    },
+    {
+      "name": "u48",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u48z",
+        "in1": "w_u78z"
+      }
+    },
+    {
+      "name": "u50",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u50z",
+        "in1": "w_u27z"
+      }
+    },
+    {
+      "name": "u62",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u62z",
+        "in1": "w_u84z"
+      }
+    },
+    {
+      "name": "u63",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u63z",
+        "in1": "w_u61z"
+      }
+    },
+    {
+      "name": "u66",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u66z",
+        "in1": "PIN_IN_12"
+      }
+    },
+    {
+      "name": "u7",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u7z",
+        "in1": "w_u6z"
+      }
+    },
+    {
+      "name": "u71",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u71z",
+        "in1": "w_u83z"
+      }
+    },
+    {
+      "name": "u75",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u75z",
+        "in1": "w_u81z"
+      }
+    },
+    {
+      "name": "u76",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u76z",
+        "in1": "w_u58z"
+      }
+    },
+    {
+      "name": "u80",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u80z",
+        "in1": "PIN_IN_36"
+      }
+    },
+    {
+      "name": "u82",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u82z",
+        "in1": "w_u78z"
+      }
+    },
+    {
+      "name": "u85",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u85z",
+        "in1": "w_u87z"
+      }
+    },
+    {
+      "name": "u86",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u86z",
+        "in1": "PIN_IN_17"
+      }
+    },
+    {
+      "name": "u89",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u89z",
+        "in1": "w_u70z"
+      }
+    },
+    {
+      "name": "u91",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u91z",
+        "in1": "w_u53z"
+      }
+    },
+    {
+      "name": "u94",
+      "type": "mioc_inv1",
+      "pins": {
+        "z": "w_u94z",
+        "in1": "PIN_IN_25"
+      }
+    },
+    {
+      "name": "u22",
+      "type": "mioc_nand2",
+      "pins": {
+        "z": "w_u22z",
+        "in1": "w_u3z",
+        "in2": "w_u20z"
+      }
+    },
+    {
+      "name": "u29",
+      "type": "mioc_nand2",
+      "pins": {
+        "z": "w_u29z",
+        "in1": "w_u75z",
+        "in2": "w_u60q"
+      }
+    },
+    {
+      "name": "u37",
+      "type": "mioc_nand2",
+      "pins": {
+        "z": "w_u37z",
+        "in1": "PIN_IN_15",
+        "in2": "PIN_IN_14"
+      }
+    },
+    {
+      "name": "u42",
+      "type": "mioc_nand2",
+      "pins": {
+        "z": "w_u42z",
+        "in1": "w_u21z",
+        "in2": "w_u22z"
+      }
+    },
+    {
+      "name": "u49",
+      "type": "mioc_nand2",
+      "pins": {
+        "z": "w_u49z",
+        "in1": "w_u77q",
+        "in2": "w_u29z"
+      }
+    },
+    {
+      "name": "u5",
+      "type": "mioc_nand2",
+      "pins": {
+        "z": "w_u5z",
+        "in1": "w_u4z",
+        "in2": "w_u20z"
+      }
+    },
+    {
+      "name": "u52",
+      "type": "mioc_nand2",
+      "pins": {
+        "z": "w_u52z",
+        "in1": "PIN_IN_12",
+        "in2": "w_u65z"
+      }
+    },
+    {
+      "name": "u56",
+      "type": "mioc_nand2",
+      "pins": {
+        "z": "w_u56z",
+        "in1": "w_u72z",
+        "in2": "w_u73z"
+      }
+    },
+    {
+      "name": "u67",
+      "type": "mioc_nand2",
+      "pins": {
+        "z": "w_u67z",
+        "in1": "PIN_IN_13B",
+        "in2": "PIN_IN_14"
+      }
+    },
+    {
+      "name": "u70",
+      "type": "mioc_nand2",
+      "pins": {
+        "z": "w_u70z",
+        "in1": "w_u67z",
+        "in2": "w_u89z"
+      }
+    },
+    {
+      "name": "u79",
+      "type": "mioc_nand2",
+      "pins": {
+        "z": "w_u79z",
+        "in1": "w_u70z",
+        "in2": "w_u78z"
+      }
+    },
+    {
+      "name": "u8",
+      "type": "mioc_nand2",
+      "pins": {
+        "z": "w_u8z",
+        "in1": "w_u24z",
+        "in2": "w_u7z"
+      }
+    },
+    {
+      "name": "u87",
+      "type": "mioc_nand2",
+      "pins": {
+        "z": "w_u87z",
+        "in1": "w_u66z",
+        "in2": "w_u65z"
+      }
+    },
+    {
+      "name": "u9",
+      "type": "mioc_nand2",
+      "pins": {
+        "z": "w_u9z",
+        "in1": "w_u24z",
+        "in2": "w_u10z"
+      }
+    },
+    {
+      "name": "u81",
+      "type": "mioc_nand4_nor2",
+      "pins": {
+        "z": "w_u81z",
+        "in1": "PIN_IN_32",
+        "in2": "w_u78z",
+        "in3": "w_u93q",
+        "in4": "w_u82z"
+      }
+    },
+    {
+      "name": "u83",
+      "type": "mioc_nand4_nor2",
+      "pins": {
+        "z": "w_u83z",
+        "in1": "PIN_IN_33",
+        "in2": "w_u78z",
+        "in3": "w_u93q",
+        "in4": "w_u82z"
+      }
+    },
+    {
+      "name": "u12",
+      "type": "mioc_nor2",
+      "pins": {
+        "z": "w_u12z",
+        "in1": "w_u48z",
+        "in2": "w_u11z"
+      }
+    },
+    {
+      "name": "u13",
+      "type": "mioc_nor2",
+      "pins": {
+        "z": "w_u13z",
+        "in1": "w_u35z",
+        "in2": "w_u48z"
+      }
+    },
+    {
+      "name": "u3",
+      "type": "mioc_nor2",
+      "pins": {
+        "z": "w_u3z",
+        "in1": "PIN_IN_5",
+        "in2": "PIN_IN_4"
+      }
+    },
+    {
+      "name": "u44",
+      "type": "mioc_nor2",
+      "pins": {
+        "z": "w_u44z",
+        "in1": "w_u60q",
+        "in2": "w_u43qb"
+      }
+    },
+    {
+      "name": "u47",
+      "type": "mioc_nor2",
+      "pins": {
+        "z": "w_u47z",
+        "in1": "w_u54qb",
+        "in2": "PIN_IN_36"
+      }
+    },
+    {
+      "name": "u53",
+      "type": "mioc_nor2",
+      "pins": {
+        "z": "w_u53z",
+        "in1": "PIN_IN_6",
+        "in2": "PIN_IN_25"
+      }
+    },
+    {
+      "name": "u58",
+      "type": "mioc_nor2",
+      "pins": {
+        "z": "w_u58z",
+        "in1": "w_u75z",
+        "in2": "w_u40z"
+      }
+    },
+    {
+      "name": "u59",
+      "type": "mioc_nor2",
+      "pins": {
+        "z": "w_u59z",
+        "in1": "w_u45q",
+        "in2": "w_u14qb"
+      }
+    },
+    {
+      "name": "u6",
+      "type": "mioc_nor2",
+      "pins": {
+        "z": "w_u6z",
+        "in1": "w_u25z",
+        "in2": "w_u18z"
+      }
+    },
+    {
+      "name": "u61",
+      "type": "mioc_nor2",
+      "pins": {
+        "z": "w_u61z",
+        "in1": "w_u78z",
+        "in2": "w_u77q"
+      }
+    },
+    {
+      "name": "u65",
+      "type": "mioc_nor2",
+      "pins": {
+        "z": "w_u65z",
+        "in1": "PIN_IN_11",
+        "in2": "w_u67z"
+      }
+    },
+    {
+      "name": "u69",
+      "type": "mioc_nor2",
+      "pins": {
+        "z": "w_u69z",
+        "in1": "w_u86z",
+        "in2": "w_u54q"
+      }
+    },
+    {
+      "name": "u72",
+      "type": "mioc_nor2",
+      "pins": {
+        "z": "w_u72z",
+        "in1": "PIN_IN_11",
+        "in2": "w_u45q"
+      }
+    },
+    {
+      "name": "u73",
+      "type": "mioc_nor2",
+      "pins": {
+        "z": "w_u73z",
+        "in1": "w_u71z",
+        "in2": "w_u45q"
+      }
+    },
+    {
+      "name": "u74",
+      "type": "mioc_nor2",
+      "pins": {
+        "z": "w_u74z",
+        "in1": "w_u75z",
+        "in2": "w_u42z"
+      }
+    },
+    {
+      "name": "u78",
+      "type": "mioc_nor2",
+      "pins": {
+        "z": "w_u78z",
+        "in1": "PIN_IN_16",
+        "in2": "w_u69z"
+      }
+    },
+    {
+      "name": "u84",
+      "type": "mioc_nor2",
+      "pins": {
+        "z": "w_u84z",
+        "in1": "w_u77q",
+        "in2": "PIN_IN_35"
+      }
+    },
+    {
+      "name": "u18",
+      "type": "mioc_nor3",
+      "pins": {
+        "z": "w_u18z",
+        "in1": "w_u38qb",
+        "in2": "w_u17q",
+        "in3": "w_u19z"
+      }
+    },
+    {
+      "name": "u20",
+      "type": "mioc_nor3",
+      "pins": {
+        "z": "w_u20z",
+        "in1": "w_u38qb",
+        "in2": "w_u17qb",
+        "in3": "w_u19z"
+      }
+    },
+    {
+      "name": "u25",
+      "type": "mioc_nor3",
+      "pins": {
+        "z": "w_u25z",
+        "in1": "w_u1qb",
+        "in2": "w_u2q",
+        "in3": "w_u28z"
+      }
+    },
+    {
+      "name": "u26",
+      "type": "mioc_nor3",
+      "pins": {
+        "z": "w_u26z",
+        "in1": "w_u1qb",
+        "in2": "w_u2qb",
+        "in3": "w_u28z"
+      }
+    },
+    {
+      "name": "u27",
+      "type": "mioc_nor3",
+      "pins": {
+        "z": "w_u27z",
+        "in1": "w_u1q",
+        "in2": "w_u2qb",
+        "in3": "w_u28z"
+      }
+    },
+    {
+      "name": "u30",
+      "type": "mioc_nor3",
+      "pins": {
+        "z": "w_u30z",
+        "in1": "w_u1q",
+        "in2": "w_u2q",
+        "in3": "w_u28z"
+      }
+    },
+    {
+      "name": "u34",
+      "type": "mioc_nor3",
+      "pins": {
+        "z": "w_u34z",
+        "in1": "w_u30z",
+        "in2": "w_u32z",
+        "in3": "w_u41z"
+      }
+    },
+    {
+      "name": "u41",
+      "type": "mioc_nor3",
+      "pins": {
+        "z": "w_u41z",
+        "in1": "w_u38q",
+        "in2": "w_u17qb",
+        "in3": "w_u19z"
+      }
+    },
+    {
+      "name": "u55",
+      "type": "mioc_nor3",
+      "pins": {
+        "z": "w_u55z",
+        "in1": "w_u38q",
+        "in2": "w_u17q",
+        "in3": "w_u19z"
+      }
+    },
+    {
+      "name": "u23",
+      "type": "mioc_xnor2",
+      "pins": {
+        "z": "w_u23z",
+        "in1": "PIN_IN_13",
+        "in2": "w_u44z"
+      }
+    },
+    {
+      "name": "u31",
+      "type": "mioc_xnor2",
+      "pins": {
+        "z": "w_u31z",
+        "in1": "PIN_IN_3",
+        "in2": "w_u48z"
+      }
+    }
+  ],
+  "nets": {
+    "1'b0": {
+      "drivers": [],
+      "loads": [
+        [
+          "u14",
+          "in1"
+        ],
+        [
+          "u43",
+          "in4"
+        ],
+        [
+          "u45",
+          "in1"
+        ],
+        [
+          "u54",
+          "in1"
+        ],
+        [
+          "u57",
+          "in4"
+        ],
+        [
+          "u60",
+          "in1"
+        ],
+        [
+          "u77",
+          "in1"
+        ],
+        [
+          "u88",
+          "in4"
+        ],
+        [
+          "u90",
+          "in4"
+        ],
+        [
+          "u92",
+          "in3"
+        ],
+        [
+          "u93",
+          "in4"
+        ]
+      ],
+      "tags": []
+    },
+    "ADDRBUFEN_N": {
+      "drivers": [
+        [
+          "assign_ADDRBUFEN_N",
+          "z"
+        ]
+      ],
+      "loads": [],
+      "tags": [
+        "top_out"
+      ]
+    },
+    "AUXDECODE1_N": {
+      "drivers": [
+        [
+          "assign_AUXDECODE1_N",
+          "z"
+        ]
+      ],
+      "loads": [],
+      "tags": [
+        "top_out"
+      ]
+    },
+    "AUXROMCS_N": {
+      "drivers": [
+        [
+          "assign_AUXROMCS_N",
+          "z"
+        ]
+      ],
+      "loads": [],
+      "tags": [
+        "top_out"
+      ]
+    },
+    "BA13": {
+      "drivers": [],
+      "loads": [
+        [
+          "assign_PIN_IN_5",
+          "in1"
+        ]
+      ],
+      "tags": [
+        "top_in"
+      ]
+    },
+    "BA14": {
+      "drivers": [],
+      "loads": [
+        [
+          "assign_PIN_IN_4",
+          "in1"
+        ]
+      ],
+      "tags": [
+        "top_in"
+      ]
+    },
+    "BA15": {
+      "drivers": [],
+      "loads": [
+        [
+          "assign_PIN_IN_3",
+          "in1"
+        ]
+      ],
+      "tags": [
+        "top_in"
+      ]
+    },
+    "BA6": {
+      "drivers": [],
+      "loads": [
+        [
+          "assign_PIN_IN_12",
+          "in1"
+        ]
+      ],
+      "tags": [
+        "top_in"
+      ]
+    },
+    "BA7": {
+      "drivers": [],
+      "loads": [
+        [
+          "assign_PIN_IN_13",
+          "in1"
+        ],
+        [
+          "assign_PIN_IN_13N",
+          "in1"
+        ]
+      ],
+      "tags": [
+        "top_in"
+      ]
+    },
+    "BD0": {
+      "drivers": [],
+      "loads": [
+        [
+          "assign_PIN_IN_7",
+          "in1"
+        ]
+      ],
+      "tags": [
+        "top_in"
+      ]
+    },
+    "BD1": {
+      "drivers": [],
+      "loads": [
+        [
+          "assign_PIN_IN_8",
+          "in1"
+        ]
+      ],
+      "tags": [
+        "top_in"
+      ]
+    },
+    "BD2": {
+      "drivers": [],
+      "loads": [
+        [
+          "assign_PIN_IN_9",
+          "in1"
+        ]
+      ],
+      "tags": [
+        "top_in"
+      ]
+    },
+    "BD3": {
+      "drivers": [],
+      "loads": [
+        [
+          "assign_PIN_IN_10",
+          "in1"
+        ]
+      ],
+      "tags": [
+        "top_in"
+      ]
+    },
+    "BM1_N": {
+      "drivers": [],
+      "loads": [
+        [
+          "assign_PIN_IN_35",
+          "in1"
+        ]
+      ],
+      "tags": [
+        "top_in"
+      ]
+    },
+    "BMREQ_N": {
+      "drivers": [],
+      "loads": [
+        [
+          "assign_PIN_IN_32",
+          "in1"
+        ]
+      ],
+      "tags": [
+        "top_in"
+      ]
+    },
+    "BOOTROMCS_N": {
+      "drivers": [
+        [
+          "assign_BOOTROMCS_N",
+          "z"
+        ]
+      ],
+      "loads": [],
+      "tags": [
+        "top_out"
+      ]
+    },
+    "BRD_N": {
+      "drivers": [],
+      "loads": [
+        [
+          "assign_PIN_IN_33",
+          "in1"
+        ]
+      ],
+      "tags": [
+        "top_in"
+      ]
+    },
+    "BRFSH_N": {
+      "drivers": [],
+      "loads": [
+        [
+          "assign_PIN_IN_34",
+          "in1"
+        ]
+      ],
+      "tags": [
+        "top_in"
+      ]
+    },
+    "BUSAK_N": {
+      "drivers": [],
+      "loads": [
+        [
+          "assign_PIN_IN_16",
+          "in1"
+        ]
+      ],
+      "tags": [
+        "top_in"
+      ]
+    },
+    "BUSRQ_N": {
+      "drivers": [
+        [
+          "assign_BUSRQ_N",
+          "z"
+        ]
+      ],
+      "loads": [],
+      "tags": [
+        "top_out"
+      ]
+    },
+    "B_PHI": {
+      "drivers": [],
+      "loads": [
+        [
+          "assign_PIN_IN_36",
+          "in1"
+        ]
+      ],
+      "tags": [
+        "top_in"
+      ]
+    },
+    "CAS1_N": {
+      "drivers": [
+        [
+          "assign_CAS1_N",
+          "z"
+        ]
+      ],
+      "loads": [],
+      "tags": [
+        "top_out"
+      ]
+    },
+    "CAS2_N": {
+      "drivers": [
+        [
+          "assign_CAS2_N",
+          "z"
+        ]
+      ],
+      "loads": [],
+      "tags": [
+        "top_out"
+      ]
+    },
+    "CPRST_N": {
+      "drivers": [
+        [
+          "assign_CPRST_N",
+          "z"
+        ]
+      ],
+      "loads": [],
+      "tags": [
+        "top_out"
+      ]
+    },
+    "DMA_N": {
+      "drivers": [],
+      "loads": [
+        [
+          "assign_PIN_IN_17",
+          "in1"
+        ]
+      ],
+      "tags": [
+        "top_in"
+      ]
+    },
+    "EN245_N": {
+      "drivers": [
+        [
+          "assign_EN245_N",
+          "z"
+        ]
+      ],
+      "loads": [],
+      "tags": [
+        "top_out"
+      ]
+    },
+    "IORQ_N": {
+      "drivers": [],
+      "loads": [
+        [
+          "assign_PIN_IN_14",
+          "in1"
+        ]
+      ],
+      "tags": [
+        "top_in"
+      ]
+    },
+    "IS3_N": {
+      "drivers": [
+        [
+          "assign_IS3_N",
+          "z"
+        ]
+      ],
+      "loads": [],
+      "tags": [
+        "top_out"
+      ]
+    },
+    "MUX": {
+      "drivers": [
+        [
+          "assign_MUX",
+          "z"
+        ]
+      ],
+      "loads": [],
+      "tags": [
+        "top_out"
+      ]
+    },
+    "NETRST_N": {
+      "drivers": [
+        [
+          "assign_NETRST_N",
+          "z"
+        ]
+      ],
+      "loads": [],
+      "tags": [
+        "top_out"
+      ]
+    },
+    "N_BWR": {
+      "drivers": [],
+      "loads": [
+        [
+          "assign_PIN_IN_11",
+          "in1"
+        ]
+      ],
+      "tags": [
+        "top_in"
+      ]
+    },
+    "N_CVRST": {
+      "drivers": [],
+      "loads": [
+        [
+          "assign_PIN_IN_6",
+          "in1"
+        ]
+      ],
+      "tags": [
+        "top_in"
+      ]
+    },
+    "OS3_N": {
+      "drivers": [],
+      "loads": [
+        [
+          "assign_PIN_IN_31",
+          "in1"
+        ]
+      ],
+      "tags": [
+        "top_in"
+      ]
+    },
+    "PBRST_N": {
+      "drivers": [],
+      "loads": [
+        [
+          "assign_PIN_IN_25",
+          "in1"
+        ]
+      ],
+      "tags": [
+        "top_in"
+      ]
+    },
+    "PIN_IN_10": {
+      "drivers": [
+        [
+          "assign_PIN_IN_10",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u1",
+          "in3"
+        ]
+      ],
+      "tags": []
+    },
+    "PIN_IN_11": {
+      "drivers": [
+        [
+          "assign_PIN_IN_11",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u65",
+          "in1"
+        ],
+        [
+          "u72",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "PIN_IN_12": {
+      "drivers": [
+        [
+          "assign_PIN_IN_12",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u52",
+          "in1"
+        ],
+        [
+          "u57",
+          "in3"
+        ],
+        [
+          "u66",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "PIN_IN_13": {
+      "drivers": [
+        [
+          "assign_PIN_IN_13",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u23",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "PIN_IN_13B": {
+      "drivers": [],
+      "loads": [
+        [
+          "u67",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "PIN_IN_13N": {
+      "drivers": [
+        [
+          "assign_PIN_IN_13N",
+          "z"
+        ]
+      ],
+      "loads": [],
+      "tags": []
+    },
+    "PIN_IN_14": {
+      "drivers": [
+        [
+          "assign_PIN_IN_14",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u37",
+          "in2"
+        ],
+        [
+          "u67",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "PIN_IN_15": {
+      "drivers": [
+        [
+          "assign_PIN_IN_15",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u37",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "PIN_IN_16": {
+      "drivers": [
+        [
+          "assign_PIN_IN_16",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u78",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "PIN_IN_17": {
+      "drivers": [
+        [
+          "assign_PIN_IN_17",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u86",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "PIN_IN_25": {
+      "drivers": [
+        [
+          "assign_PIN_IN_25",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u1",
+          "in1"
+        ],
+        [
+          "u17",
+          "in1"
+        ],
+        [
+          "u2",
+          "in1"
+        ],
+        [
+          "u38",
+          "in1"
+        ],
+        [
+          "u53",
+          "in2"
+        ],
+        [
+          "u94",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "PIN_IN_3": {
+      "drivers": [
+        [
+          "assign_PIN_IN_3",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u11",
+          "in1"
+        ],
+        [
+          "u31",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "PIN_IN_31": {
+      "drivers": [
+        [
+          "assign_PIN_IN_31",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u92",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "PIN_IN_32": {
+      "drivers": [
+        [
+          "assign_PIN_IN_32",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u81",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "PIN_IN_33": {
+      "drivers": [
+        [
+          "assign_PIN_IN_33",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u83",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "PIN_IN_34": {
+      "drivers": [
+        [
+          "assign_PIN_IN_34",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u14",
+          "in4"
+        ]
+      ],
+      "tags": []
+    },
+    "PIN_IN_35": {
+      "drivers": [
+        [
+          "assign_PIN_IN_35",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u84",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "PIN_IN_36": {
+      "drivers": [
+        [
+          "assign_PIN_IN_36",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u14",
+          "in2"
+        ],
+        [
+          "u33",
+          "in1"
+        ],
+        [
+          "u47",
+          "in2"
+        ],
+        [
+          "u60",
+          "in2"
+        ],
+        [
+          "u80",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "PIN_IN_4": {
+      "drivers": [
+        [
+          "assign_PIN_IN_4",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u3",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "PIN_IN_5": {
+      "drivers": [
+        [
+          "assign_PIN_IN_5",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u3",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "PIN_IN_6": {
+      "drivers": [
+        [
+          "assign_PIN_IN_6",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u1",
+          "in4"
+        ],
+        [
+          "u17",
+          "in4"
+        ],
+        [
+          "u2",
+          "in4"
+        ],
+        [
+          "u38",
+          "in4"
+        ],
+        [
+          "u53",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "PIN_IN_7": {
+      "drivers": [
+        [
+          "assign_PIN_IN_7",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u17",
+          "in3"
+        ],
+        [
+          "u90",
+          "in3"
+        ]
+      ],
+      "tags": []
+    },
+    "PIN_IN_8": {
+      "drivers": [
+        [
+          "assign_PIN_IN_8",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u38",
+          "in3"
+        ],
+        [
+          "u88",
+          "in3"
+        ]
+      ],
+      "tags": []
+    },
+    "PIN_IN_9": {
+      "drivers": [
+        [
+          "assign_PIN_IN_9",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u2",
+          "in3"
+        ]
+      ],
+      "tags": []
+    },
+    "RA7": {
+      "drivers": [
+        [
+          "assign_RA7",
+          "z"
+        ]
+      ],
+      "loads": [],
+      "tags": [
+        "top_out"
+      ]
+    },
+    "RAS_N": {
+      "drivers": [
+        [
+          "assign_RAS_N",
+          "z"
+        ]
+      ],
+      "loads": [],
+      "tags": [
+        "top_out"
+      ]
+    },
+    "RST_N": {
+      "drivers": [
+        [
+          "assign_RST_N",
+          "z"
+        ]
+      ],
+      "loads": [],
+      "tags": [
+        "top_out"
+      ]
+    },
+    "SPINDIS_N": {
+      "drivers": [
+        [
+          "assign_SPINDIS_N",
+          "z"
+        ]
+      ],
+      "loads": [],
+      "tags": [
+        "top_out"
+      ]
+    },
+    "WAIT_N": {
+      "drivers": [],
+      "loads": [
+        [
+          "assign_PIN_IN_15",
+          "in1"
+        ]
+      ],
+      "tags": [
+        "top_in"
+      ]
+    },
+    "w_u10z": {
+      "drivers": [
+        [
+          "u10",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u9",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u11z": {
+      "drivers": [
+        [
+          "u11",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u12",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u12z": {
+      "drivers": [
+        [
+          "u12",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u28",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u13z": {
+      "drivers": [
+        [
+          "u13",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u10",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u14q": {
+      "drivers": [
+        [
+          "u14",
+          "q"
+        ]
+      ],
+      "loads": [
+        [
+          "u45",
+          "in3"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u14qb": {
+      "drivers": [
+        [
+          "u14",
+          "qbar"
+        ]
+      ],
+      "loads": [
+        [
+          "assign_MUX",
+          "in1"
+        ],
+        [
+          "u59",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u17q": {
+      "drivers": [
+        [
+          "u17",
+          "q"
+        ]
+      ],
+      "loads": [
+        [
+          "u18",
+          "in2"
+        ],
+        [
+          "u55",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u17qb": {
+      "drivers": [
+        [
+          "u17",
+          "qbar"
+        ]
+      ],
+      "loads": [
+        [
+          "u20",
+          "in2"
+        ],
+        [
+          "u41",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u18z": {
+      "drivers": [
+        [
+          "u18",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u6",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u19z": {
+      "drivers": [
+        [
+          "u19",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u18",
+          "in3"
+        ],
+        [
+          "u20",
+          "in3"
+        ],
+        [
+          "u41",
+          "in3"
+        ],
+        [
+          "u55",
+          "in3"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u1q": {
+      "drivers": [
+        [
+          "u1",
+          "q"
+        ]
+      ],
+      "loads": [
+        [
+          "u27",
+          "in1"
+        ],
+        [
+          "u30",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u1qb": {
+      "drivers": [
+        [
+          "u1",
+          "qbar"
+        ]
+      ],
+      "loads": [
+        [
+          "u25",
+          "in1"
+        ],
+        [
+          "u26",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u20z": {
+      "drivers": [
+        [
+          "u20",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u22",
+          "in2"
+        ],
+        [
+          "u5",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u21z": {
+      "drivers": [
+        [
+          "u21",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u42",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u22z": {
+      "drivers": [
+        [
+          "u22",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u42",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u23z": {
+      "drivers": [
+        [
+          "u23",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "assign_RA7",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u24z": {
+      "drivers": [
+        [
+          "u24",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u8",
+          "in1"
+        ],
+        [
+          "u9",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u25z": {
+      "drivers": [
+        [
+          "u25",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u6",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u26z": {
+      "drivers": [
+        [
+          "u26",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u21",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u27z": {
+      "drivers": [
+        [
+          "u27",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u50",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u28z": {
+      "drivers": [
+        [
+          "u28",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u25",
+          "in3"
+        ],
+        [
+          "u26",
+          "in3"
+        ],
+        [
+          "u27",
+          "in3"
+        ],
+        [
+          "u30",
+          "in3"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u29z": {
+      "drivers": [
+        [
+          "u29",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u49",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u2q": {
+      "drivers": [
+        [
+          "u2",
+          "q"
+        ]
+      ],
+      "loads": [
+        [
+          "u25",
+          "in2"
+        ],
+        [
+          "u30",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u2qb": {
+      "drivers": [
+        [
+          "u2",
+          "qbar"
+        ]
+      ],
+      "loads": [
+        [
+          "u26",
+          "in2"
+        ],
+        [
+          "u27",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u30z": {
+      "drivers": [
+        [
+          "u30",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u34",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u31z": {
+      "drivers": [
+        [
+          "u31",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u19",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u32z": {
+      "drivers": [
+        [
+          "u32",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u34",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u33z": {
+      "drivers": [
+        [
+          "u33",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u45",
+          "in2"
+        ],
+        [
+          "u77",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u34z": {
+      "drivers": [
+        [
+          "u34",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u35",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u35z": {
+      "drivers": [
+        [
+          "u35",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u13",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u37z": {
+      "drivers": [
+        [
+          "u37",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u54",
+          "in3"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u38q": {
+      "drivers": [
+        [
+          "u38",
+          "q"
+        ]
+      ],
+      "loads": [
+        [
+          "u41",
+          "in1"
+        ],
+        [
+          "u55",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u38qb": {
+      "drivers": [
+        [
+          "u38",
+          "qbar"
+        ]
+      ],
+      "loads": [
+        [
+          "u18",
+          "in1"
+        ],
+        [
+          "u20",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u39z": {
+      "drivers": [
+        [
+          "u39",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u1",
+          "in2"
+        ],
+        [
+          "u17",
+          "in2"
+        ],
+        [
+          "u2",
+          "in2"
+        ],
+        [
+          "u38",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u3z": {
+      "drivers": [
+        [
+          "u3",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u22",
+          "in1"
+        ],
+        [
+          "u4",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u40z": {
+      "drivers": [
+        [
+          "u40",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u58",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u41z": {
+      "drivers": [
+        [
+          "u41",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u34",
+          "in3"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u42z": {
+      "drivers": [
+        [
+          "u42",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "assign_AUXDECODE1_N",
+          "in1"
+        ],
+        [
+          "u74",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u43q": {
+      "drivers": [
+        [
+          "u43",
+          "q"
+        ]
+      ],
+      "loads": [],
+      "tags": []
+    },
+    "w_u43qb": {
+      "drivers": [
+        [
+          "u43",
+          "qbar"
+        ]
+      ],
+      "loads": [
+        [
+          "u43",
+          "in3"
+        ],
+        [
+          "u44",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u44z": {
+      "drivers": [
+        [
+          "u44",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u23",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u45q": {
+      "drivers": [
+        [
+          "u45",
+          "q"
+        ]
+      ],
+      "loads": [
+        [
+          "u59",
+          "in1"
+        ],
+        [
+          "u72",
+          "in2"
+        ],
+        [
+          "u73",
+          "in2"
+        ],
+        [
+          "u77",
+          "in3"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u45qb": {
+      "drivers": [
+        [
+          "u45",
+          "qbar"
+        ]
+      ],
+      "loads": [],
+      "tags": []
+    },
+    "w_u46z": {
+      "drivers": [
+        [
+          "u46",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u54",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u47z": {
+      "drivers": [
+        [
+          "u47",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u46",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u48z": {
+      "drivers": [
+        [
+          "u48",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "assign_AUXROMCS_N",
+          "in1"
+        ],
+        [
+          "u12",
+          "in1"
+        ],
+        [
+          "u13",
+          "in2"
+        ],
+        [
+          "u31",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u49z": {
+      "drivers": [
+        [
+          "u49",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "assign_RAS_N",
+          "in1"
+        ],
+        [
+          "u14",
+          "in3"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u4z": {
+      "drivers": [
+        [
+          "u4",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u5",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u50z": {
+      "drivers": [
+        [
+          "u50",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "assign_ADDRBUFEN_N",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u52z": {
+      "drivers": [
+        [
+          "u52",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u39",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u53z": {
+      "drivers": [
+        [
+          "u53",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "assign_RST_N",
+          "in1"
+        ],
+        [
+          "u91",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u54q": {
+      "drivers": [
+        [
+          "u54",
+          "q"
+        ]
+      ],
+      "loads": [
+        [
+          "u69",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u54qb": {
+      "drivers": [
+        [
+          "u54",
+          "qbar"
+        ]
+      ],
+      "loads": [
+        [
+          "u47",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u55z": {
+      "drivers": [
+        [
+          "u55",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u40",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u56z": {
+      "drivers": [
+        [
+          "u56",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u24",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u57q": {
+      "drivers": [
+        [
+          "u57",
+          "q"
+        ]
+      ],
+      "loads": [],
+      "tags": []
+    },
+    "w_u57qb": {
+      "drivers": [
+        [
+          "u57",
+          "qbar"
+        ]
+      ],
+      "loads": [
+        [
+          "u43",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u58z": {
+      "drivers": [
+        [
+          "u58",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u76",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u59z": {
+      "drivers": [
+        [
+          "u59",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u92",
+          "in4"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u5z": {
+      "drivers": [
+        [
+          "u5",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u32",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u60q": {
+      "drivers": [
+        [
+          "u60",
+          "q"
+        ]
+      ],
+      "loads": [
+        [
+          "u29",
+          "in2"
+        ],
+        [
+          "u44",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u60qb": {
+      "drivers": [
+        [
+          "u60",
+          "qbar"
+        ]
+      ],
+      "loads": [
+        [
+          "u57",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u61z": {
+      "drivers": [
+        [
+          "u61",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u63",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u62z": {
+      "drivers": [
+        [
+          "u62",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u60",
+          "in3"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u63z": {
+      "drivers": [
+        [
+          "u63",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "assign_IS3_N",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u65z": {
+      "drivers": [
+        [
+          "u65",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u52",
+          "in2"
+        ],
+        [
+          "u87",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u66z": {
+      "drivers": [
+        [
+          "u66",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u87",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u67z": {
+      "drivers": [
+        [
+          "u67",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u65",
+          "in2"
+        ],
+        [
+          "u70",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u69z": {
+      "drivers": [
+        [
+          "u69",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u78",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u6z": {
+      "drivers": [
+        [
+          "u6",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u7",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u70z": {
+      "drivers": [
+        [
+          "u70",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u79",
+          "in1"
+        ],
+        [
+          "u89",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u71z": {
+      "drivers": [
+        [
+          "u71",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u73",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u72z": {
+      "drivers": [
+        [
+          "u72",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u56",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u73z": {
+      "drivers": [
+        [
+          "u73",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u56",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u74z": {
+      "drivers": [
+        [
+          "u74",
+          "z"
+        ]
+      ],
+      "loads": [],
+      "tags": []
+    },
+    "w_u75z": {
+      "drivers": [
+        [
+          "u75",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u29",
+          "in1"
+        ],
+        [
+          "u45",
+          "in4"
+        ],
+        [
+          "u58",
+          "in1"
+        ],
+        [
+          "u74",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u76z": {
+      "drivers": [
+        [
+          "u76",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "assign_BOOTROMCS_N",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u77q": {
+      "drivers": [
+        [
+          "u77",
+          "q"
+        ]
+      ],
+      "loads": [
+        [
+          "u49",
+          "in1"
+        ],
+        [
+          "u61",
+          "in2"
+        ],
+        [
+          "u84",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u77qb": {
+      "drivers": [
+        [
+          "u77",
+          "qbar"
+        ]
+      ],
+      "loads": [],
+      "tags": []
+    },
+    "w_u78z": {
+      "drivers": [
+        [
+          "u78",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u48",
+          "in1"
+        ],
+        [
+          "u61",
+          "in1"
+        ],
+        [
+          "u79",
+          "in2"
+        ],
+        [
+          "u81",
+          "in2"
+        ],
+        [
+          "u82",
+          "in1"
+        ],
+        [
+          "u83",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u79z": {
+      "drivers": [
+        [
+          "u79",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "assign_EN245_N",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u7z": {
+      "drivers": [
+        [
+          "u7",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u8",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u80z": {
+      "drivers": [
+        [
+          "u80",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u93",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u81z": {
+      "drivers": [
+        [
+          "u81",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u75",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u82z": {
+      "drivers": [
+        [
+          "u82",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u81",
+          "in4"
+        ],
+        [
+          "u83",
+          "in4"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u83z": {
+      "drivers": [
+        [
+          "u83",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u71",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u84z": {
+      "drivers": [
+        [
+          "u84",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u62",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u85z": {
+      "drivers": [
+        [
+          "u85",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u88",
+          "in2"
+        ],
+        [
+          "u90",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u86z": {
+      "drivers": [
+        [
+          "u86",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "assign_BUSRQ_N",
+          "in1"
+        ],
+        [
+          "u54",
+          "in4"
+        ],
+        [
+          "u69",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u87z": {
+      "drivers": [
+        [
+          "u87",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u85",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u88q": {
+      "drivers": [
+        [
+          "u88",
+          "q"
+        ]
+      ],
+      "loads": [],
+      "tags": []
+    },
+    "w_u88qb": {
+      "drivers": [
+        [
+          "u88",
+          "qbar"
+        ]
+      ],
+      "loads": [
+        [
+          "assign_SPINDIS_N",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u89z": {
+      "drivers": [
+        [
+          "u89",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u70",
+          "in2"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u8z": {
+      "drivers": [
+        [
+          "u8",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "assign_CAS2_N",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u90q": {
+      "drivers": [
+        [
+          "u90",
+          "q"
+        ]
+      ],
+      "loads": [],
+      "tags": []
+    },
+    "w_u90qb": {
+      "drivers": [
+        [
+          "u90",
+          "qbar"
+        ]
+      ],
+      "loads": [
+        [
+          "assign_NETRST_N",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u91z": {
+      "drivers": [
+        [
+          "u91",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "u43",
+          "in1"
+        ],
+        [
+          "u57",
+          "in1"
+        ],
+        [
+          "u60",
+          "in4"
+        ],
+        [
+          "u77",
+          "in4"
+        ],
+        [
+          "u88",
+          "in1"
+        ],
+        [
+          "u90",
+          "in1"
+        ],
+        [
+          "u92",
+          "in1"
+        ],
+        [
+          "u93",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u92q": {
+      "drivers": [
+        [
+          "u92",
+          "q"
+        ]
+      ],
+      "loads": [
+        [
+          "u93",
+          "in3"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u92qb": {
+      "drivers": [
+        [
+          "u92",
+          "qbar"
+        ]
+      ],
+      "loads": [],
+      "tags": []
+    },
+    "w_u93q": {
+      "drivers": [
+        [
+          "u93",
+          "q"
+        ]
+      ],
+      "loads": [
+        [
+          "u81",
+          "in3"
+        ],
+        [
+          "u83",
+          "in3"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u93qb": {
+      "drivers": [
+        [
+          "u93",
+          "qbar"
+        ]
+      ],
+      "loads": [],
+      "tags": []
+    },
+    "w_u94z": {
+      "drivers": [
+        [
+          "u94",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "assign_CPRST_N",
+          "in1"
+        ]
+      ],
+      "tags": []
+    },
+    "w_u9z": {
+      "drivers": [
+        [
+          "u9",
+          "z"
+        ]
+      ],
+      "loads": [
+        [
+          "assign_CAS1_N",
+          "in1"
+        ]
+      ],
+      "tags": []
+    }
+  },
+  "aliases": {
+    "PIN_IN_10": {
+      "display": "BD3",
+      "invert": true,
+      "kind": "top_in"
+    },
+    "PIN_IN_11": {
+      "display": "N_BWR",
+      "invert": true,
+      "kind": "top_in"
+    },
+    "PIN_IN_12": {
+      "display": "BA6",
+      "invert": true,
+      "kind": "top_in"
+    },
+    "PIN_IN_13": {
+      "display": "BA7",
+      "invert": false,
+      "kind": "top_in"
+    },
+    "PIN_IN_13N": {
+      "display": "BA7",
+      "invert": true,
+      "kind": "top_in"
+    },
+    "PIN_IN_14": {
+      "display": "IORQ_N",
+      "invert": false,
+      "kind": "top_in"
+    },
+    "PIN_IN_15": {
+      "display": "WAIT_N",
+      "invert": false,
+      "kind": "top_in"
+    },
+    "PIN_IN_16": {
+      "display": "BUSAK_N",
+      "invert": false,
+      "kind": "top_in"
+    },
+    "PIN_IN_17": {
+      "display": "DMA_N",
+      "invert": false,
+      "kind": "top_in"
+    },
+    "PIN_IN_25": {
+      "display": "PBRST_N",
+      "invert": true,
+      "kind": "top_in"
+    },
+    "PIN_IN_3": {
+      "display": "BA15",
+      "invert": true,
+      "kind": "top_in"
+    },
+    "PIN_IN_31": {
+      "display": "OS3_N",
+      "invert": true,
+      "kind": "top_in"
+    },
+    "PIN_IN_32": {
+      "display": "BMREQ_N",
+      "invert": true,
+      "kind": "top_in"
+    },
+    "PIN_IN_33": {
+      "display": "BRD_N",
+      "invert": true,
+      "kind": "top_in"
+    },
+    "PIN_IN_34": {
+      "display": "BRFSH_N",
+      "invert": false,
+      "kind": "top_in"
+    },
+    "PIN_IN_35": {
+      "display": "BM1_N",
+      "invert": true,
+      "kind": "top_in"
+    },
+    "PIN_IN_36": {
+      "display": "B_PHI",
+      "invert": false,
+      "kind": "top_in"
+    },
+    "PIN_IN_4": {
+      "display": "BA14",
+      "invert": true,
+      "kind": "top_in"
+    },
+    "PIN_IN_5": {
+      "display": "BA13",
+      "invert": true,
+      "kind": "top_in"
+    },
+    "PIN_IN_6": {
+      "display": "N_CVRST",
+      "invert": false,
+      "kind": "top_in"
+    },
+    "PIN_IN_7": {
+      "display": "BD0",
+      "invert": true,
+      "kind": "top_in"
+    },
+    "PIN_IN_8": {
+      "display": "BD1",
+      "invert": true,
+      "kind": "top_in"
+    },
+    "PIN_IN_9": {
+      "display": "BD2",
+      "invert": true,
+      "kind": "top_in"
+    }
+  },
+  "constants": [
+    "1'b0"
+  ]
+}
