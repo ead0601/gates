@@ -1,0 +1,4 @@
+#!/bin/bash
+
+python3 python/verilog_parse.py  -m verilog_manifest.txt
+

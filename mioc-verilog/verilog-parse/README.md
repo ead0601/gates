@@ -1,185 +1,88 @@
-# Verilog Netlist CLI Tool
+# Verilog Netlist CLI — v0.6.5 Additions & User Guide
 
-This tool provides a command-line interface (CLI) to explore and query netlists parsed from Verilog designs.  
-It is step 3 of the multi-step pipeline (after building devices and assembling the netgraph).
+This guide documents **new and changed functionality** since the earlier README and consolidates common workflows and examples.
 
----
+> Built on the existing README (features, core commands, traversal notes). See that file for background.
 
-## Pipeline Steps
+## What’s New in v0.6.5
 
-### Step 1: Build Device Definitions
-Parses RTL files and creates per-device Python classes plus a `celllib.json`.
+### CLI & UX
+- **`-m, --manifest`**: start the REPL with a manifest auto-loaded. Example: `./vlnt -m ./verilog_manifest.txt`
+- **History & line editing**: Arrow keys / tab completion; history persisted to `~/.vnlt_history`.
+- **Exit commands**: `quit` / `exit` cleanly leave the REPL.
+- **Output redirection**: `>` or `>>` to send any command output to a file.
+- **UNIX-style pipelines**: `|` to pipe vnlt output to a shell command, and **`$( ... )`** form.
 
-Example:
-```bash
-python3 step1_build_devices.py \
-  --rtl-list ./verilog_rtl.lst \
-  --out-devices ./devices \
-  --out-celllib ./celllib.json \
-  --seq-cells mioc_flop
-```
+### New Commands
+- **`ls`**: list files in the current working directory.
+- **`cat <path>`**: print a file’s contents.
 
-Outputs:
-- `devices/*.py` for each device
-- `celllib.json`
+### Listing & Finding
+- **`list files`**: show what the manifest resolved (kind, path, status, size, mtime).
+- **`list components`**: filter with `--like`, `--seq|--comb`, and `--ports` to print port names.
+- **`list instances`**: `--like`, `--type CTYPE`, `--seq|--comb` views; totals fanin/fanout/net counts.
+- **`list pins <INST>`** or `list pins --like 'U*.A*'`.
+- **`list port [--like GLOB]`**: *globs are case-sensitive and do not require quotes*.
+- **`list nets [--like GLOB] [--dangling] [--multi-driver] [--show-ends] [--limit N]`**.
 
----
+- **`find components|instance|pin|port|net PATTERN`**: shell-style globs `* ? [abc]`, **case-sensitive**.
 
-### Step 2: Build Netlist Graph
-Parses structural netlist and assignments, connects devices, and produces `netgraph.json`.
+### Traversal
+- **`fanin <target>`**: `--tree`, `--endpoints`, `--cross-ff`, `--depth`, `--branch`.
+- **`fanout <target>`**: `--endpoints`, `--depth` (comb-only forward traversal).
+- **`paths --from A[,B,…] --to X[,Y,…]`**: no FF crossing; supports `--depth`, `--max-paths`.
 
-Example:
-```bash
-python3 step2_build_graph.py \
-  --celllib ./celllib.json \
-  --components ./mioc_components.v \
-  --assigns ./mioc_pin_assignments.v \
-  --out ./netgraph.json
-```
+### Parser & Netgraph Semantics
+- **Assign elimination**: **all `assign` statements** (even inside the top module body) are compiled into concrete instances, never shown as textual assigns.
+  - Non-inverting ⇒ **`iobuf`** (1-in/1-out comb)
+  - Inverting ⇒ **`iobuf_n`**
+  - Instances auto-named **`io1`, `io2`, …**
+- **No “assign_*” wrappers** appear in `list instances`.
+- **Top alias policy**: `PIN_IN_*` are **aliases only**; not promoted to ports.
 
-Outputs:
-- `netgraph.json` containing:
-  - Instances
-  - Nets and connectivity
-  - Aliases for top ports
-  - Constants
+## Quick Reference — Common Tasks
 
----
-
-### Step 3: Explore with CLI
-Interactive CLI or batch mode for exploring the netlist.
-
-Examples:
-```bash
-# Interactive REPL
-python3 step3_cli.py --graph ./netgraph.json
-
-# Run batch commands from a file
-python3 step3_cli.py --graph ./netgraph.json -y commands.txt
-```
-
----
-
-## Features
-- Inspect nets and instances (`show`)
-- Trace fan-in and fan-out cones
-- Render ASCII tree diagrams for fan-in
-- Collect only endpoint pins (TOP_IN / TOP_OUT / CONST)
-- Explore paths between signals
-- Batch mode via script files
-- Interactive REPL with command history (↑/↓ arrows, persisted in `~/.vnlt_history`)
-
----
-
-## Commands
-
-### `show <target>`
-Inspect a **net** (drivers/loads) or an **instance** (type, pins, connections).
-
-Examples:
 ```text
-show RA7
-show u23
-show u23.z
-```
+./vlnt -m ./verilog_manifest.txt
+list files
+list port
+list instances --seq
+list instances --comb
 
----
+find components *flop*
+find instance u2*
+find pin U23.A
+find net w_*
 
-### `fanin <target>`
-Explore what **drives** a net.
+list components --like mioc_xnor2 --ports
+list pins u23
+list nets --like RA7 --show-ends
 
-**Modes:**
-- `--tree` → Pretty ASCII tree
-- `--endpoints` → List only terminal sources (TOP_IN / CONST)
-- Default (no flags) → JSON cone
-
-**Traversal Options:**
-- `--cross-ff` → Allow crossing flip-flops
-- `--stage-limit N` → Maximum number of FF stages (omit = unlimited when crossing)
-- `--depth N` → Depth cap (default: 200)
-- `--branch N` → In tree mode, cap children per node (omit = unlimited)
-
-Examples:
-```text
 fanin RA7 --tree --cross-ff
-fanin RA7 --endpoints --cross-ff --depth 1000
-fanin u44.z --tree --branch 8
-```
-
----
-
-### `fanout <target>`
-Explore what a net **drives**.
-
-**Modes:**
-- `--endpoints` → List only terminal sinks (TOP_OUT)
-- Default (no flags) → JSON cone
-
-**Traversal:**
-- Combinational forward only (does not cross FFs)
-- `--depth N` → Depth cap (default: 200)
-
-Examples:
-```text
 fanout w_u23z --endpoints
-fanout RA7 --depth 400
-```
-
----
-
-### `paths --from A[,B,…] --to X[,Y,…]`
-Find combinational paths from sources to sinks (no FF crossing).
-
-**Options:**
-- `--depth N` → Depth cap (default: 200)
-- `--max-paths N` → Limit number of paths (default: 200)
-
-Examples:
-```text
-paths --from PIN_IN_15 --to BOOTROMCS_N
 paths --from BA6,BA7 --to RA7 --depth 500 --max-paths 50
+
+fanin RA7 --tree --cross-ff | grep flop | awk '{print $1}' | sort -u
+fanin RA7 --tree --cross-ff | $(grep flop | awk '{print $1}' | sort -u)
+fanin RA7 --tree --cross-ff > ra7_fanin.txt
 ```
 
----
-
-## Session Control
-
-- `quit` / `exit` → Leave the REPL
-- `-y, --batch <file>` → Run commands from a file  
-  (ignores blank lines and `#` comments)
-- **History** → Up/Down arrows cycle past commands, persisted to `~/.vnlt_history`
-
----
-
-## Output Conventions
-
-- **Aliases:**  
-  `PIN_IN_12` prints as `BA6 [TOP_IN][INV]` if assigned `~BA6`
-- **[FF]** → Sequential instance
-- **[crossed FF]** → Crossing through a flip-flop
-- **CONST:** `1'b0` or `1'b1` shown as `[CONST ...]`
-- **(loop)** → Cycle detected
-- **↪ see ▲N** → Shared substructure (node seen earlier)
-
----
-
-## Example Session
+## Manifest Tips
 
 ```text
-vnlt> show RA7
-vnlt> fanin RA7 --tree --cross-ff
-vnlt> fanin RA7 --endpoints --cross-ff --depth 1000
-vnlt> fanout RA7 --endpoints
-vnlt> paths --from PIN_IN_15 --to BOOTROMCS_N
-vnlt> quit
+top: mioc_top
+seq_cells: mioc_flop
+
+rtl: ./rtl/mioc_flop_rtl.v
+rtl: ./rtl/mioc_nor2_rtl.v
+rtl: ./rtl/mioc_nor3_rtl.v
+rtl: ./rtl/mioc_nand2_rtl.v
+rtl: ./rtl/mioc_nand4_nor2_rtl.v
+rtl: ./rtl/mioc_inv1_rtl.v
+rtl: ./rtl/mioc_xnor2_rtl.v
+
+components: ./mioc_top.v   # assigns inside top are compiled into iobuf / iobuf_n
 ```
 
----
-
-## TODO / Ideas
-- Add inline `help` command (`help` or `?`) with per-command usage
-- Add export options (`--json`, `--csv`) for endpoints
-- Support `--hide-const` to suppress constants in output
-- Support explicit `--branch 0` meaning “no cap”
-
----
+## Version
+Covers **v0.6.5**.

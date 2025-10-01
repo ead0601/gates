@@ -1,0 +1,15 @@
+top: mioc_top
+seq_cells: mioc_flop
+
+# RTL files (define cell pin directions)
+rtl: ./rtl/mioc_nor2_rtl.v
+rtl: ./rtl/mioc_inv1_rtl.v
+rtl: ./rtl/mioc_nand2_rtl.v
+rtl: ./rtl/mioc_xnor2_rtl.v
+rtl: ./rtl/mioc_nor3_rtl.v
+rtl: ./rtl/mioc_nand4_nor2_rtl.v
+rtl: ./rtl/mioc_flop_rtl.v
+
+# Structural netlist
+components: ./mioc_top.v
+
