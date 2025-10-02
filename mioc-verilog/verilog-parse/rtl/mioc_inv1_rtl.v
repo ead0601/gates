@@ -10,13 +10,13 @@
 module mioc_inv1 (
     z,
 
-    in1
+    in
     );
 
    output z;
 
-   input  in1;
+   input  in;
 
-   assign z = ~in1;
+   assign z = ~in;
 
 endmodule

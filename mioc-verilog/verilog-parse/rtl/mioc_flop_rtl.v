@@ -16,26 +16,26 @@ module mioc_flop (
     q,
     qbar,
 
-    in1,            // async   reset
-    in2,            // negedge clk         // negedge reset (???)
-    in3,            // sync    D          // inverted negedge reset  
-    in4             // async   set
+    ar,        // async   reset
+    nclk,      // negedge clk         // negedge reset (???)
+    din,       // sync    D          // inverted negedge reset  
+    as         // async   set
     );
 
    output q;
    output qbar;
 
-   input  in1;
-   input  in2;
-   input  in3;
-   input  in4;
+   input  ar;    // in1;
+   input  nclk;  // in2;
+   input  din;   // in3;
+   input  as;    // in4;
 
    reg    qr, n_qr; 
 
-   always @(negedge in2, posedge in1, posedge in4) begin
-      if (in1 == 1'b1)
+   always @(negedge nclk, posedge ar, posedge as) begin
+      if (ar == 1'b1)
 	qr <= 1'b0;
-      else if (in4 == 1'b1) begin
+      else if (as == 1'b1) begin
 	qr <= 1'b1;
       end
       else begin
@@ -43,7 +43,7 @@ module mioc_flop (
       end      
    end
    
-   always @(in3) begin
+   always @(din) begin
       n_qr = in3;
    end
    

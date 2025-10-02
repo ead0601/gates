@@ -1,4 +1,7 @@
 **/volatile/*.*
+**/__pycache__/*.*
+**/__pycache__/*
+
 **/*~
 **/a.out
 **/waves.vcd
