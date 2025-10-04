@@ -1,10 +1,8 @@
 # === VNLT REV ===
 # file: python/verilog_parse.py
-# rev:  2025-10-03  r2  by:ediaz  tag:revs
-# note: register 'revs' command in built-ins so it's available in help & runtime
+# rev:  2025-10-03  r4  by:ediaz  tag:core
+# note: Auto-discover cmd_*.py in this directory; preserve -m/--manifest; no --cmd-dir needed
 # === /VNLT REV ===
-
-# vnlt launcher with variables & foreach (keeps your existing behavior, adds 'gui')
 
 import argparse
 import json
@@ -12,16 +10,17 @@ import os
 import sys
 import atexit
 import subprocess
+import importlib.util
 from pathlib import Path
-from cmd_revs import register as register_revs
 
-# Ensure this file's directory is importable so bare "cmd_*.py" imports work
-_SCRIPT_DIR = str(Path(__file__).parent.resolve())
-if _SCRIPT_DIR not in sys.path:
-    sys.path.insert(0, _SCRIPT_DIR)
+# Ensure this file's directory is importable so "import cmd_*.py" works
+_SCRIPT_DIR = Path(__file__).parent.resolve()
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
 
-from registry import CommandRegistry, set_global_registry  # noqa: E402
-from core import Interpreter  # noqa: E402
+# Your framework pieces
+from registry import CommandRegistry, set_global_registry   # noqa: E402
+from core import Interpreter                                # noqa: E402
 
 APP_NAME = "vnlt"
 VERSION  = "0.6.6"
@@ -41,21 +40,21 @@ try:
 except Exception:
     readline = None
 
-# ---------- tiny state for Option B ----------
-_VARS = {}  # name -> List[str]
-
-
 def _print_raw(text: str):
     sys.stdout.write(text)
     if not text.endswith("\n"):
         sys.stdout.write("\n")
     sys.stdout.flush()
 
-
-def _print_banner():
-    _print_raw(f"{APP_NAME} v{VERSION} — Verilog Netlist CLI")
-    _print_raw("Type 'help' for a list of commands, or 'help <cmd>' for details.")
-
+def _res_to_text(res):
+    if isinstance(res, dict) and "__raw" in res:
+        return res["__raw"]
+    if isinstance(res, str):
+        return res
+    try:
+        return json.dumps(res, sort_keys=False)
+    except Exception:
+        return str(res)
 
 def _scan_tokens(line: str, target_chars: str):
     """Return indices of unquoted target chars in the line (simple shell-ish scan)."""
@@ -79,7 +78,6 @@ def _scan_tokens(line: str, target_chars: str):
         if ch in target_chars:
             idxs.append(i)
     return idxs
-
 
 def _split_pipeline_and_redirect(s: str):
     """
@@ -123,76 +121,9 @@ def _split_pipeline_and_redirect(s: str):
 
     return vnlt_cmd, shell_pipe, out_path, append
 
-
-def _res_to_text(res):
-    if isinstance(res, dict) and "__raw" in res:
-        return res["__raw"]
-    if isinstance(res, str):
-        return res
-    try:
-        return json.dumps(res, sort_keys=False)
-    except Exception:
-        return str(res)
-
-
-def load_builtin_commands(reg: CommandRegistry):
-    """
-    Import cmd_* modules and call their register(reg) if present.
-    This preserves your current command set and adds 'cmd_gui'.
-    """
-    mods = [
-        ("cmd_help", True),
-        ("cmd_exit", True),
-        ("cmd_list", True),
-        ("cmd_find", True),
-        ("cmd_cat", True),
-        ("cmd_ls", True),
-        ("cmd_show", False),
-        ("cmd_fanin", False),
-        ("cmd_fanout", False),
-        ("cmd_paths", False),
-        ("cmd_read_verilog", True),
-        ("cmd_export", True),
-        ("cmd_gui", False),   # GUI command
-        ("cmd_revs", True),   # <<< ensure 'revs' is registered and visible
-    ]
-    for mod, required in mods:
-        try:
-            m = __import__(mod)
-        except Exception as e:
-            tag = "ERROR" if required else "WARN"
-            _print_raw(f"[{tag}] could not load {mod}: {e}")
-            continue
-        # Call module-level register(reg) if provided
-        try:
-            if hasattr(m, "register"):
-                m.register(reg)
-        except Exception as e:
-            tag = "ERROR" if required else "WARN"
-            _print_raw(f"[{tag}] {mod}.register failed: {e}")
-
-    # Optionally, also support direct-registration path if import paths were preconfigured:
-    # (harmless if already registered)
-    try:
-        register_revs(reg)
-    except Exception:
-        pass
-
-
-def _install_basic_completer(reg: CommandRegistry):
-    if readline is None:
-        return
-    try:
-        cmds = sorted(reg.list_commands()) + ["set", "vars", "unset", "foreach"]
-        def _vnlt_completer(text, state):
-            matches = [c for c in cmds if c.startswith(text)]
-            return matches[state] if state < len(matches) else None
-        readline.set_completer(_vnlt_completer)
-        readline.parse_and_bind("tab: complete")
-    except Exception:
-        pass
-
-
+# ----------------------------
+# Command execution helpers
+# ----------------------------
 def _exec_core(cmdline: str, interp: Interpreter, reg: CommandRegistry):
     """Execute a vnlt command line with pipeline/redirection handling; return dict/str."""
     vnlt_cmd, shell_pipe, out_path, append = _split_pipeline_and_redirect(cmdline)
@@ -200,7 +131,6 @@ def _exec_core(cmdline: str, interp: Interpreter, reg: CommandRegistry):
     if not res:
         return None
 
-    # handle exit
     if isinstance(res, dict) and res.get("cmd") == "quit":
         return res
 
@@ -222,158 +152,40 @@ def _exec_core(cmdline: str, interp: Interpreter, reg: CommandRegistry):
                     f.write("\n")
         except Exception as e:
             _print_raw(f"[ERROR] could not write to '{out_path}': {e}")
-        return None  # nothing to print to stdout
+        return None
 
     return res
 
-
-def _handle_meta(line: str, interp: Interpreter, reg: CommandRegistry):
-    """Return True if handled (printed), False if not a meta-command, or 'QUIT' to exit."""
-    s = line.strip()
-    if not s:
-        return True
-
-    if s.startswith("set "):
+# ----------------------------
+# Auto-discover and register cmd_*.py in this directory
+# ----------------------------
+def _auto_discover_and_register(reg: CommandRegistry):
+    for p in sorted(_SCRIPT_DIR.glob("cmd_*.py")):
+        if p.name == Path(__file__).name:
+            continue
         try:
-            _, rest = s.split(" ", 1)
-            name, rhs = rest.split("=", 1)
-            name = name.strip()
-            rhs = rhs.strip()
-            items = []
-            if rhs.startswith("$(") and rhs.endswith(")"):
-                inner = rhs[2:-1].strip()
-                vnlt_cmd, shell_pipe, _, _ = _split_pipeline_and_redirect(inner)
-                res = reg.execute(vnlt_cmd, interp)
-                if res:
-                    if shell_pipe:
-                        _txt = _res_to_text(res)
-                        try:
-                            proc = subprocess.run(shell_pipe, input=_txt.encode("utf-8"), shell=True, capture_output=True)
-                            res = {"__raw": proc.stdout.decode("utf-8", errors="replace")}
-                        except Exception as e:
-                            res = {"__raw": f"[ERROR] pipeline failed: {e}\n"}
-                    text = _res_to_text(res)
-                    for line in text.splitlines():
-                        t = line.strip()
-                        if t:
-                            items.append(t)
-            else:
-                buf = ""
-                q = None
-                def flush():
-                    nonlocal buf
-                    if buf != "":
-                        items.append(buf)
-                        buf = ""
-                for ch in rhs:
-                    if q:
-                        if ch == q:
-                            q = None
-                        else:
-                            buf += ch
-                        continue
-                    if ch in ("'", '"'):
-                        q = ch
-                        continue
-                    if ch.isspace():
-                        flush()
-                        continue
-                    buf += ch
-                flush()
-
-            _VARS[name] = items
-            _print_raw(f"[set] {name} = {len(items)} item(s)")
+            spec = importlib.util.spec_from_file_location(p.stem, p)
+            if not spec or not spec.loader:
+                _print_raw(f"[WARN] could not prepare import for {p.name}")
+                continue
+            mod = importlib.util.module_from_spec(spec)
+            sys.modules[p.stem] = mod
+            spec.loader.exec_module(mod)
+            reg_fn = getattr(mod, "register", None)
+            if callable(reg_fn):
+                reg_fn(reg)
         except Exception as e:
-            _print_raw(f"[ERROR] set: {e}")
-        return True
+            _print_raw(f"[WARN] {p.name}.register failed: {e}")
 
-    if s == "vars":
-        if not _VARS:
-            _print_raw("(no vars)")
-        else:
-            for k, v in _VARS.items():
-                _print_raw(f"{k} : {len(v)}")
-        return True
-    if s.startswith("vars "):
-        name = s.split(" ", 1)[1].strip()
-        vals = _VARS.get(name)
-        if vals is None:
-            _print_raw(f"[vars] {name} : <unset>")
-        else:
-            for it in vals:
-                _print_raw(it)
-        return True
-
-    if s.startswith("unset "):
-        name = s.split(" ", 1)[1].strip()
-        if name in _VARS:
-            del _VARS[name]
-            _print_raw(f"[unset] {name}")
-        else:
-            _print_raw(f"[unset] {name} : <unset>")
-        return True
-
-    if s.startswith("foreach "):
-        try:
-            rest = s[len("foreach "):].strip()
-            do_idx = rest.find(" do ")
-            if do_idx == -1 or not rest.endswith(" end"):
-                raise ValueError("usage: foreach <iter> in $<NAME> [--echo] [--limit N] do <BODY> end")
-            head = rest[:do_idx].strip()
-            body = rest[do_idx+4:-4].strip()
-
-            parts = head.split()
-            if len(parts) < 3 or parts[1] != "in" or not parts[2].startswith("$"):
-                raise ValueError("bad head, want: <iter> in $<NAME> [--echo] [--limit N]")
-            iter_name = parts[0]
-            list_name = parts[2][1:]
-            echo = False
-            limit = None
-            i = 3
-            while i < len(parts):
-                if parts[i] == "--echo":
-                    echo = True
-                    i += 1
-                elif parts[i] == "--limit":
-                    if i+1 >= len(parts):
-                        raise ValueError("--limit needs a number")
-                    try:
-                        limit = int(parts[i+1])
-                    except Exception:
-                        raise ValueError("--limit needs an integer")
-                    i += 2
-                else:
-                    raise ValueError(f"unknown option: {parts[i]}")
-
-            items = _VARS.get(list_name) or []
-            total = len(items) if limit is None else min(len(items), limit)
-            for idx, val in enumerate(items[:total], 1):
-                expanded = body.replace(f"${{{iter_name}}}", val).replace(f"${iter_name}", val)
-                if echo:
-                    _print_raw(f"[{idx}/{total}] {expanded}")
-                res = _exec_core(expanded, interp, reg)
-                if res is None:
-                    continue
-                if isinstance(res, dict) and res.get("cmd") == "quit":
-                    return "QUIT"
-                if isinstance(res, dict) and "__raw" in res:
-                    _print_raw(res["__raw"])
-                else:
-                    try:
-                        print(json.dumps(res, sort_keys=False))
-                    except Exception:
-                        print(res)
-        except Exception as e:
-            _print_raw(f"[ERROR] foreach: {e}")
-        return True
-
-    return False
-
+# ----------------------------
+# REPL / Batch
+# ----------------------------
+def _print_banner():
+    _print_raw(f"{APP_NAME} v{VERSION} — Verilog Netlist CLI")
+    _print_raw("Type 'help' for a list of commands, or 'help <cmd>' for details.")
 
 def run_repl(interp: Interpreter, reg: CommandRegistry):
     _print_banner()
-    # install completer AFTER commands are loaded, and refresh list once
-    _install_basic_completer(reg)
     prompt = "vnlt> "
     while True:
         try:
@@ -384,23 +196,14 @@ def run_repl(interp: Interpreter, reg: CommandRegistry):
         except KeyboardInterrupt:
             _print_raw("")
             continue
-
-        if not line.strip():
+        s = line.strip()
+        if not s:
             continue
-
-        handled = _handle_meta(line, interp, reg)
-        if handled == "QUIT":
-            break
-        if handled:
-            continue
-
-        res = _exec_core(line, interp, reg)
+        res = _exec_core(s, interp, reg)
         if res is None:
             continue
-
         if isinstance(res, dict) and res.get("cmd") == "quit":
             break
-
         if isinstance(res, dict) and "__raw" in res:
             _print_raw(res["__raw"])
         else:
@@ -409,24 +212,16 @@ def run_repl(interp: Interpreter, reg: CommandRegistry):
             except Exception:
                 print(res)
 
-
 def run_batch(interp: Interpreter, reg: CommandRegistry, batch_path: Path):
     if not batch_path.exists():
         _print_raw(f"[ERROR] batch file not found: {batch_path}")
         return
     with batch_path.open("r", encoding="utf-8", errors="replace") as fh:
         for raw in fh:
-            line = raw.strip()
-            if not line or line.startswith("#"):
+            s = raw.strip()
+            if not s or s.startswith("#"):
                 continue
-
-            handled = _handle_meta(line, interp, reg)
-            if handled == "QUIT":
-                return
-            if handled:
-                continue
-
-            res = _exec_core(line, interp, reg)
+            res = _exec_core(s, interp, reg)
             if res is None:
                 continue
             if isinstance(res, dict) and res.get("cmd") == "quit":
@@ -439,7 +234,9 @@ def run_batch(interp: Interpreter, reg: CommandRegistry, batch_path: Path):
                 except Exception:
                     print(res)
 
-
+# ----------------------------
+# Main
+# ----------------------------
 def main():
     ap = argparse.ArgumentParser(prog="verilog_parse.py")
     ap.add_argument("--graph", help="Path to netgraph.json (optional; can load later via 'read verilog')")
@@ -449,7 +246,9 @@ def main():
 
     reg = CommandRegistry()
     set_global_registry(reg)
-    load_builtin_commands(reg)  # ensures all cmd_* call register(reg), including cmd_gui & cmd_revs
+
+    # Auto-discover all cmd_*.py alongside this file (default python dir)
+    _auto_discover_and_register(reg)
 
     interp = Interpreter()
 
@@ -468,7 +267,6 @@ def main():
         run_batch(interp, reg, Path(args.batch))
     else:
         run_repl(interp, reg)
-
 
 if __name__ == "__main__":
     main()

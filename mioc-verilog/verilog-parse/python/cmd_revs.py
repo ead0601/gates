@@ -1,8 +1,8 @@
-# cmd_revs.py
+# cmd_revs.py — aligned output + robust register
 # === VNLT REV ===
 # file: python/cmd_revs.py
-# rev:  2025-10-03  r2  by:ediaz  tag:revs
-# note: 'revs' command — scans for VNLT REV headers and prints "<relpath>  <rev-line>"
+# rev:  2025-10-03  r5  by:ediaz  tag:revs
+# note: 'revs' command — scans for VNLT REV headers and prints "<relpath>  <rev-line>" aligned
 # === /VNLT REV ===
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ DETAIL = """Usage:
   revs
 
 Scans the current working directory for VNLT REV header blocks in common text/code
-files and prints a sorted list of:
+files and prints a sorted, aligned list of:
   <relative-path>  <rev: ...>
 
 Recognized header forms:
@@ -36,25 +36,20 @@ HTML (comment blocks):
   <!-- === /VNLT REV === -->
 """
 
-# File extensions we scan
 EXTS = {".py", ".txt", ".md", ".html", ".htm"}
 
-# Regex for Python/text style block
 PY_BLOCK_RE = re.compile(
     r"(?ms)^#\s*===\s*VNLT\s+REV\s*===\s*$"
     r"(.*?)"
     r"^#\s*===\s*/VNLT\s+REV\s*===\s*$"
 )
-
 PY_REV_LINE_RE = re.compile(r"(?mi)^\s*#\s*rev:\s*(.*)\s*$")
 
-# Regex for HTML comment style block
 HTML_BLOCK_RE = re.compile(
     r"(?ms)^\s*<!--\s*===\s*VNLT\s+REV\s*===\s*-->\s*$"
     r"(.*?)"
     r"^\s*<!--\s*===\s*/VNLT\s+REV\s*===\s*-->\s*$"
 )
-
 HTML_REV_LINE_RE = re.compile(r"(?mis)<!--\s*rev:\s*(.*?)\s*-->")
 
 SKIP_DIRS = {".git", ".hg", ".svn", "__pycache__", "node_modules", "dist", "build", ".venv", "venv"}
@@ -62,7 +57,6 @@ SKIP_DIRS = {".git", ".hg", ".svn", "__pycache__", "node_modules", "dist", "buil
 
 def _iter_files(root: str) -> Iterable[str]:
     for dirpath, dirnames, filenames in os.walk(root):
-        # prune
         dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
         for fn in filenames:
             ext = os.path.splitext(fn)[1].lower()
@@ -79,27 +73,22 @@ def _read_text(path: str) -> Optional[str]:
 
 
 def _extract_rev(text: str) -> Optional[str]:
-    # Try Python/text style
     m = PY_BLOCK_RE.search(text)
     if m:
         block = m.group(1)
         m2 = PY_REV_LINE_RE.search(block)
         if m2:
             return m2.group(1).strip()
-
-    # Try HTML style
     m = HTML_BLOCK_RE.search(text)
     if m:
         block = m.group(1)
         m2 = HTML_REV_LINE_RE.search(block)
         if m2:
             return m2.group(1).strip()
-
-    # Fallback: single-line "rev:" anywhere
+    # Fallback: a single-line "rev:" anywhere
     m = re.search(r"(?mi)^\s*(?:#|<!--)?\s*rev:\s*(.*?)(?:-->)?\s*$", text)
     if m:
         return m.group(1).strip()
-
     return None
 
 
@@ -117,18 +106,20 @@ def run(args: List[str], interp) -> dict:
             pairs.append((rel, rev))
 
     pairs.sort(key=lambda t: t[0].lower())
-    lines = [f"{rel}  {rev}" for (rel, rev) in pairs]
-    out = ("\n".join(lines) + ("\n" if lines else ""))
-    return {"__raw": out}
+    if not pairs:
+        return {"__raw": ""}
+
+    width = max(len(rel) for rel, _ in pairs)
+    lines = [f"{rel.ljust(width)}  {rev}" for (rel, rev) in pairs]
+    return {"__raw": "\n".join(lines) + "\n"}
 
 
 def register(registry) -> None:
     """
     Be robust to different registry APIs.
-    Prefer registry.register(name, func, help, detail) if present,
-    else try registry.add_command(name, func, help, detail).
+    Tries: register(name, func, help, detail) → add_command(...) → add(...).
     """
-    add = getattr(registry, "register", None) or getattr(registry, "add_command", None)
+    add = getattr(registry, "register", None) or getattr(registry, "add_command", None) or getattr(registry, "add", None)
     if add is None:
-        raise AttributeError("CommandRegistry has no 'register' or 'add_command'")
+        raise AttributeError("CommandRegistry has no 'register' or 'add_command' or 'add'")
     add(COMMAND, run, HELP, DETAIL)
