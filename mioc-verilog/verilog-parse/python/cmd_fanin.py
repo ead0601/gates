@@ -1,4 +1,8 @@
-# cmd_fanin.py — fanin explorer with built-in tree renderer (no core dependency)
+# === VNLT REV ===
+# file: python/cmd_fanin.py
+# rev:  2025-10-03  r1  by:ediaz  tag:read
+# note: initial per-file revision header; build & load design from manifest
+# === /VNLT REV ===
 
 from typing import List, Optional, Tuple
 from registry import CommandRegistry

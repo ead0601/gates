@@ -1,5 +1,11 @@
-#!/usr/bin/env python3
-# vnlt launcher with variables & foreach
+# === VNLT REV ===
+# file: python/verilog_parse.py
+# rev:  2025-10-03  r2  by:ediaz  tag:revs
+# note: register 'revs' command in built-ins so it's available in help & runtime
+# === /VNLT REV ===
+
+# vnlt launcher with variables & foreach (keeps your existing behavior, adds 'gui')
+
 import argparse
 import json
 import os
@@ -7,6 +13,7 @@ import sys
 import atexit
 import subprocess
 from pathlib import Path
+from cmd_revs import register as register_revs
 
 # Ensure this file's directory is importable so bare "cmd_*.py" imports work
 _SCRIPT_DIR = str(Path(__file__).parent.resolve())
@@ -77,7 +84,7 @@ def _scan_tokens(line: str, target_chars: str):
 def _split_pipeline_and_redirect(s: str):
     """
     Returns (vnlt_cmd, shell_pipeline_or_None, out_path_or_None, append_flag).
-    Supports a single pipeline chunk; if it starts with '$(' and ends with ')', those are stripped.
+    Supports a single pipeline chunk; if it starts with '$(') and ends with ')', those are stripped.
     Parses trailing redirection (> or >>) to filename (quoted or bare).
     """
     s = s.strip()
@@ -129,6 +136,10 @@ def _res_to_text(res):
 
 
 def load_builtin_commands(reg: CommandRegistry):
+    """
+    Import cmd_* modules and call their register(reg) if present.
+    This preserves your current command set and adds 'cmd_gui'.
+    """
     mods = [
         ("cmd_help", True),
         ("cmd_exit", True),
@@ -141,6 +152,9 @@ def load_builtin_commands(reg: CommandRegistry):
         ("cmd_fanout", False),
         ("cmd_paths", False),
         ("cmd_read_verilog", True),
+        ("cmd_export", True),
+        ("cmd_gui", False),   # GUI command
+        ("cmd_revs", True),   # <<< ensure 'revs' is registered and visible
     ]
     for mod, required in mods:
         try:
@@ -149,14 +163,20 @@ def load_builtin_commands(reg: CommandRegistry):
             tag = "ERROR" if required else "WARN"
             _print_raw(f"[{tag}] could not load {mod}: {e}")
             continue
+        # Call module-level register(reg) if provided
         try:
             if hasattr(m, "register"):
                 m.register(reg)
-            else:
-                _print_raw(f"[WARN] {mod} has no register(reg)")
         except Exception as e:
             tag = "ERROR" if required else "WARN"
             _print_raw(f"[{tag}] {mod}.register failed: {e}")
+
+    # Optionally, also support direct-registration path if import paths were preconfigured:
+    # (harmless if already registered)
+    try:
+        register_revs(reg)
+    except Exception:
+        pass
 
 
 def _install_basic_completer(reg: CommandRegistry):
@@ -213,10 +233,8 @@ def _handle_meta(line: str, interp: Interpreter, reg: CommandRegistry):
     if not s:
         return True
 
-    # ---- set NAME = $( <vnlt-cmd> [| shell ...] )  OR  set NAME = literal ... ----
     if s.startswith("set "):
         try:
-            # split: set NAME = RHS
             _, rest = s.split(" ", 1)
             name, rhs = rest.split("=", 1)
             name = name.strip()
@@ -224,7 +242,6 @@ def _handle_meta(line: str, interp: Interpreter, reg: CommandRegistry):
             items = []
             if rhs.startswith("$(") and rhs.endswith(")"):
                 inner = rhs[2:-1].strip()
-                # run inner via core executor but ignore its redirection
                 vnlt_cmd, shell_pipe, _, _ = _split_pipeline_and_redirect(inner)
                 res = reg.execute(vnlt_cmd, interp)
                 if res:
@@ -241,8 +258,6 @@ def _handle_meta(line: str, interp: Interpreter, reg: CommandRegistry):
                         if t:
                             items.append(t)
             else:
-                # literal list: split on spaces, keep quotes content
-                # very light tokenizer: split by spaces unless inside quotes
                 buf = ""
                 q = None
                 def flush():
@@ -272,7 +287,6 @@ def _handle_meta(line: str, interp: Interpreter, reg: CommandRegistry):
             _print_raw(f"[ERROR] set: {e}")
         return True
 
-    # ---- vars / vars NAME ----
     if s == "vars":
         if not _VARS:
             _print_raw("(no vars)")
@@ -290,7 +304,6 @@ def _handle_meta(line: str, interp: Interpreter, reg: CommandRegistry):
                 _print_raw(it)
         return True
 
-    # ---- unset NAME ----
     if s.startswith("unset "):
         name = s.split(" ", 1)[1].strip()
         if name in _VARS:
@@ -300,20 +313,15 @@ def _handle_meta(line: str, interp: Interpreter, reg: CommandRegistry):
             _print_raw(f"[unset] {name} : <unset>")
         return True
 
-    # ---- foreach item in $NAME [--echo] [--limit N] do BODY end ----
     if s.startswith("foreach "):
         try:
-            # crude parse
-            # foreach <iter> in $<NAME> [--echo] [--limit N] do <BODY> end
             rest = s[len("foreach "):].strip()
-            # split on ' do ' (first occurrence), and ensure ending ' end'
             do_idx = rest.find(" do ")
             if do_idx == -1 or not rest.endswith(" end"):
                 raise ValueError("usage: foreach <iter> in $<NAME> [--echo] [--limit N] do <BODY> end")
             head = rest[:do_idx].strip()
             body = rest[do_idx+4:-4].strip()
 
-            # parse head: "<iter> in $<NAME> [--echo] [--limit N]"
             parts = head.split()
             if len(parts) < 3 or parts[1] != "in" or not parts[2].startswith("$"):
                 raise ValueError("bad head, want: <iter> in $<NAME> [--echo] [--limit N]")
@@ -340,7 +348,6 @@ def _handle_meta(line: str, interp: Interpreter, reg: CommandRegistry):
             items = _VARS.get(list_name) or []
             total = len(items) if limit is None else min(len(items), limit)
             for idx, val in enumerate(items[:total], 1):
-                # expand $iter_name / ${iter_name}
                 expanded = body.replace(f"${{{iter_name}}}", val).replace(f"${iter_name}", val)
                 if echo:
                     _print_raw(f"[{idx}/{total}] {expanded}")
@@ -365,6 +372,7 @@ def _handle_meta(line: str, interp: Interpreter, reg: CommandRegistry):
 
 def run_repl(interp: Interpreter, reg: CommandRegistry):
     _print_banner()
+    # install completer AFTER commands are loaded, and refresh list once
     _install_basic_completer(reg)
     prompt = "vnlt> "
     while True:
@@ -380,7 +388,6 @@ def run_repl(interp: Interpreter, reg: CommandRegistry):
         if not line.strip():
             continue
 
-        # meta commands first
         handled = _handle_meta(line, interp, reg)
         if handled == "QUIT":
             break
@@ -442,24 +449,21 @@ def main():
 
     reg = CommandRegistry()
     set_global_registry(reg)
-    load_builtin_commands(reg)
+    load_builtin_commands(reg)  # ensures all cmd_* call register(reg), including cmd_gui & cmd_revs
 
     interp = Interpreter()
 
-    # Optional preloaded graph
     if args.graph:
         try:
             interp.load_graph(Path(args.graph))
         except Exception as e:
             _print_raw(f"[WARN] could not load graph '{args.graph}': {e}")
 
-    # Auto-load manifest if provided
     if args.manifest:
         res = _exec_core(f"read verilog {args.manifest}", interp, reg)
         if isinstance(res, dict) and "__raw" in res:
             _print_raw(res["__raw"])
 
-    # Batch or interactive
     if args.batch:
         run_batch(interp, reg, Path(args.batch))
     else:

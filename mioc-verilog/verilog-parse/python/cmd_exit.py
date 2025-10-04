@@ -1,3 +1,10 @@
+# cmd_exit.py
+# === VNLT REV ===
+# file: python/cmd_exit.py
+# rev:  2025-10-03  r1  by:ediaz  tag:read
+# note: initial per-file revision header; build & load design from manifest
+# === /VNLT REV ===
+
 from typing import List
 from registry import CommandRegistry
 from core import Interpreter

@@ -1,3 +1,9 @@
+# === VNLT REV ===
+# file: python/cmd_read_verilog.py
+# rev:  2025-10-03  r1  by:ediaz  tag:read
+# note: initial per-file revision header; build & load design from manifest
+# === /VNLT REV ===
+
 from pathlib import Path
 from typing import List, Dict
 from registry import CommandRegistry, REG

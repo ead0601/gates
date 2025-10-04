@@ -1,3 +1,8 @@
+# === VNLT REV ===
+# file: python/registry.py
+# rev:  2025-10-03  r1  by:ediaz  tag:read
+# note: initial per-file revision header; build & load design from manifest
+# === /VNLT REV ===
 
 """
 registry.py — tiny command registry so each command lives in its own module.

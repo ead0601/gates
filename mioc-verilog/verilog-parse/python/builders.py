@@ -1,3 +1,9 @@
+# === VNLT REV ===
+# file: python/builders.py
+# rev:  2025-10-03  r1  by:ediaz  tag:show
+# note: initial per-file revision header; show single instance/net details
+# === /VNLT REV ===
+
 import re
 from pathlib import Path
 from typing import Dict, List, Tuple, Set

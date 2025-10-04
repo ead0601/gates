@@ -1,6 +1,8 @@
-"""
-core.py — shared data model & interpreter shell
-"""
+# === VNLT REV ===
+# file: python/core.py
+# rev:  2025-10-03  r1  by:ediaz  tag:read
+# note: initial per-file revision header; build & load design from manifest
+# === /VNLT REV ===
 
 import json
 from pathlib import Path
