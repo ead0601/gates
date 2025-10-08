@@ -1,4 +1,6 @@
 #!/bin/bash
 
+export PYTHONPYCACHEPREFIX="$PWD/volatile/__pycache__"
+
 python3 python/verilog_parse.py  -m verilog_manifest.txt
 

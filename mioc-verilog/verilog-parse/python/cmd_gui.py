@@ -1,206 +1,226 @@
-# === VNLT REV ===
-# file: python/cmd_gui.py
-# rev:  2025-10-03  r1  by:ediaz  tag:read
-# note: initial per-file revision header; build & load design from manifest
-# === /VNLT REV ===
+# rev:  2025-10-08  r12  by: ediaz  tag: gui
+"""
+GUI command: always-inline viewer (newplace-direct)
+- Exports volatile/graph.json (via cmd_export)
+- Builds volatile/graph_view_ffcenter.inline.html by inlining window.VNLT_GRAPH
+- Strips any loader code (external or inline fetch) from the base HTML
+- Opens the inline HTML unless --no-open is supplied
+- --newplace calls placement_gen.generate() directly (no argparse)
 
-# Launch the HTML5 GUI by exporting JSON and inlining it into the viewer HTML.
+Args (r2-style):
+  gui [--newplace] [--html FILE] [--json FILE] [--to FILE] [--no-open]
 
-from typing import List, Optional
-import os
-import json
-import webbrowser
-from pathlib import Path
-import re
-
-import registry as _reg  # uses REG and CommandRegistry
-
-SUMMARY = "gui [--html FILE] [--to FILE] [--json FILE] [--no-open] — export and open the HTML GUI"
-DETAIL = """\
-Usage:
-  gui
-  gui --html graph_view_step1.html
-  gui --to ./gui-view.html
-  gui --json ./graph-for-gui.json
-  gui --no-open
-
-What it does:
-  1) Ensures a design is loaded (via 'read verilog <manifest>' or '-m').
-  2) Runs 'export json' to produce the annotated netlist JSON.
-  3) Inlines that JSON into the HTML viewer as: window.VNLT_GRAPH = {...};
-  4) Writes a new HTML file (default: ./gui-view.html).
-  5) Opens it in your default browser (omit with --no-open).
-
-Options:
-  --html FILE     Path to the base viewer HTML. Default: ./graph_view_step1.html
-  --to FILE       Output HTML path to write.  Default: ./gui-view.html
-  --json FILE     Where to write/read the exported JSON. Default: ./graph-for-gui.json
-  --no-open       Do not open a browser after writing the HTML.
-
-Notes:
-  - This injector replaces ANY 'window.VNLT_GRAPH = ...;' assignment (including '|| {}'),
-    ensuring the data is available BEFORE viewer scripts execute.
-  - If no assignment is found, it injects a <script> BEFORE the first <script> tag.
+Defaults:
+  --html  html/graph_view_ffcenter.html            (base template)
+  --json  volatile/graph.json                      (export path)
+  --to    volatile/graph_view_ffcenter.inline.html (inline output)
 """
 
-DEFAULT_HTML = "html/graph_view_ffcenter.html"
-DEFAULT_JSON = "volatile/gui-graph.json"
-DEFAULT_OUT = "volatile/gui-view.html"
+from __future__ import annotations
+import json
+import re
+import webbrowser
+from pathlib import Path
+import importlib.util as _iu
 
-def _parse_args(argv: List[str]):
-    html = None
-    out_html = None
-    json_path = None
-    open_flag = True
+import registry as _reg         # CommandRegistry (r2-style)
+import cmd_export as _cmd_export
 
-    tokens = list(argv or [])
-    i = 0
-    while i < len(tokens):
-        t = tokens[i]
-        if t == "--html" and i + 1 < len(tokens):
-            html = tokens[i + 1]
-            i += 2
-        elif t == "--to" and i + 1 < len(tokens):
-            out_html = tokens[i + 1]
-            i += 2
-        elif t == "--json" and i + 1 < len(tokens):
-            json_path = tokens[i + 1]
-            i += 2
-        elif t == "--no-open":
-            open_flag = False
-            i += 1
-        else:
-            i += 1
+SUMMARY = "Launch the HTML GUI with the current design (always-inline data)."
+DETAIL = """\
+gui
+    Export design to volatile/graph.json, build an inline HTML at
+    volatile/graph_view_ffcenter.inline.html (no network fetch), and open it.
 
-    return {
-        "html": html or DEFAULT_HTML,
-        "to": out_html or DEFAULT_OUT,
-        "json": json_path or DEFAULT_JSON,
-        "open": open_flag,
-    }
+gui --newplace
+    Deterministically regenerate data-in/placement.csv via placement_gen.generate(),
+    then proceed as above.
 
+Options:
+    --html FILE   Base HTML template (default: html/graph_view_ffcenter.html)
+    --json FILE   JSON output path (default: volatile/graph.json)
+    --to   FILE   Inline HTML output (default: volatile/graph_view_ffcenter.inline.html)
+    --no-open     Do not open the viewer after generation.
+"""
 
-def _read_text(path: Path) -> str:
-    with path.open("r", encoding="utf-8", errors="replace") as f:
-        return f.read()
+# ---------- helpers ----------
 
+def _repo_root() -> Path:
+    # .../verilog-parse/python/cmd_gui.py -> repo root is parent of 'python'
+    return Path(__file__).resolve().parent.parent
 
-def _write_text(path: Path, text: str):
-    if path.parent and not path.parent.exists():
-        path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as f:
-        f.write(text)
+def _ensure_dir(p: Path) -> None:
+    p.parent.mkdir(parents=True, exist_ok=True)
 
+def _safe_inline_json(obj) -> str:
+    """Serialize JSON safe for embedding in <script> tag."""
+    s = json.dumps(obj, ensure_ascii=False, separators=(",", ":"))
+    # Avoid closing the script tag accidentally if data ever contained it.
+    return s.replace("</script>", "<\\/script>")
 
-def _inject_json_into_html(html_text: str, graph_obj) -> (str, str):
+def _strip_external_loader(html: str) -> str:
+    """Remove any <script ... graph.loader.js ...></script> tags."""
+    pattern = re.compile(
+        r'\s*<script[^>]+src=["\'][^"\']*?/js/graph\.loader\.js(?:\.r\d+)?["\'][^>]*>\s*</script>\s*',
+        re.IGNORECASE,
+    )
+    return pattern.sub("\n", html)
+
+def _strip_inline_fetch_blocks(html: str) -> str:
     """
-    Replace an existing 'window.VNLT_GRAPH = ...;' (robust), or inject BEFORE the first <script>.
-    Returns (new_html_text, where_msg).
+    Remove inline <script> blocks that fetch graph.json or are labeled as inline loader.
     """
-    json_text = json.dumps(graph_obj, ensure_ascii=False, indent=2)
-    assign_line = f"window.VNLT_GRAPH = {json_text};"
+    pattern = re.compile(
+        r'<script[^>]*>\s*(?:<!--)?(?:(?:(?!</script>).)*?(?:File:\s*inline\s+graph\.loader\.js|fetch\(\s*[\'"]graph\.json[\'"]))(?:(?!</script>).)*?</script>',
+        re.IGNORECASE | re.DOTALL,
+    )
+    return pattern.sub("\n", html)
 
-    # 1) Replace ANY assignment to window.VNLT_GRAPH, including "|| {}" defaults
-    # Matches: window.VNLT_GRAPH = <anything until semicolon> ;
-    pat_any_assign = re.compile(r"(window\.VNLT_GRAPH\s*=\s*)([^;]*)(;)", re.DOTALL)
-    if pat_any_assign.search(html_text):
-        new_text = pat_any_assign.sub(rf"\1{json_text}\3", html_text, count=1)
-        return new_text, "replaced existing window.VNLT_GRAPH assignment"
-
-    # 2) If no assignment exists, inject BEFORE the first <script ...>
-    m = re.search(r"<script\b", html_text, flags=re.IGNORECASE)
+def _insert_before_app_core(html: str, block: str) -> str:
+    """
+    Insert `block` immediately before the first <script ... js/app.core.js ...>.
+    Fallbacks: before </head>, else before </body>, else prepend.
+    """
+    app_pat = re.compile(
+        r'(<script[^>]+src=["\'][^"\']*?/js/app\.core\.js(?:\.r\d+)?["\'][^>]*>\s*</script>)',
+        re.IGNORECASE,
+    )
+    m = app_pat.search(html)
     if m:
-        idx = m.start()
-        inject_block = f"<script>\n{assign_line}\n</script>\n"
-        new_text = html_text[:idx] + inject_block + html_text[idx:]
-        return new_text, "injected data script before first <script> tag"
+        start = m.start()
+        return html[:start] + block + "\n" + html[start:]
 
-    # 3) Else, try injecting inside <head> if present
-    mhead = re.search(r"</head>", html_text, flags=re.IGNORECASE)
-    if mhead:
-        idx = mhead.start()
-        inject_block = f"<script>\n{assign_line}\n</script>\n"
-        new_text = html_text[:idx] + inject_block + html_text[idx:]
-        return new_text, "injected data script at end of <head>"
+    # Fallbacks
+    for tag in ("</head>", "</HEAD>", "</body>", "</BODY>"):
+        idx = html.find(tag)
+        if idx != -1:
+            return html[:idx] + block + "\n" + html[idx:]
+    return block + "\n" + html
 
-    # 4) Fallback: inject before </body> (may be too late in some pages, but last resort)
-    mbody = re.search(r"</body>", html_text, flags=re.IGNORECASE)
-    if mbody:
-        idx = mbody.start()
-        inject_block = f"<script>\n{assign_line}\n</script>\n"
-        new_text = html_text[:idx] + inject_block + html_text[idx:]
-        return new_text, "injected data script before </body>"
+def _add_inline_revision_banner(block_after: str) -> str:
+    """Standard top-of-file revision comment for the generated inline viewer."""
+    banner = [
+        "<!-- =============================================================== -->",
+        "<!-- rev:  2025-10-08  r12  by: ediaz  tag: gui-inline              -->",
+        "<!-- Revision: r12 (2025-10-08)                                      -->",
+        "<!-- Always-inline build: window.VNLT_GRAPH embedded; no fetch.      -->",
+        "<!-- =============================================================== -->",
+        "",
+    ]
+    return "\n".join(banner) + block_after
 
-    # 5) Absolute fallback: append at end
-    new_text = html_text + f"\n<script>\n{assign_line}\n</script>\n"
-    return new_text, "appended data script at end of document"
+def _build_inline_html(base_html: Path, json_path: Path, out_html: Path) -> None:
+    """
+    Read base HTML, strip loaders, embed window.VNLT_GRAPH, write inline HTML.
+    """
+    html = base_html.read_text(encoding="utf-8", errors="ignore")
 
+    # Strip loaders to ensure file:// safe inline
+    html = _strip_external_loader(html)
+    html = _strip_inline_fetch_blocks(html)
 
-def _load_json(path: Path):
-    with path.open("r", encoding="utf-8") as f:
-        return json.load(f)
+    # Load graph.json (must exist)
+    data = json.loads(json_path.read_text(encoding="utf-8", errors="ignore"))
+    inline_block = (
+        "<script>\n"
+        "/* window.VNLT_GRAPH (always-inline) */\n"
+        "window.VNLT_GRAPH = " + _safe_inline_json(data) + ";\n"
+        "</script>"
+    )
 
+    # Insert inline data BEFORE app.core.js so app sees it at init
+    html = _insert_before_app_core(html, inline_block)
 
-def run(argv: List[str], interp) -> Optional[dict]:
-    if not getattr(interp, "graph", None):
-        return {"__raw": "ERROR: No design loaded. Use 'read verilog <manifest>' first.\n"}
+    # Add revision banner at top (keeps base file untouched)
+    html = _add_inline_revision_banner(html)
 
-    args = _parse_args(argv)
-    html_in = Path(args["html"]).resolve()
-    out_html = Path(args["to"]).resolve()
-    json_path = Path(args["json"]).resolve()
+    _ensure_dir(out_html)
+    out_html.write_text(html, encoding="utf-8")
 
-    # 1) Export annotated JSON using the existing 'export json' command
+def _open_in_browser(p: Path) -> None:
     try:
-        _ = _reg.REG.execute(f"export json --to {json_path}", interp)
-    except Exception as e:
-        return {"__raw": f"ERROR: failed to run 'export json': {e}\n"}
-
-    if not json_path.exists():
-        return {"__raw": f"ERROR: export did not create JSON at {json_path}\n"}
-
-    try:
-        graph_obj = _load_json(json_path)
-    except Exception as e:
-        return {"__raw": f"ERROR: could not read JSON '{json_path}': {e}\n"}
-
-    if not html_in.exists():
-        return {"__raw": f"ERROR: viewer HTML not found: {html_in}\n"}
-    try:
-        html_text = _read_text(html_in)
-    except Exception as e:
-        return {"__raw": f"ERROR: could not read HTML '{html_in}': {e}\n"}
-
-    # 2) Inject JSON assignment early enough so the viewer sees it
-    final_text, where_msg = _inject_json_into_html(html_text, graph_obj)
-
-    # 3) Write output HTML
-    try:
-        _write_text(out_html, final_text)
-    except Exception as e:
-        return {"__raw": f"ERROR: failed to write output HTML '{out_html}': {e}\n"}
-
-    # 4) Open in browser (unless --no-open)
-    msg = f"Wrote GUI HTML to {out_html}\nUsing JSON {json_path}\nBase viewer {html_in}\nInjection: {where_msg}\n"
-    if args["open"]:
-        try:
-            webbrowser.open(out_html.as_uri())
-            msg += "Opened in default browser.\n"
-        except Exception as e:
-            msg += f"[WARN] could not open browser automatically: {e}\n"
-
-    # Meta counts (if present)
-    try:
-        nc = graph_obj.get("_meta", {}).get("node_count")
-        ec = graph_obj.get("_meta", {}).get("edge_count")
-        if nc is not None and ec is not None:
-            msg += f"Graph: nodes={nc} edges={ec}\n"
+        # Prefer file:// to ensure no network requirement
+        url = p.resolve().as_uri()
+        webbrowser.open_new_tab(url)
     except Exception:
         pass
 
-    return {"__raw": msg}
+def _do_newplace_direct(repo: Path, interpreter=None) -> None:
+    """
+    Import placement_gen directly from file and call generate() only.
+    Avoids argparse and any argv bleed-through.
+    """
+    mod_path = (repo / "python" / "placement_gen.py").resolve()
+    spec = _iu.spec_from_file_location("placement_gen", str(mod_path))
+    if not spec or not spec.loader:
+        return
+    pg = _iu.module_from_spec(spec)
+    try:
+        spec.loader.exec_module(pg)  # type: ignore[attr-defined]
+    except Exception:
+        return
+    gen = getattr(pg, "generate", None)
+    if callable(gen):
+        try:
+            # Call with interpreter if available; out_path uses the module default
+            gen(interpreter=interpreter)
+        except Exception:
+            # Silent continue; placement.csv might already exist
+            pass
 
+# ---------- command entrypoint (r2-style) ----------
 
-def register(reg: _reg.CommandRegistry):
-    # Your registry API: add_command(name, handler, summary, detail=None, aliases=None)
-    reg.add_command("gui", run, SUMMARY, DETAIL)
+def run(argv, interpreter=None):
+    repo = _repo_root()
+    volatile = repo / "volatile"
+    html_dir = repo / "html"
+
+    # Defaults
+    base_html = html_dir / "graph_view_ffcenter.html"
+    json_out = volatile / "graph.json"
+    inline_out = volatile / "graph_view_ffcenter.inline.html"
+    open_flag = True
+    do_newplace = False
+
+    # Minimal arg parsing (r2-style)
+    it = iter(argv or [])
+    for tok in it:
+        if tok == "--no-open":
+            open_flag = False
+        elif tok == "--newplace":
+            do_newplace = True
+        elif tok == "--html":
+            base_html = Path(next(it, str(base_html)))
+        elif tok == "--json":
+            json_out = Path(next(it, str(json_out)))
+        elif tok == "--to":
+            inline_out = Path(next(it, str(inline_out)))
+        else:
+            # ignore unknowns to stay lenient with prior revs
+            pass
+
+    if do_newplace:
+        _do_newplace_direct(repo, interpreter)
+
+    # Ensure JSON export (always overwrite)
+    _ensure_dir(json_out)
+    _cmd_export.run(["json", "--to", str(json_out)], interpreter)
+
+    # Build inline HTML (no fetch, file:// safe)
+    _build_inline_html(base_html, json_out, inline_out)
+
+    # Open unless suppressed
+    if open_flag:
+        _open_in_browser(inline_out)
+
+    # Return a small status dict for shells/tests (optional)
+    return {
+        "json": str(json_out),
+        "html": str(inline_out),
+        "opened": bool(open_flag),
+        "mode": "always-inline",
+    }
+
+def register(registry):
+    # r2-style registration so it appears in help
+    registry.add_command("gui", run, SUMMARY, DETAIL)
