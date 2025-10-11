@@ -27,7 +27,8 @@ find net w_u9z
 find net w_u*
 
 # Paths (use required flags)
-paths --from U1.A0 --to U2.B --depth 50 --max-paths 10
+paths --from N_CVRST,PBRST_N --to RST_N --depth 100 --max-paths 10
+paths --from w_u23z --to io1.in1 --depth 50 --max-paths 10
 
 # Fanin / Fanout / Show on known nets
 fanin RST_N --tree
