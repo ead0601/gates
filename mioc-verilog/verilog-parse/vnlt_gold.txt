@@ -1,0 +1,47 @@
+vnlt> # Basic variable workflow
+vnlt> set names1 = U1.A0 "U1.A 1" U2.B
+vnlt> set names2 = A.B C.D
+vnlt> vars
+'names1 = U1.A0 U1.A 1 U2.B, names2 = A.B C.D'
+vnlt> vars names1
+'1: U1.A0, 2: U1.A 1, 3: U2.B'
+vnlt> echo $names1 | awk '{print NF " items"}'
+{'__raw': '4 items\n'}
+vnlt> unset names2
+vnlt> vars
+'names1 = U1.A0 U1.A 1 U2.B'
+vnlt> # Inventory (use supported subcommands)
+vnlt> list files
+{'__raw': 'KIND        PATH                                                                    STATUS  SIZE   MTIME              \n----------  ----------------------------------------------------------------------  ------  -----  -------------------\nrtl         /build/repo/gates/mioc-verilog/verilog-parse/rtl/mioc_nor2_rtl.v        ok      342    2025-10-11 03:44:00\nrtl         /build/repo/gates/mioc-verilog/verilog-parse/rtl/mioc_inv1_rtl.v        ok      279    2025-10-11 03:44:00\nrtl         /build/repo/gates/mioc-verilog/verilog-parse/rtl/mioc_nand2_rtl.v       ok      341    2025-10-11 03:44:00\nrtl         /build/repo/gates/mioc-verilog/verilog-parse/rtl/mioc_xnor2_rtl.v       ok      341    2025-10-11 03:44:00\nrtl         /build/repo/gates/mioc-verilog/verilog-parse/rtl/mioc_nor3_rtl.v        ok      367    2025-10-11 03:44:00\nrtl         /build/repo/gates/mioc-verilog/verilog-parse/rtl/mioc_nand4_nor2_rtl.v  ok      448    2025-10-11 03:44:00\nrtl         /build/repo/gates/mioc-verilog/verilog-parse/rtl/mioc_flop_rtl.v        ok      1000   2025-10-11 03:44:00\ncomponents  /build/repo/gates/mioc-verilog/verilog-parse/mioc_top.v                 ok      28242  2025-10-11 03:44:00\n8 rows\n'}
+vnlt> list components --limit 10
+{'__raw': "Usage:\n  list files\n  list components [--like PATTERN] [--seq|--comb] [--ports]\n  list instances [--like PATTERN] [--type CTYPE] [--seq|--comb]\n  list pins <INSTANCE> | [--like 'U*.A*']\n  list port [--like PATTERN]\n  list nets [--like PATTERN] [--dangling] [--multi-driver] [--show-ends] [--limit N]\n\nNotes:\n  - Globs use shell-style patterns (* ? [abc]), case-sensitive.\n  - Use --limit with --show-ends to cap verbose expansions.\n"}
+vnlt> list instances --limit 10
+{'__raw': "Usage:\n  list files\n  list components [--like PATTERN] [--seq|--comb] [--ports]\n  list instances [--like PATTERN] [--type CTYPE] [--seq|--comb]\n  list pins <INSTANCE> | [--like 'U*.A*']\n  list port [--like PATTERN]\n  list nets [--like PATTERN] [--dangling] [--multi-driver] [--show-ends] [--limit N]\n\nNotes:\n  - Globs use shell-style patterns (* ? [abc]), case-sensitive.\n  - Use --limit with --show-ends to cap verbose expansions.\n"}
+vnlt> list pins U1 --like 'U1.*'
+{'__raw': 'Unknown instance: U1\n'}
+vnlt> list port --like 'OUT*'
+{'__raw': 'PORT  DIR  NET\n----  ---  ---\n0 rows\n'}
+vnlt> list nets --limit 10
+{'__raw': "NET           DRIVERS  #LOADS\n------------  -------  ------\nw_u23z        1        1     \nRA7           1        0     \nw_u86z        1        3     \nBUSRQ_N       1        0     \nw_u88qb       1        1     \nSPINDIS_N     1        0     \nw_u90qb       1        1     \nNETRST_N      1        0     \nw_u42z        1        2     \nAUXDECODE1_N  1        0     \nw_u53z        1        2     \nRST_N         1        0     \nw_u94z        1        1     \nCPRST_N       1        0     \nw_u48z        1        4     \nAUXROMCS_N    1        0     \nw_u50z        1        1     \nADDRBUFEN_N   1        0     \nw_u76z        1        1     \nBOOTROMCS_N   1        0     \nw_u79z        1        1     \nEN245_N       1        0     \nw_u63z        1        1     \nIS3_N         1        0     \nw_u14qb       1        2     \nMUX           1        0     \nw_u49z        1        2     \nRAS_N         1        0     \nw_u9z         1        1     \nCAS1_N        1        0     \nw_u8z         1        1     \nCAS2_N        1        0     \nBA15          0        1     \nPIN_IN_3      1        2     \nBA14          0        1     \nPIN_IN_4      1        1     \nBA13          0        1     \nPIN_IN_5      1        1     \nN_CVRST       0        1     \nPIN_IN_6      1        5     \nBD0           0        1     \nPIN_IN_7      1        2     \nBD1           0        1     \nPIN_IN_8      1        2     \nBD2           0        1     \nPIN_IN_9      1        1     \nBD3           0        1     \nPIN_IN_10     1        1     \nN_BWR         0        1     \nPIN_IN_11     1        2     \nBA6           0        1     \nPIN_IN_12     1        3     \nBA7           0        2     \nPIN_IN_13     1        1     \nPIN_IN_13N    1        0     \nIORQ_N        0        1     \nPIN_IN_14     1        2     \nWAIT_N        0        1     \nPIN_IN_15     1        1     \nBUSAK_N       0        1     \nPIN_IN_16     1        1     \nDMA_N         0        1     \nPIN_IN_17     1        1     \nPBRST_N       0        1     \nPIN_IN_25     1        6     \nOS3_N         0        1     \nPIN_IN_31     1        1     \nBMREQ_N       0        1     \nPIN_IN_32     1        1     \nBRD_N         0        1     \nPIN_IN_33     1        1     \nBRFSH_N       0        1     \nPIN_IN_34     1        1     \nBM1_N         0        1     \nPIN_IN_35     1        1     \nB_PHI         0        1     \nPIN_IN_36     1        5     \nw_u1q         1        2     \nw_u1qb        1        2     \nw_u39z        1        4     \nw_u2q         1        2     \nw_u2qb        1        2     \nw_u3z         1        2     \nw_u4z         1        1     \nw_u5z         1        1     \nw_u20z        1        2     \nw_u6z         1        1     \nw_u25z        1        1     \nw_u18z        1        1     \nw_u7z         1        1     \nw_u24z        1        2     \nw_u10z        1        1     \nw_u13z        1        1     \nw_u11z        1        1     \nw_u12z        1        1     \nw_u35z        1        1     \nw_u14q        1        1     \n1'b0          0        11    \nw_u17q        1        2     \nw_u17qb       1        2     \nw_u38qb       1        2     \nw_u19z        1        4     \nw_u31z        1        1     \nw_u21z        1        1     \nw_u26z        1        1     \nw_u22z        1        1     \nw_u44z        1        1     \nw_u56z        1        1     \nw_u28z        1        4     \nw_u27z        1        1     \nw_u29z        1        1     \nw_u75z        1        4     \nw_u60q        1        2     \nw_u30z        1        1     \nw_u32z        1        1     \nw_u33z        1        2     \nw_u34z        1        1     \nw_u41z        1        1     \nw_u37z        1        1     \nw_u38q        1        2     \nw_u52z        1        1     \nw_u40z        1        1     \nw_u55z        1        1     \nw_u43q        1        0     \nw_u43qb       1        2     \nw_u91z        1        8     \nw_u57qb       1        1     \nw_u45q        1        4     \nw_u45qb       1        0     \nw_u46z        1        1     \nw_u47z        1        1     \nw_u54qb       1        1     \nw_u78z        1        6     \nw_u77q        1        3     \nw_u65z        1        2     \nw_u54q        1        1     \nw_u72z        1        1     \nw_u73z        1        1     \nw_u57q        1        0     \nw_u60qb       1        1     \nw_u58z        1        1     \nw_u59z        1        1     \nw_u62z        1        1     \nw_u61z        1        1     \nw_u84z        1        1     \nw_u67z        1        2     \nw_u66z        1        1     \nPIN_IN_13B    0        1     \nw_u69z        1        1     \nw_u70z        1        2     \nw_u89z        1        1     \nw_u71z        1        1     \nw_u83z        1        1     \nw_u74z        1        0     \nw_u81z        1        1     \nw_u77qb       1        0     \nw_u80z        1        1     \nw_u93q        1        2     \nw_u82z        1        2     \nw_u85z        1        2     \nw_u87z        1        1     \nw_u88q        1        0     \nw_u90q        1        0     \nw_u92q        1        1     \nw_u92qb       1        0     \nw_u93qb       1        0     \n166 rows\n"}
+vnlt> # Find (category + pattern)
+vnlt> find instance U1*
+{'__raw': 'No matches.\n'}
+vnlt> find port OUT*
+{'__raw': 'No matches.\n'}
+vnlt> find net U*
+{'__raw': 'No matches.\n'}
+vnlt> find components REG*
+{'__raw': 'No matches.\n'}
+vnlt> # Paths (use required flags)
+vnlt> paths --from U1.A0 --to U2.B --depth 50 --max-paths 10
+{'__raw': 'paths: no valid sources or sinks after resolution\n'}
+vnlt> # Fanin / Fanout
+vnlt> fanin U1.A0 --tree
+{'__raw': 'FANIN TREE for U1.A0\n  U1.A0 [NO_DRIVERS]\n'}
+vnlt> fanout U1.A0 --tree
+{'cmd': 'fanout', 'target': 'U1.A0', 'error': {'code': 'NOT_FOUND', 'msg': 'target not found'}}
+vnlt> # Show a couple of things
+vnlt> show U1
+{'cmd': 'show', 'target': 'U1', 'error': {'code': 'NOT_FOUND', 'msg': 'target not found'}}
+vnlt> show U2
+{'cmd': 'show', 'target': 'U2', 'error': {'code': 'NOT_FOUND', 'msg': 'target not found'}}
