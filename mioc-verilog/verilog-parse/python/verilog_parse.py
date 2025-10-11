@@ -1,7 +1,7 @@
 # === VNLT REV ===
 # file: python/verilog_parse.py
-# rev:  2025-10-03  r4  by:ediaz  tag:core
-# note: Auto-discover cmd_*.py in this directory; preserve -m/--manifest; no --cmd-dir needed
+# rev:  2025-10-11  r5  by:ediaz  tag:core
+# note: Pre-dispatch $(...) expansion (no monkey-patch); in-memory capture; preserves pipes/redirects
 # === /VNLT REV ===
 
 import argparse
@@ -12,6 +12,7 @@ import atexit
 import subprocess
 import importlib.util
 from pathlib import Path
+import re
 
 # Ensure this file's directory is importable so "import cmd_*.py" works
 _SCRIPT_DIR = Path(__file__).parent.resolve()
@@ -122,11 +123,92 @@ def _split_pipeline_and_redirect(s: str):
     return vnlt_cmd, shell_pipe, out_path, append
 
 # ----------------------------
+# Built-in capture and $(...) expansion
+# ----------------------------
+def execute_one_line_and_capture_text(line: str, interp: Interpreter, reg: CommandRegistry) -> str:
+    """
+    Execute *one* vnlt line through the exact same per-line path as interactive execution,
+    apply any shell pipeline on that line, but IGNORE final redirection (> >>).
+    Return the final textual stdout the REPL would print.
+    """
+    vnlt_cmd, shell_pipe, out_path, _append = _split_pipeline_and_redirect(line)
+
+    # Run vnlt part
+    res = reg.execute(vnlt_cmd, interp)
+    if isinstance(res, dict) and res.get("cmd") == "quit":
+        # Captures nothing for quit
+        return ""
+
+    # Apply shell pipe if present
+    if shell_pipe:
+        _txt = _res_to_text(res) if res is not None else ""
+        try:
+            proc = subprocess.run(shell_pipe, input=_txt.encode("utf-8"), shell=True, capture_output=True)
+            text = proc.stdout.decode("utf-8", errors="replace")
+        except Exception as e:
+            text = f"[ERROR] pipeline failed: {e}\n"
+    else:
+        text = _res_to_text(res) if res is not None else ""
+
+    # Ignore redirection for capture: just return the text
+    return text
+
+def _expand_dollar_parens_pre(line: str, interp: Interpreter, reg: CommandRegistry) -> str:
+    """Expand all non-nested $(...) on the RAW line before parsing pipes/redirects."""
+    out = []
+    i = 0
+    s = line
+    while i < len(s):
+        j = s.find("$(", i)
+        if j == -1:
+            out.append(s[i:])
+            break
+        # append prefix
+        out.append(s[i:j])
+        # find matching ')', non-nested but quote-aware
+        k = j + 2
+        q = None
+        esc = False
+        while k < len(s):
+            ch = s[k]
+            if esc:
+                esc = False; k += 1; continue
+            if ch == "\\":
+                esc = True; k += 1; continue
+            if q:
+                if ch == q:
+                    q = None
+                k += 1; continue
+            if ch in ('"', "'"):
+                q = ch; k += 1; continue
+            if ch == ')':
+                break
+            k += 1
+        if k >= len(s) or s[k] != ')':
+            # unmatched, leave literal remainder
+            out.append(s[j:])
+            break
+        inner = s[j+2:k].strip()
+        captured = execute_one_line_and_capture_text(inner, interp, reg)
+        # newline split -> tokens; drop empties; strip CR/LF
+        items = []
+        for raw in captured.splitlines():
+            t = raw.replace('\r','').strip()
+            if t:
+                items.append(t)
+        out.append(" ".join(items))
+        i = k + 1
+    return "".join(out)
+
+# ----------------------------
 # Command execution helpers
 # ----------------------------
 def _exec_core(cmdline: str, interp: Interpreter, reg: CommandRegistry):
     """Execute a vnlt command line with pipeline/redirection handling; return dict/str."""
-    vnlt_cmd, shell_pipe, out_path, append = _split_pipeline_and_redirect(cmdline)
+    # NEW: expand $(...) on the raw line first
+    expanded = _expand_dollar_parens_pre(cmdline, interp, reg)
+
+    vnlt_cmd, shell_pipe, out_path, append = _split_pipeline_and_redirect(expanded)
     res = reg.execute(vnlt_cmd, interp)
     if not res:
         return None
