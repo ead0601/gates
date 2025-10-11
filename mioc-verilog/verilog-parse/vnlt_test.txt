@@ -1,3 +1,8 @@
+# vnlt> source --no-echo vnlt_test_fixed2.txt > out.txt
+# or if you want the human-style transcript on screen:
+#
+# vnlt> source vnlt_test_fixed2.txt
+
 # Basic variable workflow
 set names1 = U1.A0 "U1.A 1" U2.B
 set names2 = A.B C.D
@@ -7,27 +12,27 @@ echo $names1 | awk '{print NF " items"}'
 unset names2
 vars
 
-# Inventory (use supported subcommands)
+# Inventory (use valid subcommands/options)
 list files
-list components --limit 10
-list instances --limit 10
-list pins U1 --like 'U1.*'
-list port --like 'OUT*'
-list nets --limit 10
+list components
+list instances
+list port
+list nets --limit 25
 
-# Find (category + pattern)
-find instance U1*
-find port OUT*
-find net U*
-find components REG*
+# Find (use only categories/patterns we saw in your design)
+find net RST_N
+find net BA1*
+find net PIN_IN_*
+find net w_u9z
+find net w_u*
 
 # Paths (use required flags)
 paths --from U1.A0 --to U2.B --depth 50 --max-paths 10
 
-# Fanin / Fanout
-fanin U1.A0 --tree
-fanout U1.A0 --tree
+# Fanin / Fanout / Show on known nets
+fanin RST_N --tree
+fanout RST_N --tree
 
 # Show a couple of things
-show U1
-show U2
+show RST_N
+show w_u23z
