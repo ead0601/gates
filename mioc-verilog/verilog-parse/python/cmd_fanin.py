@@ -1,147 +1,168 @@
-# === VNLT REV ===
-# file: python/cmd_fanin.py
-# rev:  2025-10-03  r1  by:ediaz  tag:read
-# note: initial per-file revision header; build & load design from manifest
-# === /VNLT REV ===
-
-from typing import List, Optional, Tuple
+# REV:r4
+# cmd_fanin.py — fanin with FULL path printing via --path (stops at ports/FFs unless requested)
+from typing import List, Dict, Set, Tuple
+import re
 from registry import CommandRegistry
 from core import Interpreter
 
-SUMMARY = "fanin <target> [--tree|--endpoints] [--cross-ff] [--stage-limit N] [--depth N] [--branch N]"
-DETAIL = """\
-Usage:
-  fanin <target> [--tree] [--endpoints] [--cross-ff] [--stage-limit N] [--depth N] [--branch N]
+SUMMARY = "fanin <target> [--endpoints] [--depth N] [--limit N] [--path]"
+DETAIL = (
+    "fanin <target> [--endpoints] [--depth N] [--limit N] [--path]\n"
+    "  --endpoints   : print terminal sources only (one per line)\n"
+    "  --depth N     : limit traversal depth (default 200)\n"
+    "  --limit N     : limit number of sources/lines shown\n"
+    "  --path        : print FULL path lines 'SOURCE : ... : TARGET'\n"
+)
 
-Description:
-  Explore what drives <target>. <target> can be a pin (INST.PIN), a port (PORT:NAME),
-  or a net (NET:NAME). Use --tree for an ASCII tree, --endpoints for TOP_IN/CONST list.
-  By default, traversal stops at FF boundaries; add --cross-ff to walk through flops.
-"""
+_SEQ_PIN_RX = re.compile(r"\.(D|Q|CLK|CLKN|RN|SN)\b", re.IGNORECASE)
 
-def _resolve_target_net(tok: str, interp: Interpreter) -> Optional[str]:
-    if not interp.graph:
+def _parse(args: List[str]):
+    if not args:
+        return None, {"__raw": "Usage: " + SUMMARY + "\n"}
+    target = args[0]
+    depth = 200
+    limit = None
+    endpoints_only = False
+    want_path = False
+    i = 1
+    while i < len(args):
+        t = args[i]
+        if t == "--endpoints":
+            endpoints_only = True; i += 1; continue
+        if t == "--path":
+            want_path = True; i += 1; continue
+        if t == "--depth" and i + 1 < len(args):
+            try:
+                depth = int(args[i+1])
+            except ValueError:
+                return None, {"__raw":"fanin: --depth requires integer\n"}
+            i += 2; continue
+        if t == "--limit" and i + 1 < len(args):
+            try:
+                limit = int(args[i+1])
+            except ValueError:
+                return None, {"__raw":"fanin: --limit requires integer\n"}
+            i += 2; continue
+        return None, {"__raw": f"fanin: unknown option '{t}'\n"}
+    return (target, depth, limit, endpoints_only, want_path), None
+
+def _nodes_from_edges(edges: List[Dict[str,str]]):
+    srcs: Set[str] = set(); dsts: Set[str] = set()
+    for e in edges:
+        s = e.get("src"); d = e.get("dst")
+        if s: srcs.add(s)
+        if d: dsts.add(d)
+    return srcs, dsts
+
+def _sources_from_edges(target: str, edges: List[Dict[str,str]]) -> List[str]:
+    srcs, dsts = _nodes_from_edges(edges)
+    nodes = srcs | dsts
+    indeg = {n:0 for n in nodes}
+    for e in edges:
+        s = e.get("src"); d = e.get("dst")
+        if s and d and d in indeg:
+            indeg[d] += 1
+    src_only = sorted([n for n in nodes if indeg.get(n,0) == 0 and n != target])
+    return src_only
+
+def _inst_name(pin: str) -> str:
+    i = pin.rfind('.'); return pin[:i] if i > 0 else pin
+
+def _is_pin(name: str) -> bool:
+    return '.' in name
+
+def _augment_with_intra_instance_reverse(edges: List[Dict[str,str]]):
+    from collections import defaultdict
+    radj = defaultdict(list)
+    indeg = {}
+    pins_by_inst_inputs = {}
+    pins_by_inst_outputs = {}
+    seq_inst: Set[str] = set()
+    nodes: Set[str] = set()
+    for e in edges:
+        s = e.get("src"); d = e.get("dst")
+        if not s or not d: 
+            continue
+        nodes.add(s); nodes.add(d)
+        radj[d].append(s)
+        indeg[s] = indeg.get(s,0) + 1
+        indeg.setdefault(d, 0)
+        if _is_pin(d) and not _is_pin(s):
+            inst = _inst_name(d)
+            pins_by_inst_inputs.setdefault(inst, set()).add(d)
+            if _SEQ_PIN_RX.search(d): seq_inst.add(inst)
+        if _is_pin(s) and not _is_pin(d):
+            inst = _inst_name(s)
+            pins_by_inst_outputs.setdefault(inst, set()).add(s)
+            if _SEQ_PIN_RX.search(s): seq_inst.add(inst)
+    for inst, out_pins in pins_by_inst_outputs.items():
+        if inst in seq_inst:
+            continue
+        in_pins = pins_by_inst_inputs.get(inst, set())
+        if not in_pins:
+            continue
+        for op in out_pins:
+            for ip in in_pins:
+                radj[ip].append(op)
+                indeg[op] = indeg.get(op,0) + 1
+                indeg.setdefault(ip, 0)
+    return radj, indeg
+
+def _bfs_path_forward(src: str, dst: str, radj):
+    from collections import deque
+    q = deque([dst]); parent = {dst: None}
+    while q:
+        u = q.popleft()
+        if u == src:
+            break
+        for v in radj.get(u, ()):
+            if v not in parent:
+                parent[v] = u
+                q.append(v)
+    if src not in parent:
         return None
-    # Allow raw net names too: if resolution fails, we return None and the caller can try tok directly
-    return interp.graph.resolve_target_to_net(tok)
-
-def _render_fanin_tree(interp: Interpreter, start_net: str, *, depth: int, cross_ff: bool,
-                       stage_limit: int, branch_limit: Optional[int]) -> str:
-    """
-    ASCII fan-in tree:
-      • Stops at TOP_IN or CONST nets.
-      • Stops at FF boundaries unless cross_ff=True.
-      • depth: max edge depth (passed to summaries; used as overall guard here).
-      • stage_limit: max gate levels to print (0 = unlimited).
-      • branch_limit: max input pins to expand per gate (None = unlimited).
-    """
-    g = interp.graph
-    t = interp.trav
-    lines: List[str] = []
-    seen_edges = set()
-    seen_nets_depth = {start_net: 0}
-
-    def is_ff(iname: str) -> bool:
-        ctype = (g.instances.get(iname) or {}).get("type", "")
-        return g.celllib.is_sequential(ctype) if g.celllib else False
-
-    def emit(s: str, lvl: int):
-        lines.append(("  " * lvl) + s)
-
-    def walk_net(net: str, lvl: int, stages: int):
-        if stage_limit > 0 and stages > stage_limit:
-            emit("… (stage limit)", lvl)
-            return
-        curd = seen_nets_depth.get(net, lvl)
-        if lvl > depth:
-            emit("… (depth limit)", lvl)
-            return
-        if net in g.top_inputs:
-            emit(f"{net} [TOP_IN]", lvl)
-            return
-        if getattr(g, "constants", None) and net in g.constants:
-            emit(f"{net} [CONST]", lvl)
-            return
-
-        drivers = t._drivers_of(net)  # list[(iname, opin)]
-        if not drivers:
-            emit(f"{net} [NO_DRIVERS]", lvl)
-            return
-
-        # Expand each driver
-        for (iname, opin) in drivers[: (branch_limit or 10**9)]:
-            ctype = (g.instances.get(iname) or {}).get("type", "")
-            emit(f"{iname}.{opin} [{ctype}]", lvl)
-            # At FF boundary, stop unless cross_ff
-            if is_ff(iname) and not cross_ff:
-                emit("(ff boundary)", lvl + 1)
-                continue
-            # Walk each input pin of the driving instance
-            count = 0
-            for ipin, inet in t._inst_inputs(iname):
-                edge_key = (inet, iname, ipin)
-                if edge_key in seen_edges:
-                    continue
-                seen_edges.add(edge_key)
-                emit(f"{iname}.{ipin}", lvl + 1)
-                walk_net(inet, lvl + 2, stages + 1)
-                count += 1
-                if branch_limit and count >= branch_limit:
-                    emit("… (branch limit)", lvl + 1)
-                    break
-
-    emit(f"FANIN TREE for {start_net}", 0)
-    walk_net(start_net, 1, 0)
-    return "\n".join(lines) + ("\n" if lines and not lines[-1].endswith("\n") else "")
+    seq = []
+    x = src
+    while x is not None:
+        seq.append(x)
+        x = parent[x]
+    return seq
 
 def _handler(args: List[str], interp: Interpreter):
     if not interp.trav:
-        return {"__raw": "No graph loaded. Use: read verilog <manifest.lst>\n"}
+        return {"__raw":"No graph loaded. Use: read verilog <manifest.lst>\n"}
+    parsed, err = _parse(args)
+    if err: return err
+    target, depth, limit, endpoints_only, want_path = parsed
+    net = target
 
-    tree_mode = False
-    endpoints_mode = False
-    cross_ff = False
-    stage_limit = 0
-    depth = 200
-    branch_limit: Optional[int] = None
-    tokens: List[str] = []
-    it = iter(args)
-    for a in it:
-        if a == "--tree":
-            tree_mode = True
-        elif a == "--endpoints":
-            endpoints_mode = True
-        elif a == "--cross-ff":
-            cross_ff = True
-        elif a == "--stage-limit":
-            stage_limit = int(next(it))
-        elif a == "--depth":
-            depth = int(next(it))
-        elif a == "--branch":
-            branch_limit = int(next(it))
-        else:
-            tokens.append(a)
-
-    if not tokens:
-        return {"__raw": DETAIL}
-    target = tokens[0]
-
-    # Resolve to a net if possible; if not, assume caller provided a raw net name
-    net = _resolve_target_net(target, interp) or target
-
-    if endpoints_mode:
-        eps = interp.trav.collect_fanin_endpoints(net, depth=depth)
-        body = "".join([f"  - {e}\n" for e in sorted(eps)])
-        return {"__raw": f"FANIN ENDPOINTS (TOP_IN/CONST) for {target}\n" + body}
-
-    if tree_mode:
-        text = _render_fanin_tree(interp, net, depth=depth, cross_ff=cross_ff,
-                                  stage_limit=stage_limit, branch_limit=branch_limit)
-        return {"__raw": text}
-
-    # Default summary mode (cone sizes)
     if hasattr(interp.trav, "fanin_cone"):
         nets_seen, insts_seen, edges = interp.trav.fanin_cone(net, depth=depth)
+        if want_path:
+            radj, indeg = _augment_with_intra_instance_reverse(edges)
+            nodes = set(indeg.keys()) | set(radj.keys())
+            indeg2 = {n:0 for n in nodes}
+            for u, vs in radj.items():
+                for v in vs:
+                    indeg2[v] = indeg2.get(v,0) + 1
+                    indeg2.setdefault(u, 0)
+            sources = sorted([n for n,deg in indeg2.items() if deg == 0 and n != net])
+            if limit is not None and limit >= 0:
+                sources = sources[:limit]
+            lines = []
+            for s in sources:
+                p = _bfs_path_forward(s, net, radj)
+                if p:
+                    lines.append(" : ".join(p))
+            if not lines:
+                return {"__raw":"(no paths)\n"}
+            return {"__raw":"\n".join(lines) + "\n"}
+        if endpoints_only:
+            srcs = _sources_from_edges(net, edges)
+            if limit is not None and limit >= 0:
+                srcs = srcs[:limit]
+            body = "".join(f"  - {s}\n" for s in srcs)
+            return {"__raw": f"FANIN SOURCES for {target}\n" + body}
         return {
             "__raw": f"FANIN SUMMARY for {target}\n  nets={len(nets_seen)} insts={len(insts_seen)} edges={len(edges)}\n",
             "nets": sorted(nets_seen),
@@ -150,10 +171,19 @@ def _handler(args: List[str], interp: Interpreter):
             "meta": {"direction": "in", "depth": depth, "stop": ["ff", "io", "const"]},
         }
     else:
-        # Fallback: just run endpoints mode if cone summary not available
-        eps = interp.trav.collect_fanin_endpoints(net, depth=depth)
-        body = "".join([f"  - {e}\n" for e in sorted(eps)])
-        return {"__raw": f"FANIN ENDPOINTS (fallback) for {target}\n" + body}
+        srcs = interp.trav.collect_fanin_endpoints(net, depth=depth)
+        if want_path:
+            if limit is not None and limit >= 0:
+                srcs = srcs[:limit]
+            lines = [f"{s} : {target}" for s in sorted(srcs)]
+            return {"__raw":"\n".join(lines) + "\n"}
+        if endpoints_only:
+            if limit is not None and limit >= 0:
+                srcs = srcs[:limit]
+            body = "".join(f"  - {s}\n" for s in sorted(srcs))
+            return {"__raw": f"FANIN SOURCES (fallback) for {target}\n" + body}
+        body = "".join(f"  - {s}\n" for s in sorted(srcs))
+        return {"__raw": f"FANIN SUMMARY for {target}\n(sources only; cone API unavailable)\n" + body}
 
 def register(reg: CommandRegistry):
     reg.add_command("fanin", _handler, SUMMARY, DETAIL)
