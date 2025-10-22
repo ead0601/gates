@@ -1,0 +1,41 @@
+# vnlt_test.txt — end-to-end sanity for CLI + REPL
+#
+# --- Startup & auto-dispatch ---
+#python3 python/vnlt.py --manifest "$(pwd)/verilog_manifest.txt"
+
+show
+
+# --- REPL basics & history ---
+help
+
+# Press Up/Down arrows; then quit and relaunch to confirm ~/.vnlt_history persists.
+
+# --- Variables + field expansion ---
+set nets=A,B,C
+echo $nets
+echo #($nets)
+echo %($nets)
+
+# --- Shell pipelines (right side is /bin/sh) ---
+echo $nets | awk -F, '{print $2}'
+sh ls -1 | wc -l
+
+# --- Read/Write DB ---
+save_db
+sh jq '.instances | length' volatile/graph.json
+sh jq '.nets | keys | length' volatile/graph.json
+
+# --- find (listing, wildcard, path, tree) ---
+find -src inst.* | head
+find -src net.*  | head
+# Pick a real net from show/save_db output:
+find -src net.<SOME_NET> -dst inst.* | head
+find -src net.<SOME_NET> -dst inst.* -tree
+
+# --- Error handling (no crashes) ---
+read_verilog missing.txt
+find -src foo
+echo %($(unknown))
+
+# --- Exit behavior ---
+# exit

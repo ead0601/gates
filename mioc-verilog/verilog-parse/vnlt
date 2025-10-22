@@ -1,6 +1,8 @@
 #!/bin/bash
 
+rm -rf "$PWD/volatile/*"
+
 export PYTHONPYCACHEPREFIX="$PWD/volatile/__pycache__"
 
-python3 python/verilog_parse.py  -m verilog_manifest.txt
+python3 python/vnlt.py --manifest verilog_manifest.txt
 

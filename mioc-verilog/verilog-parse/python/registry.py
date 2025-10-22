@@ -1,61 +1,40 @@
+
 # === VNLT REV ===
-# file: python/registry.py
-# rev:  2025-10-03  r1  by:ediaz  tag:read
-# note: initial per-file revision header; build & load design from manifest
+# file: registry.py
+# rev:  2025-10-19 22:05  r2d  by:Drater  tag:registry
+# note: provides CommandRegistry with register(), help_text(), and dispatch(line, interp)
 # === /VNLT REV ===
 
-"""
-registry.py — tiny command registry so each command lives in its own module.
-Provides a global REG handle so command modules can auto-register at import time.
-"""
-
-from typing import Callable, Dict, List, Optional
-# Avoid importing Interpreter here to prevent circular imports in some setups.
-# Type hints will be minimal.
-
-Handler = Callable[[List[str], "Interpreter"], Optional[dict]]  # type: ignore[name-defined]
+from typing import Callable, Dict, Optional
 
 class CommandRegistry:
-    def __init__(self):
-        self._commands: Dict[str, Handler] = {}
-        self._help_summary: Dict[str, str] = {}
-        self._help_detail:  Dict[str, str] = {}
-        self.banner_lines: List[str] = []
+    def __init__(self) -> None:
+        self._cmds: Dict[str, Callable[[str, object], str]] = {}
+        self._helps: Dict[str, str] = {}
 
-    def add_command(self, name: str, handler: Handler, summary: str, detail: Optional[str] = None, aliases: Optional[List[str]] = None):
-        self._commands[name] = handler
-        self._help_summary[name] = summary
-        if detail:
-            self._help_detail[name] = detail
-        if aliases:
-            for a in aliases:
-                self._commands[a] = handler
-                self._help_summary[a] = f"(alias for {name})"
+    def register(self, name: str, handler: Callable[[str, object], str], helptext: Optional[str] = None) -> None:
+        self._cmds[name] = handler
+        if helptext:
+            self._helps[name] = helptext
 
-    def add_banner_line(self, line: str):
-        self.banner_lines.append(line)
+    def help_text(self) -> str:
+        lines = ["Minimal commands:"]
+        for name in sorted(self._cmds.keys()):
+            ht = self._helps.get(name, "")
+            if ht:
+                lines.append(f"  {name:<18} {ht}")
+            else:
+                lines.append(f"  {name}")
+        return "\n".join(lines)
 
-    def list_commands(self):
-        return dict(sorted(self._help_summary.items()))
-
-    def help_detail(self, name: str) -> Optional[str]:
-        return self._help_detail.get(name)
-
-    def execute(self, line: str, interp: "Interpreter") -> Optional[dict]:  # type: ignore[name-defined]
-        s = line.strip()
-        if not s or s.startswith("#"):
-            return None
-        parts = s.split()
-        cmd, args = parts[0], parts[1:]
-        h = self._commands.get(cmd)
-        if h is None:
-            return {"__raw": f"Unknown command '{cmd}'. Type 'help' for a list of commands.\n"}
-        return h(args, interp)
-
-# ---- Global registry singleton wiring ----
-REG: Optional[CommandRegistry] = None
-
-def set_global_registry(reg: CommandRegistry):
-    """Called by the launcher before importing cmd_* modules, so they can auto-register."""
-    global REG
-    REG = reg
+    def dispatch(self, line: str, interp) -> str:
+        s = (line or "").strip()
+        if not s:
+            return ""
+        parts = s.split(None, 1)
+        cmd = parts[0]
+        rest = parts[1] if len(parts) > 1 else ""
+        h = self._cmds.get(cmd)
+        if not h:
+            return f"Unknown command '{cmd}'. Type 'help' for a list of commands."
+        return h(rest, interp)
