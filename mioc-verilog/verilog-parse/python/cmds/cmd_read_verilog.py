@@ -3,6 +3,7 @@
 # rev:  2025-10-20 13:27  r6a by:Drater  tag:cmd
 # note: Manifest-aware; calls builders.build_celllib(rtl, seq_cells) and build_netgraph(celllib, components, assigns, top);
 #       converts to gates.CellLib/Graph and loads via Interpreter.attach(...).
+#       r6a+dbg — guarded diagnostics with vnlt_utils.dbg (prefix 'read_verilog').
 # === /VNLT REV ===
 
 import os
@@ -10,6 +11,7 @@ import re
 from typing import List, Dict, Tuple, Optional
 from registry import CommandRegistry
 from gates import CellLib, Graph
+from vnlt_utils import dbg
 
 _VERI_EXT = (".v", ".sv", ".vh", ".svh")
 
@@ -107,15 +109,21 @@ def _dict_to_graph(graph_dict: Dict) -> Graph:
     return Graph(top_inputs=top_inputs, top_outputs=top_outputs, nets=nets, instances=instances, aliases=aliases)
 
 def _handler(rest: str, interp) -> str:
+    dbg(interp, "read_verilog", "start handler")
     arg = (rest or "").strip()
+    dbg(interp, "read_verilog", "arg=%s", arg)
     if not arg:
         return "usage: read_verilog <manifest.txt>"
     if not os.path.exists(arg):
         return f"[read_verilog] manifest not found: {arg}"
+    dbg(interp, "read_verilog", "manifest found: %s", arg)
 
     buckets, top, seq_cells = _read_manifest(arg)
     rtl = buckets["rtl"]; components = buckets["components"]; assigns = buckets["assigns"]
+    dbg(interp, "read_verilog", "buckets: rtl=%d components=%d assigns=%d", len(rtl), len(components), len(assigns))
+    dbg(interp, "read_verilog", "top=%s seq_cells=%d", top or '-', len(seq_cells or []))
     if not (rtl or components):
+        dbg(interp, "read_verilog", "no verilog files in manifest")
         return "[read_verilog] no verilog files found in manifest"
 
     # Default seq_cells: use 'top' entry if present and looks sequential. Otherwise empty.
@@ -127,16 +135,28 @@ def _handler(rest: str, interp) -> str:
     except Exception as e:
         return f"[read_verilog] import error (builders): {e}"
 
+    dbg(interp, "read_verilog", "build_celllib(rtl=%d, seq_cells=%d)", len(rtl), len(seq_cells or []))
     try:
         celllib_dict = build_celllib(rtl, seq_cells)
+        dbg(interp, "read_verilog", "celllib built: keys=%s", list(celllib_dict.keys())[:6])
         graph_dict   = build_netgraph(celllib_dict, components, assigns, top or "")
+        # lightweight structure sizes
+        di = graph_dict.get("instances", {})
+        dn = graph_dict.get("nets", {})
+        dbg(interp, "read_verilog", "graph built: instances=%s nets=%s", 
+            (len(di) if hasattr(di,'__len__') else 'dict?'),
+            (len(dn) if hasattr(dn,'__len__') else 'dict?'))
     except Exception as e:
         return f"[read_verilog] build failed: {e}"
 
     try:
         cl = _dict_to_celllib(celllib_dict)
         gr = _dict_to_graph(graph_dict)
-        interp.attach(cl, gr)
+        #interp.attach(cl, gr)
+        interp.attach(graph=gr, celllib=cl)
+        dbg(interp, "read_verilog", "attached: instances=%d nets=%d",
+            len(getattr(gr, 'instances', {}) or {}),
+            len(getattr(gr, 'nets', {}) or {}))
     except Exception as e:
         return f"[read_verilog] failed to load into interpreter: {e}"
 

@@ -1,20 +1,156 @@
-# === VNLT REV ===
-# file: cmds/cmd_for.py
-# rev:  2025-10-22 00:22  r6  by:Drater  tag:cmd
-# note: Safe import: no top-level vnlt imports. One-line loop; $item per-iteration; allow_loop_vars used in body only.
-# === /VNLT REV ===
+# ============================================================================
+# File: cmds/cmd_for.py
+# REV: r10 — standalone + grouping + quiet-by-default + vnlt→shell split
+#        + explicit $(item)/$item substitution per iteration
+# One-line loop:
+#   for (ITER) do CMD1 ; CMD2 ; ... ; end
+# $(item) is set logically per iteration (local substitution), restored by
+#   doing nothing globally (no env pollution).
+# Clause features:
+#   - optional grouping: ( ... )
+#   - vnlt command optionally piped to a shell tail and/or > / >> redirect
+#   - quote/escape/paren aware splitting like the REPL
+# Debug prints are silenced unless VNLT_DEBUG=1 or interp.debug=True.
+# ============================================================================
 
-from typing import List, Tuple
-import re
-
+import os, re, subprocess
+from pathlib import Path
 from registry import CommandRegistry
-from variables import setv as _setv
-from expander_runtime import get_executor as _get_exec
+from expander_runtime import expand_line
 
-# Defer vnlt imports until inside handler to avoid any circulars.
-_fmt_result = None
+# --- debug gate ---------------------------------------------------------------
+def _dbg(interp, *args):
+    try:
+        if getattr(interp, "debug", False) or int(os.getenv("VNLT_DEBUG","0") or "0"):
+            print(*args)
+    except Exception:
+        pass
 
-def _fallback_to_text(res) -> str:
+# --- quote/paren-aware helpers (mirror vnlt splitter logic) ------------------
+def _scan_unquoted(s: str, target: str):
+    esc=False; q=None; depth=0
+    i=0; n=len(s)
+    while i<n:
+        ch=s[i]
+        if esc: esc=False; i+=1; continue
+        if ch == '\\':
+            esc=True; i+=1; continue
+        if q:
+            if ch == q: q=None
+            i+=1; continue
+        if ch in ('"', "'"):
+            q=ch; i+=1; continue
+        if ch == '(':
+            depth += 1; i+=1; continue
+        if ch == ')':
+            depth = max(0, depth-1); i+=1; continue
+        if depth == 0 and ch == target:
+            yield i
+        i+=1
+
+def _split_pipeline_and_redirect(s: str):
+    """Return (vnlt_left, shell_tail, redirect_path, append_flag)"""
+    left = s.strip()
+    shell_tail = None
+    for i in _scan_unquoted(left, '|'):
+        shell_tail = left[i+1:].strip()
+        left = left[:i].strip()
+        break
+    gt = list(_scan_unquoted(left, '>'))
+    if not gt:
+        return left, shell_tail, None, False
+    r = gt[-1]
+    op_start = r - 1 if r - 1 >= 0 and left[r-1] == '>' else r
+    append = (op_start != r)
+    j = r + 1
+    while j < len(left) and left[j].isspace():
+        j += 1
+    if j >= len(left):
+        return left, shell_tail, None, False
+    if left[j] in ('"', "'"):
+        q = left[j]; j += 1; k = j
+        while k < len(left) and left[k] != q:
+            if left[k] == '\\': k += 2; continue
+            k += 1
+        path = left[j:k]
+    else:
+        k = j
+        while k < len(left) and not left[k].isspace():
+            k += 1
+        path = left[j:k]
+    cmd = left[:op_start].rstrip()
+    return cmd, shell_tail, path, append
+
+def _write_redirect(path: str, data: str, append: bool):
+    p = Path(path).expanduser()
+    if not p.is_absolute():
+        p = (Path.cwd() / p).resolve()
+    p.parent.mkdir(parents=True, exist_ok=True)
+    mode = 'a' if append else 'w'
+    with open(p, mode, encoding='utf-8', newline='') as f:
+        if data and not data.endswith('\n'):
+            f.write(data + '\n')
+        else:
+            f.write(data)
+    return str(p)
+
+def _split_semicolons_top(s: str):
+    out, cur = [], []
+    q = None
+    esc = False
+    depth = 0
+    for ch in s:
+        if esc:
+            cur.append(ch); esc = False; continue
+        if ch == '\\':
+            esc = True; cur.append(ch); continue
+        if q:
+            if ch == q: q=None
+            cur.append(ch); continue
+        if ch in ("'", '"'):
+            q = ch; cur.append(ch); continue
+        if ch == '(':
+            depth += 1; cur.append(ch); continue
+        if ch == ')':
+            depth = max(0, depth-1); cur.append(ch); continue
+        if ch == ';' and depth == 0:
+            seg = ''.join(cur).strip()
+            if seg: out.append(seg)
+            cur = []
+            continue
+        cur.append(ch)
+    seg = ''.join(cur).strip()
+    if seg: out.append(seg)
+    return out
+
+# --- optional clause grouping -------------------------------------------------
+def _strip_wrapping_parens(s: str) -> str:
+    t = s.strip()
+    if not (t.startswith("(") and t.endswith(")")):
+        return s
+    depth = 0
+    esc = False
+    q = None
+    for i, ch in enumerate(t):
+        if esc:
+            esc = False; continue
+        if ch == '\\':
+            esc = True; continue
+        if q:
+            if ch == q: q = None
+            continue
+        if ch in ("'", '"'):
+            q = ch; continue
+        if ch == '(':
+            depth += 1; continue
+        if ch == ')':
+            depth -= 1
+            if depth == 0 and i != len(t) - 1:
+                return s
+    return t[1:-1].strip() if depth == 0 else s
+
+# --- simple text coercion (mirror vnlt) --------------------------------------
+def _res_to_text(res):
     if res is None:
         return ''
     if isinstance(res, str):
@@ -25,245 +161,114 @@ def _fallback_to_text(res) -> str:
         if 'text' in res:
             return str(res.get('text') or '')
         if 'fields' in res:
-            vals = res.get('fields') or []
             try:
-                return ','.join(str(x) for x in vals)
+                return ','.join(str(x) for x in (res.get('fields') or []))
             except Exception:
-                return '\n'.join(str(x) for x in vals)
+                return '\n'.join(str(x) for x in (res.get('fields') or []))
     return str(res)
 
-def _to_text(res) -> str:
-    global _fmt_result
-    if _fmt_result is None:
-        try:
-            from vnlt import _res_to_text as _rt
-            _fmt_result = _rt
-        except Exception:
-            _fmt_result = False
-    if _fmt_result and _fmt_result is not False:
-        try:
-            tmp = _fmt_result(res)
-            return tmp if isinstance(tmp, str) else _fallback_to_text(tmp)
-        except Exception:
-            pass
-    return _fallback_to_text(res)
+# --- core --------------------------------------------------------------------
+_ONE_LINE = re.compile(r"^for\s*\((.*?)\)\s*do\s*(.*?)\s*;\s*end\s*$", re.S)
 
-def _find_matching_paren(s: str, start_idx: int) -> int:
-    i = start_idx + 1
-    depth = 1
-    q = None
-    esc = False
-    n = len(s)
-    while i < n:
-        ch = s[i]
-        if esc:
-            esc = False; i += 1; continue
-        if ch == '\\':
-            esc = True; i += 1; continue
-        if q:
-            if ch == q:
-                q = None
-            i += 1; continue
-        if ch in ('"', "'"):
-            q = ch; i += 1; continue
-        if ch == '(':
-            depth += 1; i += 1; continue
-        if ch == ')':
-            depth -= 1
-            if depth == 0:
-                return i
-            i += 1; continue
-        i += 1
-    return -1
-
-def _split_semicolons_top(s: str) -> List[str]:
-    out: List[str] = []
-    i = 0
-    start = 0
-    q = None
-    esc = False
-    depth = 0
-    n = len(s)
-    while i < n:
-        ch = s[i]
-        if esc:
-            esc = False; i += 1; continue
-        if ch == '\\':
-            esc = True; i += 1; continue
-        if q:
-            if ch == q:
-                q = None
-            i += 1; continue
-        if ch in ('"', "'"):
-            q = ch; i += 1; continue
-        if ch == '(':
-            depth += 1; i += 1; continue
-        if ch == ')':
-            if depth > 0: depth -= 1
-            i += 1; continue
-        if ch == ';' and depth == 0:
-            frag = s[start:i].strip()
-            if frag:
-                out.append(frag)
-            start = i + 1
-            i += 1; continue
-        i += 1
-    tail = s[start:].strip()
-    if tail:
-        out.append(tail)
-    return out
-
-_var_pat = re.compile(r'^\s*\$(?:\((?P<n1>[A-Za-z_][A-Za-z0-9_]*)\)|(?P<n2>[A-Za-z_][A-Za-z0-9_]*))\s*$')
-
-def _iter_from_expr(expr: str, interp, reg) -> List[str]:
-    s = (expr or '').strip()
-    if not s:
+def _materialize_iter_list(iter_expr: str, interp) -> list[str]:
+    expanded = expand_line(iter_expr.strip(), interp, interp.registry)
+    _dbg(interp, f"for: iter expanded -> {repr(expanded)}")
+    if not expanded:
         return []
+    if "\n" in expanded and "," not in expanded:
+        items = [x.strip() for x in expanded.splitlines() if x.strip()]
+    else:
+        items = [x.strip() for x in expanded.split(",") if x.strip()]
+    _dbg(interp, f"for: items -> {items}")
+    return items
 
-    if (s.startswith('#(') or s.startswith('%(')) and s.endswith(')'):
-        op = s[0]
-        inner = s[2:-1]
-        exec_vnlt = _get_exec(reg, interp)
-        text = exec_vnlt(inner.strip())
-        if op == '#':
-            parts = [p.strip() for p in text.split(',')]
-        else:
-            parts = [p.strip() for p in re.split(r'\r?\n', text)]
-        return [p for p in parts if p]
+def _sub_item(text: str, value: str) -> str:
+    # Replace $(item) and $item literally; avoid partial matches.
+    # Simple, robust, and quote-friendly for our use.
+    return text.replace("$(item)", value).replace("$item", value)
 
-    m = _var_pat.match(s)
-    if m:
-        name = m.group('n1') or m.group('n2')
-        vals = []
-        if hasattr(interp, 'variables') and isinstance(interp.variables, dict):
-            raw = interp.variables.get(name)
-            if isinstance(raw, (list, tuple)):
-                vals = [str(v) for v in raw]
-            elif isinstance(raw, str):
-                vals = [v.strip() for v in raw.split(',') if v.strip()]
-        if not vals:
-            try:
-                from variables import getv as _getv
-                vals = _getv(name)
-            except Exception:
-                vals = []
-        return [str(v).strip() for v in vals if str(v).strip()]
+def _run_clause(clause: str, interp, item_val: str) -> str:
+    clause0 = clause
+    clause = _strip_wrapping_parens(clause.strip())
+    if not clause:
+        return ""
 
-    parts = [p.strip() for p in s.split(',')]
-    return [p for p in parts if p]
+    # First perform the per-iteration $(item)/$item substitution
+    clause = _sub_item(clause, item_val)
 
-def _parse_one_line_for(rest: str) -> Tuple[str, str]:
-    t = (rest or '').strip()
-    if not t or t[0] != '(':
-        raise ValueError("usage: for (ITER) do CMD1 ; ... ; end")
-    r = _find_matching_paren(t, 0)
-    if r < 0:
-        raise ValueError("for: unmatched '(' in ITER")
-    iter_expr = t[1:r]
-    after = t[r+1:].lstrip()
-    if not after.lower().startswith('do'):
-        raise ValueError("for: expected 'do' after (ITER)")
-    body = after[2:].strip()
-    if not body.lower().endswith('end'):
-        raise ValueError("for: one-line form must end with '; end'")
-    body_wo_end = body[:-3].rstrip()
-    if not body_wo_end.endswith(';'):
-        raise ValueError("for: missing ';' before end")
-    body_wo_end = body_wo_end[:-1].rstrip()
-    if not body_wo_end:
-        raise ValueError("for: empty body")
-    return iter_expr, body_wo_end
+    # Split into vnlt_left | shell_tail and optional redirection
+    vnlt_left, shell_tail, out_path, append = _split_pipeline_and_redirect(clause)
+    _dbg(interp, f"for: clause split: left={repr(vnlt_left)} shell={repr(shell_tail)} out={repr(out_path)} append={append}")
 
-def _ensure_interp_vars(interp):
-    if not hasattr(interp, 'variables') or not isinstance(interp.variables, dict):
-        try:
-            interp.variables = {}
-        except Exception:
-            pass
-
-def _bind_item(interp, value: str):
-    _ensure_interp_vars(interp)
+    # Expand & run the vnlt side first ($..., #( ), %( ) apply now)
+    vnlt_expanded = expand_line(vnlt_left, interp, interp.registry)
+    _dbg(interp, f"for: vnlt_expanded={repr(vnlt_expanded)}")
     try:
-        interp.variables['item'] = str(value)
-    except Exception:
-        pass
-    _setv('item', [value])
+        res = interp.registry.dispatch(vnlt_expanded, interp)
+    except SystemExit:
+        raise
+    except Exception as e:
+        _dbg(interp, f"for: dispatch error {e}")
+        res = ""
 
-# @help for
-# for (ITER) do CMD1 ; ... ; end
-# Iterate over ITER and run the body per item. The loop variable is $(item).
-# Examples:
-#   set nets=A,B,C
-#   for ($nets)  do echo $(item) ; end
-#   for (A,B)    do echo X$(item)X ; end
-#   for (A,B)    do echo $(item) >> out.txt ; end
-#
-# @manual for
-# Goal:
-#   Iterate a list and execute one or more VNLT body clauses per item.
-# Iterator sources:
-#   - $name or $(name): if list, iterate; if string, split on commas.
-#   - #( vnlt ): run vnlt, split result on commas.
-#   - %( vnlt ): run vnlt, split result on newlines.
-#   - Literal: split on commas.
-# Body:
-#   One or more VNLT commands separated by ';'. Each clause may pipe to shell
-#   or redirect (> / >>) per iteration.
-# Outputs:
-#   Aggregated text from clauses that did not redirect/pipe.
-# Notes:
-#   - Loop var $(item) is set per iteration and left as the final value after the loop.
-#   - Empty iterator: no iterations, no error.
-#   - Clause errors: continue to next item.
+    text = _res_to_text(res)
+
+    # If there is a shell tail, substitute $(item)/$item in it too (rare but safe)
+    if shell_tail:
+        shell_tail = _sub_item(shell_tail, item_val)
+        _dbg(interp, f"for: running shell tail: {shell_tail}")
+        p = subprocess.Popen(['/bin/sh','-c', shell_tail],
+                             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        out, err = p.communicate(text)
+        if err and err.strip():
+            # Only print shell errors in debug
+            _dbg(interp, f"[SHELL ERROR {p.returncode}] {err.strip()}")
+        text = out
+
+    # Handle redirect if present
+    if out_path:
+        _write_redirect(out_path, text, append)
+        return ""
+
+    return text
 
 def _handler(rest: str, interp) -> str:
-    try:
-        iter_expr, body = _parse_one_line_for(rest)
-    except Exception as e:
-        return str(e)
+    r = rest.strip()
+    line = r if r.startswith("for ") else f"for {r}"
+    _dbg(interp, f"for: handler line={repr(line)}")
+    m = _ONE_LINE.match(line)
+    if not m:
+        print("for: one-line form must end with '; end'")
+        return ""
 
-    items = _iter_from_expr(iter_expr, interp, interp.registry)
+    iter_expr, body = m.groups()
+    _dbg(interp, f"for: iter_expr={repr(iter_expr)} body={repr(body)}")
+
+    items = _materialize_iter_list(iter_expr, interp)
     if not items:
-        return f"[for] no items from ITER: ({iter_expr.strip()})"
+        _dbg(interp, "for: no items -> exit")
+        return ""
 
     clauses = _split_semicolons_top(body)
+    _dbg(interp, f"for: clauses -> {clauses}")
     if not clauses:
-        return ''
+        _dbg(interp, "for: no clauses -> exit")
+        return ""
 
-    outputs: List[str] = []
-    try:
-        from vnlt import _dispatch_one as _dispatch_one_vnlt
-    except Exception as e:
-        return f"[for] internal import error: {e}"
+    out_lines = []
+    for it in items:
+        _dbg(interp, f"for: iteration item={repr(it)}")
+        for clause in clauses:
+            out = _run_clause(clause, interp, it)
+            if out:
+                out_lines.append(out)
 
-    old_flag = getattr(interp, 'allow_loop_vars', False)
-    try:
-        for it in items:
-            _bind_item(interp, it)
-            try:
-                interp.allow_loop_vars = True
-            except Exception:
-                pass
-            for clause in clauses:
-                cut = clause.strip()
-                if not cut:
-                    continue
-                try:
-                    res = _dispatch_one_vnlt(interp.registry, interp, cut)
-                    txt = _to_text(res)
-                except SystemExit:
-                    txt = ''
-                except Exception as e:
-                    txt = f"[for] error: {e}"
-                if txt:
-                    outputs.append(txt.rstrip())
-    finally:
-        try:
-            interp.allow_loop_vars = old_flag
-        except Exception:
-            pass
+    return "\n".join(s for s in out_lines if s)
 
-    return "\n".join(outputs)
-
-def register(reg: CommandRegistry) -> None:
-    reg.register("for", _handler, "for (ITER) do CMD1 ; ... ; end  — one-line loop; $item set per iteration.")
+# --- registration -------------------------------------------------------------
+def register(reg: CommandRegistry):
+    reg.register(
+        "for",
+        _handler,
+        "for (ITER) do CMD1 ; ... ; end  — one-line loop; $(item) set per iteration.",
+    )

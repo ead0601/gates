@@ -1,13 +1,25 @@
-
 # === VNLT REV ===
 # file: builder_verilog.py
 # rev:  2025-10-19 06:29  r4  by:Drater  tag:builder
 # note: flat netlist builder — parses module IO, assign, and instance hookups (.PIN(net));
 #       outputs instances[name]={{type,pins{{pin:net}}}}, nets{{net:{{drivers,loads}}}}, top_inputs, top_outputs.
+#       r4+dbg — env-guarded prints with prefix 'builder_verilog'.
 # === /VNLT REV ===
 
-import re, json
+import re, json, os
 from typing import List, Dict, Tuple, Any
+
+def _dbg(msg: str, *args):
+    try:
+        if not bool(int(os.getenv('VNLT_DEBUG','0') or '0')):  # env-only (no interp here)
+            return
+    except Exception:
+        return
+    try:
+        text = msg % args if args else msg
+    except Exception:
+        text = f"{msg} | args={args}"
+    print(f"builder_verilog: {text}")
 
 WS = r"[\t\r\n ]*"
 IDENT = r"[A-Za-z_][A-Za-z0-9_$]*"
@@ -97,6 +109,7 @@ def build(files: List[str]) -> Tuple[Dict, Dict]:
     return cell, graph
 
 def build_celllib(files: List[str]) -> Dict:
+    _dbg("build_celllib: files=%d", len(files or []))
     text = "\n".join(_strip_comments(open(f, 'r', errors='ignore').read()) for f in files)
     mods = _split_modules(text)
     types = set()
@@ -111,7 +124,9 @@ def build_celllib(files: List[str]) -> Dict:
     }
 
 def build_netgraph(files: List[str], celllib: Dict = None) -> Dict:
+    _dbg("build_netgraph: files=%d", len(files or []))
     text = "\n".join(_strip_comments(open(f, 'r', errors='ignore').read()) for f in files)
+    _dbg("split modules...")
     mods = _split_modules(text)
     if not mods:
         return {
@@ -125,6 +140,7 @@ def build_netgraph(files: List[str], celllib: Dict = None) -> Dict:
         plist = _parse_portlist(top_ports)
         top_in, top_out = [], []
 
+    _dbg("parse assigns + instances...")
     assigns = _parse_assigns(top_body)
     instances = _parse_instances(top_body)
 
@@ -156,6 +172,7 @@ def build_netgraph(files: List[str], celllib: Dict = None) -> Dict:
         nets[lhs]['drivers'].append(f"$assign.{rhs}")
         nets[rhs]['loads'].append(f"$assign->{lhs}")
 
+    _dbg("graph: top=%s ins=%d outs=%d insts=%d nets=%d", top_name, len(top_in), len(top_out), len(inst_dict), len(nets))
     graph = {
         'name': top_name,
         'top_inputs': sorted(set(top_in)),
@@ -209,6 +226,7 @@ def build_from_manifest(cfg):
         if hasattr(interp, "load_celllib_graph"):
             interp.load_celllib_graph(cell, graph)
             return interp
+        import types
         G = types.SimpleNamespace(**graph)
         interp.celllib = cell
         interp.graph = G
