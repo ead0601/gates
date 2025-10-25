@@ -325,8 +325,9 @@ def _render_tree(paths: List[List[Tuple[str,str]]], fmt_node) -> str:
 # -----------------------------
 # Core handler
 # -----------------------------
-
+#
 # @help find
+#
 # find — unified listing & path search (type filters, virtual kinds, direction, and labels)
 #
 # Usage:
@@ -363,6 +364,120 @@ def _render_tree(paths: List[List[Tuple[str,str]]], fmt_node) -> str:
 #   -label_types   annotate inst nodes as inst.NAME[TYPE] (fallback [SEQ] if unknown but sequential)
 #   -show_stops    if no full path reaches -dst, also print partial paths to stop points with STOP:<reason>
 #
+# =============================================================================
+# find — unified listing & path search (with type filters & virtual kinds)
+#
+# SYNOPSIS
+#   # Listing mode (names only)
+#   find -src <inst.* | net.* | iport.* | oport.* | seq.* | gate.*> [-type <glob>]...
+#
+#   # Path search (walk graph from sources to a destination)
+#   find -src <inst.* | net.* | seq.* | gate.*> \
+#        -dst <inst.* | net.* | iport.* | oport.* | seq.* | gate.*> \
+#        [-type <glob>]... [-back] [-cross_sync] [-tree] [-label_types] [-show_stops] \
+#        [-max_depth N] [-max_nodes N] [-max_paths N]
+#
+# KINDS (prefix selectors)
+#   inst.<glob>   Instance names (default kind if prefix omitted)
+#   net.<glob>    Net names
+#   iport.<glob>  Top-level input ports (as destinations or when walking -back)
+#   oport.<glob>  Top-level output ports (as sources or when walking forward)
+#
+# VIRTUAL KINDS (derived from cell type)
+#   seq.<glob>    Sequential instances (flops/latches)
+#   gate.<glob>   Non-sequential instances (pure combinational)
+#
+# TYPE FILTERS & SUGAR
+#   -type <glob>            Keep only instances whose cell type matches <glob>.
+#                           Repeatable; matches ANY of the given globs.
+#   inst.<typeglob>.<name>  Sugar for: -src inst.<name> -type <typeglob>
+#     e.g.  inst.mioc_flop.u*   ==  -src inst.u* -type mioc_flop
+#
+# TRAVERSAL OPTIONS
+#   -back         Traverse fan-in (walk from sources backward to drivers).
+#                 Without -back, traversal is fan-out (forward).
+#   -cross_sync   Allow traversal across sequential cells (seq). By default,
+#                 traversal stops at seq boundaries (clean comb cones).
+#
+# OUTPUT OPTIONS
+#   -tree         Render paths as a prefix tree (ASCII).
+#   -label_types  Append [cell_type] after each inst.* in linear output.
+#   -show_stops   Annotate stop reasons on final hop of each path (e.g. [STOP:seq]).
+#
+# LIMITERS (safety/perf)
+#   -max_depth N  Bound hop depth from each source (default: unlimited).
+#   -max_nodes N  Bound explored nodes across the search (env FIND_MAX_NODES overrides).
+#   -max_paths N  Bound number of reported paths (env FIND_MAX_PATHS overrides).
+#
+# BEHAVIOR
+#   • Listing (-src only) prints matching names, one per line; respects -type/virtual kinds.
+#   • Path search builds a mixed graph (inst↔net). Start from all -src matches and stop
+#     when the current node matches -dst. Hops alternate between inst and net.
+#   • iport/oport are matched when the current net is a top-level input/output net.
+#   • Without -cross_sync, traversal halts when the next hop would pass through seq.*
+#     (those endpoints are marked with [STOP:seq] if -show_stops is used).
+#
+# GOTCHAS / TIPS
+#   • If a query seems too “chatty”, add -max_depth or -type to focus.
+#   • iport.* as -src with -back is uncommon; prefer iport.* as -dst when walking -back.
+#   • Use -label_types when grepping for specific cells in output.
+#
+# EXAMPLES — INVENTORY
+#   find -src inst.u*                 # instances starting with "u"
+#   find -src net.clk_*               # nets named clk_*
+#   find -src iport.*                 # top-level inputs
+#   find -src oport.*                 # top-level outputs
+#   find -src seq.*                   # all sequential instances
+#   find -src gate.*                  # all combinational instances
+#
+# EXAMPLES — TYPE FILTERS & SUGAR
+#   find -src inst.* -type mioc_flop
+#   find -src inst.mioc_*.*           # any type starting with mioc_
+#   find -src inst.mioc_flop.u*       # sugar form for flops named u*
+#
+# EXAMPLES — SIMPLE PATHS
+#   # Forward: from any flop to any output (across seq)
+#   find -src seq.* -dst oport.* -cross_sync
+#
+#   # Backward: from an output to any input (combinational only)
+#   find -src oport.* -dst iport.* -back
+#
+#   # Backward + annotate where traversal stops at flops
+#   find -src oport.MUX -dst iport.* -back -label_types -show_stops
+#
+# EXAMPLES — MULTI-LINE (REPL '\' continuation)
+#   # Inventory with counts into files
+#   set OUT=./volatile/out
+#   sh mkdir -p $(OUT)
+#   find -src inst.*        | wc -l   > $(OUT)/inst.count
+#   find -src seq.*         | wc -l   > $(OUT)/seq.count
+#   find -src gate.*        | wc -l   > $(OUT)/gate.count
+#
+#   # Backward trees for every oport (up to depth 32)
+#   for (%(find -src oport.*)) do \
+#     (echo "=== FANIN TREE for $(item) ===") ; \
+#     (find -src oport.$(item) -dst iport.* -back -tree -max_depth 32) ; \
+#     (echo) ; \
+#   end
+#
+#   # Placement seed: show where cones hit flops (then grep flops)
+#   for (%(find -src oport.*)) do \
+#     (echo "=== FANIN STOPS for $(item) ===") ; \
+#     (find -src oport.$(item) -dst iport.* -back -label_types -show_stops \
+#        | grep -F "mioc_flop") ; \
+#     (echo) ; \
+#   end
+#
+# PERFORMANCE CONTROL (when exploring big cones)
+#   # Cap depth and exploration while debugging:
+#   find -src iport.* -dst oport.* -max_depth 20 -max_nodes 20000 -max_paths 2000
+#
+# EXIT CODES
+#   0 — success (matches may be zero)
+#   1 — user error (bad flags, bad kind)
+#   2 — search aborted by limiter (will print a truncation note)
+#
+# =============================================================================
 def _handler(rest: str, interp) -> str:
     (src, dst, cross, tree, type_globs, max_nodes, max_paths,
      max_depth, back, label_types, show_stops) = _parse_args(rest)
