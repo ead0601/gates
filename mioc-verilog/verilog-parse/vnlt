@@ -1,8 +1,11 @@
 #!/bin/bash
 
-rm -rf "$PWD/volatile/*"
+rm -rf  ${PWD}/volatile
+mkdir   ${PWD}/volatile
 
 export PYTHONPYCACHEPREFIX="$PWD/volatile/__pycache__"
+#export VNLT_DEBUG=1
+export PYTHONPATH="./python/:$PYTHONPATH"
 
 python3 python/vnlt.py --manifest verilog_manifest.txt
 
