@@ -1,10 +1,12 @@
 # === VNLT REV ===
 # file: cmds/cmd_find.py
-# rev:  2025-10-25  r14  tag:cmd
+# rev:  2025-10-25  r15  tag:cmd
 # note: Directional traversal using net driver/load index (no pin-dir guess).
 #       -back (fanin), -max_nodes/-max_paths/-max_depth, virtual kinds (seq./gate.),
 #       inst.<type>.<name> sugar, iport./oport. as src/dst, -type filters.
-#       NEW: -label_types → render inst nodes as inst.NAME[TYPE] (fallback [SEQ] if sequential).
+#       -label_types → inst.NAME[TYPE] (fallback [SEQ]).
+#       NEW: -show_stops → when no full path reaches -dst, also render partial paths
+#            to the first stop point, annotated with STOP:seq | STOP:depth | STOP:dead.
 # === /VNLT REV ===
 
 import os, fnmatch, collections
@@ -94,11 +96,11 @@ def _inst_inputs_outputs_from_index(idx, inst: str) -> Tuple[List[str], List[str
 
 def _parse_args(rest: str):
     """
-    Return: (src, dst, cross, tree, type_globs, max_nodes, max_paths, max_depth, back, label_types)
+    Return: (src, dst, cross, tree, type_globs, max_nodes, max_paths, max_depth, back, label_types, show_stops)
     """
     toks = [t for t in (rest or '').split() if t.strip()]
     src = None; dst = None; tree = False; cross = False; type_globs: List[str] = []
-    max_nodes = None; max_paths = None; max_depth = None; back = False; label_types = False
+    max_nodes = None; max_paths = None; max_depth = None; back = False; label_types = False; show_stops = False
     i=0
     while i < len(toks):
         t = toks[i]
@@ -128,8 +130,10 @@ def _parse_args(rest: str):
             back = True; i+=1; continue
         if t == '-label_types':
             label_types = True; i+=1; continue
+        if t == '-show_stops':
+            show_stops = True; i+=1; continue
         i+=1
-    return src, dst, cross, tree, type_globs, max_nodes, max_paths, max_depth, back, label_types
+    return src, dst, cross, tree, type_globs, max_nodes, max_paths, max_depth, back, label_types, show_stops
 
 def _kind_and_glob(s: str) -> Tuple[str, str]:
     """Return (kind, pattern). Kind ∈ {'inst','net','iport','oport','seq','gate'}."""
@@ -165,29 +169,25 @@ def _type_matches(interp, inst_name: str, type_globs: List[str]) -> bool:
 # -----------------------------
 
 def _neighbors_from_net_forward(idx, net: str) -> List[Tuple[str,str]]:
-    # net → LOAD insts
-    return [('inst', i) for i in _nets_to_load_insts(idx, net)]
+    return [('inst', i) for i in _nets_to_load_insts(idx, net)]  # net → LOAD insts
 
 def _neighbors_from_net_back(idx, net: str) -> List[Tuple[str,str]]:
-    # net → DRIVER insts
-    return [('inst', i) for i in _nets_to_driver_insts(idx, net)]
+    return [('inst', i) for i in _nets_to_driver_insts(idx, net)]  # net → DRIVER insts
 
 def _neighbors_from_inst_forward(idx, interp, inst: str, allow_cross: bool) -> List[Tuple[str,str]]:
-    # inst → OUTPUT nets (unless blocked at sync boundary)
     if (not allow_cross) and _cell_is_sequential(interp, inst):
-        return []
+        return []  # seq boundary
     _ins, outs = _inst_inputs_outputs_from_index(idx, inst)
     return [('net', n) for n in outs]
 
 def _neighbors_from_inst_back(idx, interp, inst: str, allow_cross: bool) -> List[Tuple[str,str]]:
-    # inst → INPUT nets (unless blocked at sync boundary)
     if (not allow_cross) and _cell_is_sequential(interp, inst):
-        return []
+        return []  # seq boundary
     ins, _outs = _inst_inputs_outputs_from_index(idx, inst)
     return [('net', n) for n in ins]
 
 # -----------------------------
-# Bounded DFS
+# Bounded DFS (with stop capture)
 # -----------------------------
 
 def _dfs_all_paths(interp, idx,
@@ -197,8 +197,15 @@ def _dfs_all_paths(interp, idx,
                    forward: bool,
                    max_nodes: Optional[int] = None,
                    max_paths: Optional[int] = None,
-                   max_depth: Optional[int] = None) -> Tuple[List[List[Tuple[str,str]]], bool]:
-    """Return (paths, truncated_flag). Directional depth-first traversal."""
+                   max_depth: Optional[int] = None,
+                   collect_stops: bool = False) -> Tuple[List[List[Tuple[str,str]]], bool, List[List[Tuple[str,str]]], List[str]]:
+    """
+    Return (paths, truncated_flag, stop_paths, stop_reasons).
+    When collect_stops=True, capture partial paths that end due to:
+      - sequential boundary (no crossing): reason 'seq'
+      - max_depth exceeded:                reason 'depth'
+      - no neighbors (dead end):           reason 'dead'
+    """
     if max_nodes is None:
         max_nodes = int(os.getenv("FIND_MAX_NODES", "20000") or "20000")
     if max_paths is None:
@@ -206,7 +213,14 @@ def _dfs_all_paths(interp, idx,
 
     visited_count = 0
     out_paths: List[List[Tuple[str,str]] ] = []
+    stop_paths: List[List[Tuple[str,str]]] = []
+    stop_reasons: List[str] = []
     truncated = False
+
+    def _push_stop(path: List[Tuple[str,str]], reason: str):
+        if collect_stops and path:
+            stop_paths.append(path[:])
+            stop_reasons.append(reason)
 
     def dfs(node: Tuple[str,str], path: List[Tuple[str,str]]):
         nonlocal visited_count, truncated
@@ -218,7 +232,10 @@ def _dfs_all_paths(interp, idx,
         if len(out_paths) >= max_paths:
             truncated = True
             return
-        if (max_depth is not None) and (len(path) - 1 >= max_depth):  # edges count
+
+        # Depth check (edges = len(path)-1)
+        if (max_depth is not None) and (len(path) - 1 >= max_depth):
+            _push_stop(path, 'depth')
             return
 
         visited_count += 1
@@ -231,8 +248,16 @@ def _dfs_all_paths(interp, idx,
             nbrs = (_neighbors_from_net_forward(idx, v) if t=='net'
                     else _neighbors_from_inst_forward(idx, interp, v, allow_cross))
         else:
+            # If we are at an inst and it's sequential while crossing is off, this is a stop.
+            if t=='inst' and (not allow_cross) and _cell_is_sequential(interp, v):
+                _push_stop(path, 'seq')
+                return
             nbrs = (_neighbors_from_net_back(idx, v) if t=='net'
                     else _neighbors_from_inst_back(idx, interp, v, allow_cross))
+
+        if not nbrs:
+            _push_stop(path, 'dead')
+            return
 
         for nxt in nbrs:
             if nxt in path:
@@ -246,7 +271,7 @@ def _dfs_all_paths(interp, idx,
             break
         dfs(s, [s])
 
-    return out_paths, truncated
+    return out_paths, truncated, stop_paths, stop_reasons
 
 # -----------------------------
 # Rendering
@@ -263,8 +288,19 @@ def _make_fmt(interp, label_types: bool):
         return f"{t}.{v}[{ctype}]" if ctype else f"{t}.{v}"
     return _fmt_node
 
-def _render_path(paths: List[List[Tuple[str,str]]], fmt_node) -> str:
-    return "\n".join(" : ".join(fmt_node(n) for n in p) for p in paths)
+def _render_path(paths: List[List[Tuple[str,str]]], fmt_node, stop_reasons: Optional[List[str]] = None) -> str:
+    lines = []
+    if stop_reasons is None:
+        for p in paths:
+            lines.append(" : ".join(fmt_node(n) for n in p))
+    else:
+        # parallel arrays: paths[i] has stop_reasons[i]
+        for p, reason in zip(paths, stop_reasons):
+            if p:
+                s = " : ".join(fmt_node(n) for n in p[:-1])
+                last = fmt_node(p[-1]) + f" [STOP:{reason}]"
+                lines.append((s + " : " if s else "") + last)
+    return "\n".join(lines)
 
 def _render_tree(paths: List[List[Tuple[str,str]]], fmt_node) -> str:
     root = {}
@@ -298,19 +334,19 @@ def _render_tree(paths: List[List[Tuple[str,str]]], fmt_node) -> str:
 #   find -src <inst.* | net.* | iport.* | oport.* | seq.* | gate.*> [-type <glob>]... [-label_types]
 #
 #   # Path search (walk graph from sources to a destination)
-#   # Forward fanout (default):
+#   # Forward fanout (default) or backward fanin (-back):
 #   find -src <inst.*|net.*|iport.*|oport.*|seq.*|gate.*> \
 #        -dst <inst.*|net.*|iport.*|oport.*|seq.*|gate.*> \
 #        [-type <glob>]... [-cross_sync] [-tree] [-max_nodes N] [-max_paths N] [-max_depth N] \
-#        [-back] [-label_types]
+#        [-back] [-label_types] [-show_stops]
 #
 # Kinds (sources/dests):
 #   inst.<glob>           instance names (default kind if prefix omitted)
 #   net.<glob>            net names
-#   iport.<glob>          top-level input ports (allowed as src/dst; mapped to top nets)
-#   oport.<glob>          top-level output ports (allowed as src/dst; mapped to top nets)
-#   seq.<glob>            VIRTUAL: instances whose cell type is sequential (flop/latch)
-#   gate.<glob>           VIRTUAL: instances whose cell type is NOT sequential
+#   iport.<glob>          top-level input ports
+#   oport.<glob>          top-level output ports
+#   seq.<glob>            VIRTUAL: sequential instances (flop/latch)
+#   gate.<glob>           VIRTUAL: non-sequential instances
 #
 # Sugar:
 #   inst.<typeglob>.<nameglob>   # e.g., inst.mioc_flop.u*
@@ -323,17 +359,13 @@ def _render_tree(paths: List[List[Tuple[str,str]]], fmt_node) -> str:
 #   -max_nodes N   cap on visited nodes during DFS (default env FIND_MAX_NODES=20000)
 #   -max_paths N   cap on number of paths collected (default env FIND_MAX_PATHS=2000)
 #   -max_depth N   cap on path length (edge count)
-#   -back          traverse in fanin direction (reverse): inst→INPUT nets→DRIVER insts
-#   -label_types   annotate inst nodes as inst.NAME[TYPE] (fallback [SEQ] if type unknown but sequential)
-#
-# Examples:
-#   find -src inst.u* -label_types
-#   find -src seq.* | wc -l
-#   find -src inst.* -type mioc_flop -dst oport.* -cross_sync -label_types
-#   find -src oport.* -dst iport.* -back -tree -label_types
+#   -back          traverse in fanin direction (reverse)
+#   -label_types   annotate inst nodes as inst.NAME[TYPE] (fallback [SEQ] if unknown but sequential)
+#   -show_stops    if no full path reaches -dst, also print partial paths to stop points with STOP:<reason>
 #
 def _handler(rest: str, interp) -> str:
-    src, dst, cross, tree, type_globs, max_nodes, max_paths, max_depth, back, label_types = _parse_args(rest)
+    (src, dst, cross, tree, type_globs, max_nodes, max_paths,
+     max_depth, back, label_types, show_stops) = _parse_args(rest)
 
     # Build net driver/load index once
     idx = _index_net_sides(interp)
@@ -378,7 +410,7 @@ def _handler(rest: str, interp) -> str:
 
     # Path search mode
     if not (src and dst):
-        return "usage: find -src <kind.pattern> -dst <kind.pattern> [-type <glob>]... [-cross_sync] [-tree] [-max_nodes N] [-max_paths N] [-max_depth N] [-back] [-label_types]"
+        return "usage: find -src <kind.pattern> -dst <kind.pattern> [-type <glob>]... [-cross_sync] [-tree] [-max_nodes N] [-max_paths N] [-max_depth N] [-back] [-label_types] [-show_stops]"
 
     skind, spat = _kind_and_glob(src)
     dkind, dpat = _kind_and_glob(dst)
@@ -446,25 +478,41 @@ def _handler(rest: str, interp) -> str:
         return False
 
     # Traverse
-    paths, truncated = _dfs_all_paths(
+    paths, truncated, stop_paths, stop_reasons = _dfs_all_paths(
         interp, _index_net_sides(interp),
         src_nodes, _dst_pred,
         allow_cross=cross, forward=(not back),
-        max_nodes=max_nodes, max_paths=max_paths, max_depth=max_depth
+        max_nodes=max_nodes, max_paths=max_paths, max_depth=max_depth,
+        collect_stops=show_stops
     )
 
-    if not paths:
-        return ""
-
     fmt_node = _make_fmt(interp, label_types=label_types)
-    body = _render_tree(paths, fmt_node) if tree else _render_path(paths, fmt_node)
+
+    out_chunks: List[str] = []
+
+    # Regular matches (full paths to dst)
+    if paths:
+        body = _render_tree(paths, fmt_node) if tree else _render_path(paths, fmt_node)
+        out_chunks.append(body)
+
+    # Stops (partial paths) if requested and useful
+    if show_stops and stop_paths:
+        if paths:
+            out_chunks.append("")  # blank line separator
+        # Render stops as straight paths with a marker on the final node
+        out_chunks.append(_render_path(stop_paths, fmt_node, stop_reasons))
+
+    body = "\n".join(out_chunks).strip()
+
     if truncated:
-        body += "\n[find: output truncated — raise -max_nodes/-max_paths/-max_depth to explore more]"
+        tail = "\n[find: output truncated — raise -max_nodes/-max_paths/-max_depth to explore more]"
+        body = (body + tail) if body else tail.strip()
+
     return body
 
 def register(reg: CommandRegistry):
     reg.register(
         "find",
         _handler,
-        "Unified list/path/fanin/fanout; -src/-dst/-type/-cross_sync/-tree (-max_nodes/-max_paths/-max_depth, -back for fanin, -label_types for inst.NAME[TYPE])"
+        "Unified list/path/fanin/fanout; -src/-dst/-type/-cross_sync/-tree (-max_nodes/-max_paths/-max_depth, -back for fanin, -label_types for inst.NAME[TYPE], -show_stops to mark partial paths)"
     )
